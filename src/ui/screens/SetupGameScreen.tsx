@@ -8,15 +8,19 @@ const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'
 
 export const SetupGameScreen: React.FC = () => {
   const { dispatch } = useGameStore();
-  const [players, setPlayers] = useState<{ name: string; color: string }[]>([
-    { name: 'Người chơi 1', color: COLORS[0] },
-    { name: 'Người chơi 2', color: COLORS[1] },
+  const [players, setPlayers] = useState<{ name: string; color: string; avatarUrl?: string }[]>([
+    { name: 'Người chơi 1', color: COLORS[0], avatarUrl: '/assets/avatars/player1.png' },
+    { name: 'Người chơi 2', color: COLORS[1], avatarUrl: '/assets/avatars/player2.png' },
   ]);
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
 
   const addPlayer = () => {
     if (players.length < 6) {
-      setPlayers([...players, { name: `Người chơi ${players.length + 1}`, color: COLORS[players.length] }]);
+      setPlayers([...players, { 
+        name: `Người chơi ${players.length + 1}`, 
+        color: COLORS[players.length],
+        avatarUrl: `/assets/avatars/player${players.length + 1}.png`
+      }]);
     }
   };
 
@@ -26,7 +30,7 @@ export const SetupGameScreen: React.FC = () => {
     }
   };
 
-  const updatePlayer = (index: number, field: 'name' | 'color', value: string) => {
+  const updatePlayer = (index: number, field: 'name' | 'color' | 'avatarUrl', value: string) => {
     const newPlayers = [...players];
     newPlayers[index] = { ...newPlayers[index], [field]: value };
     setPlayers(newPlayers);
@@ -64,13 +68,22 @@ export const SetupGameScreen: React.FC = () => {
                     className="w-12 h-12 rounded-2xl cursor-pointer border-4 border-white shadow-md hover:scale-105 transition-transform appearance-none"
                   />
                 </div>
-                <input 
-                  type="text" 
-                  value={p.name}
-                  onChange={(e) => updatePlayer(idx, 'name', e.target.value)}
-                  className="flex-1 p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl outline-none font-bold text-slate-700 transition-all"
-                  placeholder="Tên người chơi"
-                />
+                <div className="flex-1 flex flex-col gap-2">
+                  <input 
+                    type="text" 
+                    value={p.name}
+                    onChange={(e) => updatePlayer(idx, 'name', e.target.value)}
+                    className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl outline-none font-bold text-slate-700 transition-all"
+                    placeholder="Tên người chơi"
+                  />
+                  <input 
+                    type="text" 
+                    value={p.avatarUrl || ''}
+                    onChange={(e) => updatePlayer(idx, 'avatarUrl', e.target.value)}
+                    className="w-full p-2 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none text-[10px] font-medium text-slate-500 transition-all"
+                    placeholder="Đường dẫn Avatar (URL)"
+                  />
+                </div>
                 {players.length > 2 && (
                   <button 
                     onClick={() => removePlayer(idx)}

@@ -72,6 +72,9 @@ export const Board: React.FC = () => {
               )}
               
               <div className="flex-1 flex flex-col justify-center items-center py-1">
+                {tile.imageUrl && (
+                  <img src={tile.imageUrl} alt="" className="w-8 h-8 object-contain mb-1 opacity-80" />
+                )}
                 <span className="font-bold leading-tight break-words px-1" style={{ fontSize: '12px' }}>{tile.name}</span>
                 {isProperty && <span className="font-bold text-gray-700" style={{ fontSize: '11px' }}>${property?.price}</span>}
               </div>
@@ -110,11 +113,15 @@ export const Board: React.FC = () => {
                         damping: 15,
                         mass: 0.8
                       }}
-                      className="w-10 h-10 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[16px] font-black text-white bg-slate-800 m-0.5"
+                      className="w-10 h-10 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[16px] font-black text-white bg-slate-800 m-0.5 overflow-hidden"
                       style={{ backgroundColor: p.color }}
                       title={p.name}
                     >
-                      {p.name.charAt(0)}
+                      {p.avatarUrl ? (
+                        <img src={p.avatarUrl} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        p.name.charAt(0)
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>

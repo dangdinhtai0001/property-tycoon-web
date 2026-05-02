@@ -47,6 +47,7 @@ export interface BoardTile {
   type: TileType;
   name: string;
   position: number;
+  imageUrl?: string;
 }
 
 export interface Property extends BoardTile {
@@ -70,6 +71,7 @@ export interface Player {
   isBankrupt: boolean;
   color: string;
   jailTurns: number;
+  avatarUrl?: string;
 }
 
 export interface Card {

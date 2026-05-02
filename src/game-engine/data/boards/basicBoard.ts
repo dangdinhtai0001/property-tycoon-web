@@ -1,17 +1,17 @@
 import { type BoardTile, TileType, type Property, PropertyGroup } from '../../types/game';
 
 export const BASIC_BOARD: BoardTile[] = [
-  { id: 'tile-0', type: TileType.START, name: 'Bắt đầu', position: 0 },
+  { id: 'tile-0', type: TileType.START, name: 'Bắt đầu', position: 0, imageUrl: '/assets/tiles/start.png' },
   { id: 'tile-1', type: TileType.PROPERTY, name: 'Đường A1', position: 1, price: 60, rent: 2, groupId: PropertyGroup.BROWN, buildingLevel: 0, buildingCost: 50, rentLevels: [2, 10, 30, 90, 160, 250], isMortgaged: false, mortgageValue: 30 } as Property,
-  { id: 'tile-2', type: TileType.CHANCE, name: 'Khí Vận', position: 2 },
+  { id: 'tile-2', type: TileType.CHANCE, name: 'Khí Vận', position: 2, imageUrl: '/assets/tiles/chance.png' },
   { id: 'tile-3', type: TileType.PROPERTY, name: 'Đường A2', position: 3, price: 60, rent: 4, groupId: PropertyGroup.BROWN, buildingLevel: 0, buildingCost: 50, rentLevels: [4, 20, 60, 180, 320, 450], isMortgaged: false, mortgageValue: 30 } as Property,
-  { id: 'tile-4', type: TileType.TAX, name: 'Thuế thu nhập', position: 4 },
+  { id: 'tile-4', type: TileType.TAX, name: 'Thuế thu nhập', position: 4, imageUrl: '/assets/tiles/tax.png' },
   { id: 'tile-5', type: TileType.PROPERTY, name: 'Bến xe 1', position: 5, price: 200, rent: 25, groupId: PropertyGroup.STATION, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 100 } as Property,
   { id: 'tile-6', type: TileType.PROPERTY, name: 'Đường B1', position: 6, price: 100, rent: 6, groupId: PropertyGroup.LIGHT_BLUE, buildingLevel: 0, buildingCost: 50, rentLevels: [6, 30, 90, 270, 400, 550], isMortgaged: false, mortgageValue: 50 } as Property,
-  { id: 'tile-7', type: TileType.FORTUNE, name: 'Cơ Hội', position: 7 },
+  { id: 'tile-7', type: TileType.FORTUNE, name: 'Cơ Hội', position: 7, imageUrl: '/assets/tiles/fortune.png' },
   { id: 'tile-8', type: TileType.PROPERTY, name: 'Đường B2', position: 8, price: 100, rent: 6, groupId: PropertyGroup.LIGHT_BLUE, buildingLevel: 0, buildingCost: 50, rentLevels: [6, 30, 90, 270, 400, 550], isMortgaged: false, mortgageValue: 50 } as Property,
   { id: 'tile-9', type: TileType.PROPERTY, name: 'Đường B3', position: 9, price: 120, rent: 8, groupId: PropertyGroup.LIGHT_BLUE, buildingLevel: 0, buildingCost: 50, rentLevels: [8, 40, 100, 300, 450, 600], isMortgaged: false, mortgageValue: 60 } as Property,
-  { id: 'tile-10', type: TileType.JAIL, name: 'Nhà tù / Thăm nuôi', position: 10 },
+  { id: 'tile-10', type: TileType.JAIL, name: 'Nhà tù / Thăm nuôi', position: 10, imageUrl: '/assets/tiles/jail.png' },
   { id: 'tile-11', type: TileType.PROPERTY, name: 'Đường C1', position: 11, price: 140, rent: 10, groupId: PropertyGroup.PINK, buildingLevel: 0, buildingCost: 100, rentLevels: [10, 50, 150, 450, 625, 750], isMortgaged: false, mortgageValue: 70 } as Property,
   { id: 'tile-12', type: TileType.PROPERTY, name: 'Công ty Điện', position: 12, price: 150, rent: 0, groupId: PropertyGroup.UTILITY, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 75 } as Property,
   { id: 'tile-13', type: TileType.PROPERTY, name: 'Đường C2', position: 13, price: 140, rent: 10, groupId: PropertyGroup.PINK, buildingLevel: 0, buildingCost: 100, rentLevels: [10, 50, 150, 450, 625, 750], isMortgaged: false, mortgageValue: 70 } as Property,

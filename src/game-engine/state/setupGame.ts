@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: GameConfig = {
 };
 
 export const createInitialGame = (
-  playerConfigs: { name: string; color: string }[],
+  playerConfigs: { name: string; color: string; avatarUrl?: string }[],
   config: GameConfig = DEFAULT_CONFIG
 ): GameState => {
   const players = playerConfigs.map((p, index) => ({
@@ -20,6 +20,7 @@ export const createInitialGame = (
     isBankrupt: false,
     color: p.color,
     jailTurns: 0,
+    avatarUrl: p.avatarUrl,
   }));
 
   return {
