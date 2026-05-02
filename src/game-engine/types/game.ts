@@ -16,6 +16,7 @@ export enum Phase {
   GAME_OVER = 'GAME_OVER',
   AUCTION = 'AUCTION',
   TRADE = 'TRADE',
+  SHOWING_CARD = 'SHOWING_CARD',
 }
 
 export enum TileType {
@@ -122,6 +123,7 @@ export interface GameState {
   debtState?: DebtState;
   auctionState?: AuctionState;
   tradeOffer?: TradeOffer;
+  activeCard?: Card;
   config: GameConfig;
 }
 
@@ -147,7 +149,10 @@ export type GameAction =
   | { type: 'UNMORTGAGE_PROPERTY'; payload: { propertyId: PropertyId } }
   | { type: 'SELL_BUILDING'; payload: { propertyId: PropertyId } }
   | { type: 'RESOLVE_DEBT' }
-  | { type: 'DECLARE_BANKRUPTCY' };
+  | { type: 'DECLARE_BANKRUPTCY' }
+  | { type: 'DRAW_CARD' }
+  | { type: 'APPLY_CARD' }
+  | { type: 'TELEPORT_PLAYER'; payload: { position: number } };
 
 export interface GameEvent {
   type: string;

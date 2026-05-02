@@ -83,7 +83,7 @@ const TileContent: React.FC<{ tile: BoardTile; isProperty: boolean; property: Pr
         <img 
           src={tile.imageUrl} 
           alt="" 
-          className="w-8 h-8 object-contain mb-1 opacity-80" 
+          className={`${tile.type === TileType.TAX ? 'w-16 h-16' : 'w-8 h-8'} object-contain mb-1 opacity-80`}
           onError={() => setImageError(true)}
         />
       )}
@@ -132,7 +132,7 @@ const PlayerToken: React.FC<{ player: Player }> = ({ player }) => {
 };
 
 export const Board: React.FC = () => {
-  const { state } = useGameStore();
+  const { state, dispatch } = useGameStore();
 
   return (
     <div className="flex-1 flex items-center justify-center bg-slate-50 p-4">
@@ -164,8 +164,13 @@ export const Board: React.FC = () => {
           return (
             <div
               key={tile.id}
+              onClick={(e) => {
+                if (e.altKey) {
+                  dispatch({ type: 'TELEPORT_PLAYER', payload: { position: tile.position } });
+                }
+              }}
               style={gridStyle}
-              className={`relative flex flex-col items-center border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden transition-all hover:shadow-md ${
+              className={`relative flex flex-col items-center border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden transition-all hover:shadow-md cursor-default ${
                 tile.position % 10 === 0 ? 'justify-center text-center' : 'justify-between text-xs text-center'
               }`}
             >

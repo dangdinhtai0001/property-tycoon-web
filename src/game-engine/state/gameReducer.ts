@@ -9,6 +9,7 @@ import { payJailFine } from '../rules/jailRules';
 import { mortgageProperty, unmortgageProperty, sellBuilding, resolveDebt, declareBankruptcy } from '../rules/financeRules';
 import { handleBid, handlePassBid } from '../rules/auctionRules';
 import { acceptTrade } from '../rules/tradeRules';
+import { drawCard, applyCardEffect } from '../rules/cardRules';
 
 export function assertGameInvariants(state: GameState): void {
   for (const player of state.players) {
@@ -58,11 +59,56 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         } else {
           nextPhase = Phase.END_TURN;
         }
+      } else if (tile.type === TileType.CHANCE || tile.type === TileType.FORTUNE) {
+        return gameReducer(stateWithLog, { type: 'DRAW_CARD' });
+      } else if (tile.type === TileType.TAX) {
+        // Simple tax logic: pay $200
+        const taxAmount = tile.name.includes('xa xỉ') ? 150 : 200;
+        const player = stateWithLog.players.find(p => p.id === state.currentPlayerId)!;
+        player.cash -= taxAmount;
+        return {
+          ...stateWithLog,
+          log: [`${player.name} nộp ${tile.name} $${taxAmount}.`, ...stateWithLog.log],
+          phase: Phase.END_TURN
+        };
       } else {
         nextPhase = Phase.END_TURN;
       }
 
       return { ...stateWithLog, phase: nextPhase };
+    }
+
+    case 'DRAW_CARD': {
+      const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+      const tile = state.board[currentPlayer.position];
+      if (tile.type !== TileType.CHANCE && tile.type !== TileType.FORTUNE) return state;
+      
+      const card = drawCard(tile.type);
+      return {
+        ...state,
+        activeCard: card,
+        phase: Phase.SHOWING_CARD,
+        log: [`${currentPlayer.name} rút thẻ ${tile.type === TileType.CHANCE ? 'Khí Vận' : 'Cơ Hội'}: ${card.description}`, ...state.log]
+      };
+    }
+
+    case 'APPLY_CARD': {
+      if (state.phase !== Phase.SHOWING_CARD || !state.activeCard) return state;
+      return applyCardEffect(state);
+    }
+
+    case 'TELEPORT_PLAYER': {
+      const players = state.players.map(p => 
+        p.id === state.currentPlayerId ? { ...p, position: action.payload.position } : p
+      );
+      const stateAfterTeleport = {
+        ...state,
+        players,
+        phase: Phase.RESOLVING_TILE,
+        log: [`[DEBUG] Đã dịch chuyển người chơi đến ${state.board[action.payload.position].name}`, ...state.log]
+      };
+      // Immediately resolve the tile we landed on
+      return gameReducer(stateAfterTeleport, { type: 'RESOLVE_TILE' });
     }
 
     case 'BUY_PROPERTY': {
