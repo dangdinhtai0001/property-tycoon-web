@@ -31,8 +31,8 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 p-4 md:p-8">
-      <div className="max-w-[1800px] mx-auto flex flex-col gap-6 px-4 md:px-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 p-2 md:p-4">
+      <div className="max-w-[2400px] mx-auto flex flex-col gap-4 px-2 md:px-4">
         
         {/* Header */}
         <header className="flex items-center justify-between mb-2">
@@ -77,9 +77,9 @@ function App() {
           </div>
         </header>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-start relative">
+        <div className="flex flex-col lg:flex-row gap-6 items-start justify-center relative">
           {/* Column 1: Board (Center) */}
-          <main className="flex-[4] w-full max-w-[1200px] flex justify-center">
+          <main className="flex-[5] w-full flex justify-center">
             <Board />
           </main>
 
@@ -91,7 +91,7 @@ function App() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -400, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="absolute left-0 top-0 z-50 w-full max-w-[320px] h-[800px] shadow-2xl"
+                className="absolute left-0 top-0 z-50 w-full max-w-[360px] h-[800px] shadow-2xl"
               >
                 <GameLogPanel onClose={() => setIsHistoryOpen(false)} />
               </motion.aside>
@@ -99,7 +99,7 @@ function App() {
           </AnimatePresence>
 
           {/* Column 2: Panels (Actions) */}
-          <aside className="flex-[0.8] flex flex-col gap-6 w-full lg:min-w-[280px]">
+          <aside className="flex-[0.7] flex flex-col gap-6 w-full lg:min-w-[300px]">
             <PlayerListPanel />
             <ActionPanel />
             

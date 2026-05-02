@@ -32,6 +32,7 @@ const getGroupColor = (groupId?: PropertyGroup) => {
 const TileContent: React.FC<{ tile: BoardTile; isProperty: boolean; property: Property | null }> = ({ tile, isProperty, property }) => {
   const [imageError, setImageError] = useState(false);
   const hasImage = !!tile.imageUrl && !imageError;
+  const isStation = isProperty && property?.groupId === PropertyGroup.STATION;
 
   const isCornerOrSpecial = [
     TileType.START, 
@@ -50,6 +51,29 @@ const TileContent: React.FC<{ tile: BoardTile; isProperty: boolean; property: Pr
         className="absolute inset-0 w-full h-full object-cover" 
         onError={() => setImageError(true)}
       />
+    );
+  }
+
+  if (isStation) {
+    return (
+      <div className="relative flex-1 flex flex-col justify-between items-center w-full h-full overflow-hidden">
+        {hasImage && (
+          <img 
+            src={tile.imageUrl} 
+            alt="" 
+            className="absolute inset-0 w-full h-full object-contain opacity-90 p-2" 
+            onError={() => setImageError(true)}
+          />
+        )}
+        <div className="relative z-10 w-full flex justify-center pt-2">
+          <span className="bg-white/80 backdrop-blur-[2px] font-black leading-tight break-words px-2 py-0.5 text-center uppercase tracking-tighter rounded-full shadow-sm text-slate-800" style={{ fontSize: '10px' }}>
+            {tile.name}
+          </span>
+        </div>
+        <div className="relative z-10 w-full flex justify-center pb-2">
+          <span className="bg-white/80 backdrop-blur-[2px] font-black px-2 py-0.5 rounded-full shadow-sm text-slate-900" style={{ fontSize: '11px' }}>${property?.price}</span>
+        </div>
+      </div>
     );
   }
 
@@ -113,7 +137,7 @@ export const Board: React.FC = () => {
   return (
     <div className="flex-1 flex items-center justify-center bg-slate-50 p-4">
       <div 
-        className="grid w-full max-w-[1200px] aspect-square bg-slate-200 border-4 border-slate-300 shadow-2xl p-2 rounded-[2.5rem]"
+        className="grid w-full aspect-square bg-slate-200 border-4 border-slate-300 shadow-2xl p-2 rounded-[2.5rem]"
         style={{ 
           gridTemplateColumns: '1.5fr repeat(9, 1fr) 1.5fr',
           gridTemplateRows: '1.5fr repeat(9, 1fr) 1.5fr',
