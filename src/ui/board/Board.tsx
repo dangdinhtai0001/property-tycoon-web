@@ -54,7 +54,7 @@ const TileContent: React.FC<{ tile: BoardTile; isProperty: boolean; property: Pr
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-center items-center py-1">
+    <div className="flex-1 flex flex-col justify-center items-center p-1 py-2">
       {hasImage && (
         <img 
           src={tile.imageUrl} 
@@ -111,19 +111,20 @@ export const Board: React.FC = () => {
   const { state } = useGameStore();
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-green-50 p-4">
+    <div className="flex-1 flex items-center justify-center bg-slate-50 p-4">
       <div 
-        className="grid w-full max-w-[1200px] aspect-square bg-gray-300 border-2 border-gray-800 shadow-xl"
+        className="grid w-full max-w-[1200px] aspect-square bg-slate-200 border-4 border-slate-300 shadow-2xl p-2 rounded-[2.5rem]"
         style={{ 
           gridTemplateColumns: '1.5fr repeat(9, 1fr) 1.5fr',
           gridTemplateRows: '1.5fr repeat(9, 1fr) 1.5fr',
-          gap: '1px'
+          gap: '2px'
         }}
       >
         {/* Center content */}
-        <div className="col-start-2 col-end-11 row-start-2 row-end-11 bg-green-100 flex flex-col items-center justify-center p-8 text-center shadow-inner relative overflow-hidden">
-          <h1 className="text-6xl font-black text-red-600 tracking-tighter transform -rotate-12 uppercase drop-shadow-md z-10">
-            Property Tycoon
+        <div className="col-start-2 col-end-11 row-start-2 row-end-11 bg-white rounded-3xl flex flex-col items-center justify-center p-8 text-center shadow-inner relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-50" />
+          <h1 className="text-6xl font-black text-slate-800 tracking-tighter transform -rotate-12 uppercase drop-shadow-sm z-10">
+            Property <span className="text-blue-600">Tycoon</span>
           </h1>
         </div>
 
@@ -140,13 +141,13 @@ export const Board: React.FC = () => {
             <div
               key={tile.id}
               style={gridStyle}
-              className={`relative flex flex-col items-center border border-gray-400 bg-gray-50 overflow-hidden ${
-                tile.position % 10 === 0 ? 'p-2 justify-center text-center' : 'p-1 justify-between text-xs text-center'
+              className={`relative flex flex-col items-center border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden transition-all hover:shadow-md ${
+                tile.position % 10 === 0 ? 'justify-center text-center' : 'justify-between text-xs text-center'
               }`}
             >
               {/* Property Group Color Header */}
               {isProperty && property?.groupId && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY && (
-                <div className={`w-full h-6 ${getGroupColor(property.groupId)} border-b border-gray-400 shrink-0 z-10`} />
+                <div className={`w-full h-6 ${getGroupColor(property.groupId)} border-b border-slate-200 shrink-0 z-10`} />
               )}
               
               <TileContent tile={tile} isProperty={isProperty} property={property} />
