@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { TileType, type Property, PropertyGroup } from '../../game-engine/types/game';
+import { TileType, type Property, PropertyGroup, type BoardTile, type Player } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const getTileGridStyles = (position: number) => {
@@ -29,6 +29,84 @@ const getGroupColor = (groupId?: PropertyGroup) => {
   }
 };
 
+const TileContent: React.FC<{ tile: BoardTile; isProperty: boolean; property: Property | null }> = ({ tile, isProperty, property }) => {
+  const [imageError, setImageError] = useState(false);
+  const hasImage = !!tile.imageUrl && !imageError;
+
+  const isCornerOrSpecial = [
+    TileType.START, 
+    TileType.CHANCE, 
+    TileType.FORTUNE, 
+    TileType.JAIL, 
+    TileType.REST, 
+    TileType.GO_TO_JAIL
+  ].includes(tile.type);
+
+  if (hasImage && isCornerOrSpecial) {
+    return (
+      <img 
+        src={tile.imageUrl} 
+        alt="" 
+        className="absolute inset-0 w-full h-full object-cover" 
+        onError={() => setImageError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col justify-center items-center py-1">
+      {hasImage && (
+        <img 
+          src={tile.imageUrl} 
+          alt="" 
+          className="w-8 h-8 object-contain mb-1 opacity-80" 
+          onError={() => setImageError(true)}
+        />
+      )}
+      {(!hasImage || tile.type !== TileType.START) && (
+        <>
+          <span className="font-bold leading-tight break-words px-1 text-center" style={{ fontSize: '12px' }}>
+            {tile.name}
+          </span>
+          {isProperty && <span className="font-bold text-gray-700" style={{ fontSize: '11px' }}>${property?.price}</span>}
+        </>
+      )}
+    </div>
+  );
+};
+
+const PlayerToken: React.FC<{ player: Player }> = ({ player }) => {
+  const [imageError, setImageError] = useState(false);
+  const hasAvatar = !!player.avatarUrl && !imageError;
+
+  return (
+    <motion.div
+      layoutId={`player-${player.id}`}
+      initial={false}
+      transition={{ 
+        type: "spring", 
+        stiffness: 400,
+        damping: 15,
+        mass: 0.8
+      }}
+      className="w-10 h-10 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[16px] font-black text-white bg-slate-800 m-0.5 overflow-hidden"
+      style={{ backgroundColor: player.color }}
+      title={player.name}
+    >
+      {hasAvatar ? (
+        <img 
+          src={player.avatarUrl} 
+          alt={player.name} 
+          className="w-full h-full object-cover" 
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        player.name.charAt(0)
+      )}
+    </motion.div>
+  );
+};
+
 export const Board: React.FC = () => {
   const { state } = useGameStore();
 
@@ -43,8 +121,8 @@ export const Board: React.FC = () => {
         }}
       >
         {/* Center content */}
-        <div className="col-start-2 col-end-11 row-start-2 row-end-11 bg-green-100 flex flex-col items-center justify-center p-8 text-center shadow-inner">
-          <h1 className="text-6xl font-black text-red-600 tracking-tighter transform -rotate-12 uppercase drop-shadow-md">
+        <div className="col-start-2 col-end-11 row-start-2 row-end-11 bg-green-100 flex flex-col items-center justify-center p-8 text-center shadow-inner relative overflow-hidden">
+          <h1 className="text-6xl font-black text-red-600 tracking-tighter transform -rotate-12 uppercase drop-shadow-md z-10">
             Property Tycoon
           </h1>
         </div>
@@ -68,20 +146,14 @@ export const Board: React.FC = () => {
             >
               {/* Property Group Color Header */}
               {isProperty && property?.groupId && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY && (
-                <div className={`w-full h-6 ${getGroupColor(property.groupId)} border-b border-gray-400 shrink-0`} />
+                <div className={`w-full h-6 ${getGroupColor(property.groupId)} border-b border-gray-400 shrink-0 z-10`} />
               )}
               
-              <div className="flex-1 flex flex-col justify-center items-center py-1">
-                {tile.imageUrl && (
-                  <img src={tile.imageUrl} alt="" className="w-8 h-8 object-contain mb-1 opacity-80" />
-                )}
-                <span className="font-bold leading-tight break-words px-1" style={{ fontSize: '12px' }}>{tile.name}</span>
-                {isProperty && <span className="font-bold text-gray-700" style={{ fontSize: '11px' }}>${property?.price}</span>}
-              </div>
+              <TileContent tile={tile} isProperty={isProperty} property={property} />
 
               {/* Owner Indicator */}
               {owner && (
-                <div className="w-full h-1 mt-auto flex" style={{ backgroundColor: owner.color }} title={`Sở hữu bởi ${owner.name}`}>
+                <div className="w-full h-1 mt-auto flex z-10" style={{ backgroundColor: owner.color }} title={`Sở hữu bởi ${owner.name}`}>
                   {property?.isMortgaged && (
                     <div className="flex-1 bg-gray-900 bg-opacity-80 flex items-center justify-center grayscale blur-[1px]">
                       <span className="text-[6px] text-white font-bold">M</span>
@@ -92,7 +164,7 @@ export const Board: React.FC = () => {
 
               {/* Building Level */}
               {property?.buildingLevel && property.buildingLevel > 0 ? (
-                <div className="absolute top-0 right-0 p-0.5 flex gap-px">
+                <div className="absolute top-0 right-0 p-0.5 flex gap-px z-10">
                   {Array.from({ length: property.buildingLevel }).map((_, i) => (
                     <div key={i} className="w-1.5 h-1.5 bg-green-600 rounded-sm" />
                   ))}
@@ -103,26 +175,7 @@ export const Board: React.FC = () => {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                 <AnimatePresence>
                   {playersOnTile.map((p) => (
-                    <motion.div
-                      key={p.id}
-                      layoutId={`player-${p.id}`}
-                      initial={false}
-                      transition={{ 
-                        type: "spring", 
-                        stiffness: 400,
-                        damping: 15,
-                        mass: 0.8
-                      }}
-                      className="w-10 h-10 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[16px] font-black text-white bg-slate-800 m-0.5 overflow-hidden"
-                      style={{ backgroundColor: p.color }}
-                      title={p.name}
-                    >
-                      {p.avatarUrl ? (
-                        <img src={p.avatarUrl} alt={p.name} className="w-full h-full object-cover" />
-                      ) : (
-                        p.name.charAt(0)
-                      )}
-                    </motion.div>
+                    <PlayerToken key={p.id} player={p} />
                   ))}
                 </AnimatePresence>
               </div>
