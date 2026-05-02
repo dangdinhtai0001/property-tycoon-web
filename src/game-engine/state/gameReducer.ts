@@ -6,6 +6,9 @@ import { buyProperty } from '../rules/propertyRules';
 import { payRent } from '../rules/rentRules';
 import { buildProperty } from '../rules/buildingRules';
 import { payJailFine } from '../rules/jailRules';
+import { mortgageProperty, unmortgageProperty, sellBuilding, resolveDebt, declareBankruptcy } from '../rules/financeRules';
+import { handleBid, handlePassBid } from '../rules/auctionRules';
+import { acceptTrade } from '../rules/tradeRules';
 
 export function assertGameInvariants(state: GameState): void {
   for (const player of state.players) {
@@ -19,7 +22,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
   let nextState = state;
   switch (action.type) {
     case 'START_GAME':
-      nextState = createInitialGame(action.payload.players);
+      nextState = createInitialGame(action.payload.players, action.payload.config);
       break;
 
     case 'ROLL_DICE': {
@@ -64,24 +67,106 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
 
     case 'DECLINE_BUY_PROPERTY': {
       if (state.phase !== Phase.BUY_DECISION) return state;
-      nextState = { ...state, phase: Phase.END_TURN };
+      
+      if (state.config.enableAuction) {
+        const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+        const property = state.board[currentPlayer.position] as Property;
+        const activePlayers = state.players.filter(p => !p.isBankrupt).map(p => p.id);
+        
+        nextState = {
+          ...state,
+          phase: Phase.AUCTION,
+          auctionState: {
+            propertyId: property.id,
+            currentBid: 0,
+            biddingPlayerIds: activePlayers,
+            turnIndex: activePlayers.indexOf(state.currentPlayerId),
+          },
+          log: [`Bắt đầu đấu giá tài sản ${property.name}`, ...state.log],
+        };
+      } else {
+        nextState = { ...state, phase: Phase.END_TURN };
+      }
+      break;
+    }
+
+    case 'BID': {
+      if (state.phase !== Phase.AUCTION) return state;
+      nextState = handleBid(state, action.payload.amount);
+      break;
+    }
+
+    case 'PASS_BID': {
+      if (state.phase !== Phase.AUCTION) return state;
+      nextState = handlePassBid(state);
+      break;
+    }
+
+    case 'PROPOSE_TRADE': {
+      nextState = {
+        ...state,
+        phase: Phase.TRADE,
+        tradeOffer: action.payload.offer,
+        log: [`${state.players.find(p => p.id === action.payload.offer.offererId)?.name} đề nghị giao dịch với ${state.players.find(p => p.id === action.payload.offer.targetId)?.name}`, ...state.log],
+      };
+      break;
+    }
+
+    case 'ACCEPT_TRADE': {
+      if (state.phase !== Phase.TRADE) return state;
+      nextState = acceptTrade(state);
+      break;
+    }
+
+    case 'REJECT_TRADE': {
+      if (state.phase !== Phase.TRADE) return state;
+      nextState = {
+        ...state,
+        phase: Phase.WAITING_TO_ROLL,
+        tradeOffer: undefined,
+        log: [`Giao dịch bị từ chối.`, ...state.log],
+      };
+      break;
+    }
+
+    case 'CANCEL_TRADE': {
+      nextState = {
+        ...state,
+        phase: Phase.WAITING_TO_ROLL,
+        tradeOffer: undefined,
+      };
       break;
     }
 
     case 'PAY_RENT': {
-      const rentedState = payRent(state);
-      const currentPlayer = rentedState.players.find(p => p.id === rentedState.currentPlayerId)!;
-      
-      if (currentPlayer.cash < 0) {
-        nextState = {
-          ...rentedState,
-          phase: Phase.GAME_OVER,
-          winnerId: rentedState.players.find(p => p.id !== currentPlayer.id)?.id,
-          log: [`${currentPlayer.name} đã phá sản!`, ...rentedState.log],
-        };
-      } else {
-        nextState = { ...rentedState, phase: Phase.END_TURN };
-      }
+      nextState = payRent(state);
+      break;
+    }
+
+    case 'MORTGAGE_PROPERTY': {
+      nextState = mortgageProperty(state, action.payload.propertyId);
+      break;
+    }
+
+    case 'UNMORTGAGE_PROPERTY': {
+      nextState = unmortgageProperty(state, action.payload.propertyId);
+      break;
+    }
+
+    case 'SELL_BUILDING': {
+      nextState = sellBuilding(state, action.payload.propertyId);
+      break;
+    }
+
+    case 'RESOLVE_DEBT': {
+      if (state.phase !== Phase.DEBT_RESOLUTION) return state;
+      nextState = resolveDebt(state);
+      break;
+    }
+
+    case 'DECLARE_BANKRUPTCY': {
+      if (state.phase !== Phase.DEBT_RESOLUTION) return state;
+      nextState = declareBankruptcy(state);
       break;
     }
 

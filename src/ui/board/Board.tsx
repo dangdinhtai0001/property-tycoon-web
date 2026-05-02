@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { TileType, type Property, PropertyGroup } from '../../game-engine/types/game';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const getTileGridStyles = (position: number) => {
   if (position <= 10) {
@@ -70,7 +71,13 @@ export const Board: React.FC = () => {
 
               {/* Owner Indicator */}
               {owner && (
-                <div className="w-full h-1 mt-auto" style={{ backgroundColor: owner.color }} title={`Sở hữu bởi ${owner.name}`} />
+                <div className="w-full h-1 mt-auto flex" style={{ backgroundColor: owner.color }} title={`Sở hữu bởi ${owner.name}`}>
+                  {property?.isMortgaged && (
+                    <div className="flex-1 bg-red-600 bg-opacity-80 flex items-center justify-center">
+                      <span className="text-[6px] text-white font-bold">M</span>
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Building Level */}
@@ -83,20 +90,28 @@ export const Board: React.FC = () => {
               ) : null}
 
               {/* Players */}
-              {playersOnTile.length > 0 && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-1 justify-center z-10 w-full px-1">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                <AnimatePresence>
                   {playersOnTile.map((p) => (
-                    <div
+                    <motion.div
                       key={p.id}
-                      className="w-4 h-4 rounded-full border border-white shadow-md flex items-center justify-center text-[8px] font-bold text-white bg-gray-800"
+                      layoutId={`player-${p.id}`}
+                      initial={false}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 30,
+                        mass: 1
+                      }}
+                      className="w-5 h-5 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white bg-slate-800 m-0.5"
                       style={{ backgroundColor: p.color }}
                       title={p.name}
                     >
                       {p.name.charAt(0)}
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
-              )}
+                </AnimatePresence>
+              </div>
             </div>
           );
         })}

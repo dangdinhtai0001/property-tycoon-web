@@ -6,6 +6,7 @@ export const canBuild = (state: GameState, propertyId: string): boolean => {
 
   if (!currentPlayer || !property || property.type !== TileType.PROPERTY) return false;
   if (property.ownerId !== currentPlayer.id) return false;
+  if (property.isMortgaged) return false;
   if (property.buildingLevel >= 5) return false; // Max 5 (Hotel)
   if (currentPlayer.cash < property.buildingCost) return false;
 
@@ -15,7 +16,8 @@ export const canBuild = (state: GameState, propertyId: string): boolean => {
   ) as Property[];
 
   const ownsAll = propertiesInGroup.every(p => p.ownerId === currentPlayer.id);
-  if (!ownsAll) return false;
+  const anyMortgaged = propertiesInGroup.some(p => p.isMortgaged);
+  if (!ownsAll || anyMortgaged) return false;
 
   // Optional even-build rule: Cannot build if this building level is > any other property in group
   const minLevelInGroup = Math.min(...propertiesInGroup.map(p => p.buildingLevel));

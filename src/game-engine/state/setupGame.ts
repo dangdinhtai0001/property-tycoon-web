@@ -1,14 +1,24 @@
-import { type GameState, Phase } from '../types/game';
+import { type GameState, Phase, type GameConfig } from '../types/game';
 import { BASIC_BOARD } from '../data/boards/basicBoard';
 
-export const createInitialGame = (playerConfigs: { name: string; color: string }[]): GameState => {
-  const players = playerConfigs.map((config, index) => ({
+export const DEFAULT_CONFIG: GameConfig = {
+  startingCash: 1500,
+  passStartBonus: 200,
+  enableAuction: false,
+  quickModeMultiplier: 1,
+};
+
+export const createInitialGame = (
+  playerConfigs: { name: string; color: string }[],
+  config: GameConfig = DEFAULT_CONFIG
+): GameState => {
+  const players = playerConfigs.map((p, index) => ({
     id: `player-${index}`,
-    name: config.name,
-    cash: 1500,
+    name: p.name,
+    cash: config.startingCash,
     position: 0,
     isBankrupt: false,
-    color: config.color,
+    color: p.color,
     jailTurns: 0,
   }));
 
@@ -19,5 +29,6 @@ export const createInitialGame = (playerConfigs: { name: string; color: string }
     board: BASIC_BOARD,
     doublesCount: 0,
     log: ['Game đã bắt đầu!'],
+    config,
   };
 };

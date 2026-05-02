@@ -14,6 +14,8 @@ export enum Phase {
   DEBT_RESOLUTION = 'DEBT_RESOLUTION',
   END_TURN = 'END_TURN',
   GAME_OVER = 'GAME_OVER',
+  AUCTION = 'AUCTION',
+  TRADE = 'TRADE',
 }
 
 export enum TileType {
@@ -51,11 +53,13 @@ export interface Property extends BoardTile {
   type: TileType.PROPERTY;
   groupId: PropertyGroup;
   price: Money;
-  rent: Money; // Base rent or rent calculation array
+  rent: Money;
   ownerId?: PlayerId;
-  buildingLevel: number; // 0: no house, 1-4: houses, 5: hotel
+  buildingLevel: number;
   buildingCost: Money;
-  rentLevels?: Money[]; // Rent based on buildingLevel
+  rentLevels?: Money[];
+  isMortgaged: boolean;
+  mortgageValue: Money;
 }
 
 export interface Player {
@@ -65,14 +69,43 @@ export interface Player {
   position: number;
   isBankrupt: boolean;
   color: string;
-  jailTurns: number; // 0 if not in jail
+  jailTurns: number;
 }
 
 export interface Card {
   id: string;
   type: TileType.CHANCE | TileType.FORTUNE;
   description: string;
-  action: any; // We'll define specific actions later
+  action: any;
+}
+
+export interface DebtState {
+  oweTo: PlayerId | 'BANK';
+  amount: Money;
+}
+
+export interface GameConfig {
+  startingCash: Money;
+  passStartBonus: Money;
+  enableAuction: boolean;
+  quickModeMultiplier: number;
+}
+
+export interface AuctionState {
+  propertyId: PropertyId;
+  currentBid: Money;
+  highestBidderId?: PlayerId;
+  biddingPlayerIds: PlayerId[];
+  turnIndex: number;
+}
+
+export interface TradeOffer {
+  offererId: PlayerId;
+  targetId: PlayerId;
+  offeredCash: Money;
+  offeredPropertyIds: PropertyId[];
+  requestedCash: Money;
+  requestedPropertyIds: PropertyId[];
 }
 
 export interface GameState {
@@ -84,18 +117,33 @@ export interface GameState {
   doublesCount: number;
   log: string[];
   winnerId?: PlayerId;
+  debtState?: DebtState;
+  auctionState?: AuctionState;
+  tradeOffer?: TradeOffer;
+  config: GameConfig;
 }
 
 export type GameAction =
-  | { type: 'START_GAME'; payload: { players: { name: string; color: string }[] } }
+  | { type: 'START_GAME'; payload: { players: { name: string; color: string }[]; config?: GameConfig } }
   | { type: 'ROLL_DICE'; payload?: { dice?: [number, number] } }
   | { type: 'MOVE_PLAYER'; payload: { steps: number } }
   | { type: 'BUY_PROPERTY'; payload: { propertyId: PropertyId } }
   | { type: 'DECLINE_BUY_PROPERTY' }
+  | { type: 'BID'; payload: { amount: Money } }
+  | { type: 'PASS_BID' }
+  | { type: 'PROPOSE_TRADE'; payload: { offer: TradeOffer } }
+  | { type: 'ACCEPT_TRADE' }
+  | { type: 'REJECT_TRADE' }
+  | { type: 'CANCEL_TRADE' }
   | { type: 'PAY_RENT' }
   | { type: 'BUILD'; payload: { propertyId: PropertyId } }
-  | { type: 'PAY_FINE' } // for jail
-  | { type: 'END_TURN' };
+  | { type: 'PAY_FINE' }
+  | { type: 'END_TURN' }
+  | { type: 'MORTGAGE_PROPERTY'; payload: { propertyId: PropertyId } }
+  | { type: 'UNMORTGAGE_PROPERTY'; payload: { propertyId: PropertyId } }
+  | { type: 'SELL_BUILDING'; payload: { propertyId: PropertyId } }
+  | { type: 'RESOLVE_DEBT' }
+  | { type: 'DECLARE_BANKRUPTCY' };
 
 export interface GameEvent {
   type: string;

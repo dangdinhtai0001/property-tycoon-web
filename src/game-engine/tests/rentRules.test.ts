@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { payRent } from '../rules/rentRules';
-import { type GameState, Phase, TileType, type Property } from '../types/game';
+import { type GameState, Phase, TileType, type Property, PropertyGroup } from '../types/game';
 
 describe('Rent Rules', () => {
   const mockProperty: Property = {
@@ -11,6 +11,7 @@ describe('Rent Rules', () => {
     price: 100,
     rent: 20,
     ownerId: 'player-2',
+    groupId: PropertyGroup.BROWN,
   };
 
   const initialState: GameState = {
@@ -23,8 +24,19 @@ describe('Rent Rules', () => {
     board: [
       { id: 'tile-0', type: TileType.START, name: 'Start', position: 0 },
       mockProperty,
+      { 
+        id: 'prop-2', 
+        type: TileType.PROPERTY, 
+        name: 'Group Mate', 
+        position: 2, 
+        price: 100, 
+        rent: 20, 
+        groupId: PropertyGroup.BROWN,
+        ownerId: undefined 
+      },
     ],
     log: [],
+    config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, quickModeMultiplier: 1 },
   };
 
   it('should transfer rent from current player to owner', () => {

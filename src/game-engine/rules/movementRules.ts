@@ -12,18 +12,20 @@ export const applyMovement = (state: GameState, steps: number): GameState => {
 
   const { position, passedStart } = calculateNewPosition(currentPlayer.position, steps, state.board.length);
   
+  const passStartBonus = state.config.passStartBonus;
+
   const updatedPlayers = state.players.map(p => {
     if (p.id === currentPlayer.id) {
       return {
         ...p,
         position,
-        cash: passedStart ? p.cash + 200 : p.cash,
+        cash: passedStart ? p.cash + passStartBonus : p.cash,
       };
     }
     return p;
   });
 
-  const logEntry = `${currentPlayer.name} di chuyển ${steps} ô đến ${state.board[position].name}${passedStart ? ' và nhận 200$ khi đi qua Bắt đầu' : ''}.`;
+  const logEntry = `${currentPlayer.name} di chuyển ${steps} ô đến ${state.board[position].name}${passedStart ? ` và nhận ${passStartBonus}$ khi đi qua Bắt đầu` : ''}.`;
 
   return {
     ...state,
