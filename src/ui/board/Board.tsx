@@ -34,7 +34,14 @@ export const Board: React.FC = () => {
 
   return (
     <div className="flex-1 flex items-center justify-center bg-green-50 p-4">
-      <div className="grid grid-cols-11 grid-rows-11 gap-0.5 w-full max-w-[1000px] aspect-square bg-gray-300 border-2 border-gray-800 shadow-xl">
+      <div 
+        className="grid w-full max-w-[1200px] aspect-square bg-gray-300 border-2 border-gray-800 shadow-xl"
+        style={{ 
+          gridTemplateColumns: '1.5fr repeat(9, 1fr) 1.5fr',
+          gridTemplateRows: '1.5fr repeat(9, 1fr) 1.5fr',
+          gap: '1px'
+        }}
+      >
         {/* Center content */}
         <div className="col-start-2 col-end-11 row-start-2 row-end-11 bg-green-100 flex flex-col items-center justify-center p-8 text-center shadow-inner">
           <h1 className="text-6xl font-black text-red-600 tracking-tighter transform -rotate-12 uppercase drop-shadow-md">
@@ -61,12 +68,12 @@ export const Board: React.FC = () => {
             >
               {/* Property Group Color Header */}
               {isProperty && property?.groupId && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY && (
-                <div className={`w-full h-4 ${getGroupColor(property.groupId)} border-b border-gray-400 shrink-0`} />
+                <div className={`w-full h-6 ${getGroupColor(property.groupId)} border-b border-gray-400 shrink-0`} />
               )}
               
-              <div className="flex-1 flex flex-col justify-center items-center py-0.5">
-                <span className="font-bold leading-tight break-words px-0.5" style={{ fontSize: '10px' }}>{tile.name}</span>
-                {isProperty && <span className="font-semibold text-gray-700" style={{ fontSize: '9px' }}>${property?.price}</span>}
+              <div className="flex-1 flex flex-col justify-center items-center py-1">
+                <span className="font-bold leading-tight break-words px-1" style={{ fontSize: '12px' }}>{tile.name}</span>
+                {isProperty && <span className="font-bold text-gray-700" style={{ fontSize: '11px' }}>${property?.price}</span>}
               </div>
 
               {/* Owner Indicator */}
@@ -103,7 +110,7 @@ export const Board: React.FC = () => {
                         damping: 15,
                         mass: 0.8
                       }}
-                      className="w-5 h-5 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white bg-slate-800 m-0.5"
+                      className="w-10 h-10 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[16px] font-black text-white bg-slate-800 m-0.5"
                       style={{ backgroundColor: p.color }}
                       title={p.name}
                     >

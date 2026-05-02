@@ -14,12 +14,13 @@ import { AuctionModal } from './ui/modals/AuctionModal';
 import { TradeModal } from './ui/modals/TradeModal';
 import { PauseMenu } from './ui/modals/PauseMenu';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
-import { Menu, Info } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Menu, Info, ScrollText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const { state, dispatch, showTradeModal, setShowTradeModal } = useGameStore();
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
 
   if (state.phase === Phase.SETUP) {
     return (
@@ -52,6 +53,17 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+              className={`p-3 rounded-2xl transition-all shadow-sm flex items-center gap-2 ${
+                isHistoryOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <ScrollText size={20} />
+              <span className="font-bold text-sm hidden sm:inline">LỊCH SỬ</span>
+            </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -65,19 +77,29 @@ function App() {
           </div>
         </header>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Column 1: Game Log (History) */}
-          <aside className="flex-[0.8] flex flex-col gap-6 w-full lg:min-w-[280px] lg:h-[800px]">
-            <GameLogPanel />
-          </aside>
-
-          {/* Column 2: Board (Center) */}
-          <main className="flex-[3] w-full max-w-[1000px] flex justify-center">
+        <div className="flex flex-col lg:flex-row gap-6 items-start relative">
+          {/* Column 1: Board (Center) */}
+          <main className="flex-[4] w-full max-w-[1200px] flex justify-center">
             <Board />
           </main>
 
-          {/* Column 3: Panels (Actions) */}
-          <aside className="flex-[1] flex flex-col gap-6 w-full lg:min-w-[320px]">
+          {/* Overlay: Game Log */}
+          <AnimatePresence>
+            {isHistoryOpen && (
+              <motion.aside
+                initial={{ x: -400, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -400, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="absolute left-0 top-0 z-50 w-full max-w-[320px] h-[800px] shadow-2xl"
+              >
+                <GameLogPanel onClose={() => setIsHistoryOpen(false)} />
+              </motion.aside>
+            )}
+          </AnimatePresence>
+
+          {/* Column 2: Panels (Actions) */}
+          <aside className="flex-[0.8] flex flex-col gap-6 w-full lg:min-w-[280px]">
             <PlayerListPanel />
             <ActionPanel />
             
