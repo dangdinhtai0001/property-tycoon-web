@@ -31,3 +31,31 @@ export const applyMovement = (state: GameState, steps: number): GameState => {
     log: [logEntry, ...state.log],
   };
 };
+
+export const moveToJail = (state: GameState): GameState => {
+  const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
+  if (!currentPlayer) return state;
+
+  // Assume jail is at position 10, we can also look it up by TileType.JAIL
+  const jailTile = state.board.find(t => t.type === 'JAIL');
+  const jailPosition = jailTile ? jailTile.position : 10;
+
+  const updatedPlayers = state.players.map(p => {
+    if (p.id === currentPlayer.id) {
+      return {
+        ...p,
+        position: jailPosition,
+        jailTurns: 1, // Start jail counter
+      };
+    }
+    return p;
+  });
+
+  const logEntry = `${currentPlayer.name} đã bị đưa vào tù!`;
+
+  return {
+    ...state,
+    players: updatedPlayers,
+    log: [logEntry, ...state.log],
+  };
+};
