@@ -86,6 +86,7 @@ export const ActionPanel: React.FC = () => {
               onClick={() => {
                 enqueue({
                   type: 'PURCHASE_SPARKLE',
+                  payload: { propertyName: currentTile.name, color: currentPlayer.color },
                   onComplete: () => dispatch({ type: 'BUY_PROPERTY', payload: { propertyId: currentTile.id } })
                 });
               }}

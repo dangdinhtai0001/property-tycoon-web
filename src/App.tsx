@@ -1,6 +1,7 @@
 import React from 'react';
 import { Board } from './ui/board/Board';
 import { DiceRollAnimation } from './ui/animation/DiceRollAnimation';
+import { PurchaseCelebration } from './ui/animation/PurchaseCelebration';
 import { ParticleSystem } from './ui/animation/ParticleSystem';
 import { PlayerListPanel } from './ui/panels/PlayerListPanel';
 import { ActionPanel } from './ui/panels/ActionPanel';
@@ -110,6 +111,7 @@ function App() {
         <PauseMenu isOpen={isPauseOpen} onClose={() => setIsPauseOpen(false)} />
         {state.phase === Phase.GAME_OVER && <EndGameScreen />}
         <DiceRollAnimation />
+        <PurchaseCelebration />
         <ParticleSystem />
       </div>
     </div>
