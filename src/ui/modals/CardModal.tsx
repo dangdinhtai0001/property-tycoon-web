@@ -37,6 +37,8 @@ export const CardModal: React.FC = () => {
     setTimeout(() => setInteraction('REVEALED'), 600);
   };
 
+  const cardBackUrl = isChance ? '/assets/tiles/chance_back.png' : '/assets/tiles/fortune_back.png';
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
@@ -72,9 +74,17 @@ export const CardModal: React.FC = () => {
                       duration: 0.6, 
                       delay: i * 0.1 
                     }}
-                    className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${colorClass} border-4 border-white shadow-xl flex items-center justify-center text-white/20`}
+                    className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${colorClass} border-4 border-white shadow-xl flex items-center justify-center text-white/20 overflow-hidden`}
                   >
-                    {icon}
+                    <img 
+                      src={cardBackUrl} 
+                      alt="" 
+                      className="absolute inset-0 w-full h-full object-cover" 
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                    <div className="relative z-10 opacity-30">
+                      {icon}
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -94,11 +104,19 @@ export const CardModal: React.FC = () => {
                     onClick={() => selectedIndex === null && handlePick(i)}
                     className={`w-56 h-80 rounded-[2.5rem] bg-gradient-to-br ${colorClass} border-4 border-white shadow-2xl flex flex-col items-center justify-center text-white cursor-pointer relative overflow-hidden`}
                   >
-                    <div className="absolute inset-0 bg-white/10 opacity-50" />
-                    <div className="bg-white/20 p-4 rounded-3xl backdrop-blur-md mb-4">
+                    <img 
+                      src={cardBackUrl} 
+                      alt="" 
+                      className="absolute inset-0 w-full h-full object-cover" 
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                    
+                    <div className="absolute inset-0 bg-black/20" />
+                    
+                    <div className="relative z-10 bg-white/20 p-4 rounded-3xl backdrop-blur-md mb-4">
                       {icon}
                     </div>
-                    <span className="font-black tracking-widest text-white/50">?</span>
+                    <span className="relative z-10 font-black tracking-widest text-white/50 text-2xl">?</span>
                     
                     {selectedIndex === i && interaction === 'REVEALING' && (
                       <motion.div 

@@ -14,6 +14,9 @@ import { AuctionModal } from './ui/modals/AuctionModal';
 import { TradeModal } from './ui/modals/TradeModal';
 import { PauseMenu } from './ui/modals/PauseMenu';
 import { CardModal } from './ui/modals/CardModal';
+import { MoneyLossEffect } from './ui/animation/MoneyLossEffect';
+import { MoneyGainEffect } from './ui/animation/MoneyGainEffect';
+import { MoneyWatcher } from './ui/animation/MoneyWatcher';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
 import { Menu, Info, ScrollText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -151,6 +154,9 @@ function App() {
         <PauseMenu isOpen={isPauseOpen} onClose={() => setIsPauseOpen(false)} />
         {state.phase === Phase.GAME_OVER && <EndGameScreen />}
         <CardModal />
+        <MoneyLossEffect />
+        <MoneyGainEffect />
+        <MoneyWatcher />
         <DiceRollAnimation />
         <PurchaseCelebration />
         <ParticleSystem />

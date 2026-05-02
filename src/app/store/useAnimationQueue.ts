@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AnimationType = 'DICE_ROLL' | 'TOKEN_MOVE' | 'PURCHASE_SPARKLE' | 'MORTGAGE_DIM';
+export type AnimationType = 'DICE_ROLL' | 'TOKEN_MOVE' | 'PURCHASE_SPARKLE' | 'MORTGAGE_DIM' | 'MONEY_LOSS' | 'MONEY_GAIN';
 
 export interface AnimationEvent {
   id: string;
