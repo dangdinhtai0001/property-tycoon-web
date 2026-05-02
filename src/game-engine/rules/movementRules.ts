@@ -6,7 +6,7 @@ export const calculateNewPosition = (currentPosition: number, steps: number, boa
   return { position: newPosition, passedStart };
 };
 
-export const applyMovement = (state: GameState, steps: number): GameState => {
+export const applyMovement = (state: GameState, steps: number, silent: boolean = false): GameState => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
   if (!currentPlayer) return state;
 
@@ -24,6 +24,13 @@ export const applyMovement = (state: GameState, steps: number): GameState => {
     }
     return p;
   });
+
+  if (silent) {
+    return {
+      ...state,
+      players: updatedPlayers,
+    };
+  }
 
   const logEntry = `${currentPlayer.name} di chuyển ${steps} ô đến ${state.board[position].name}${passedStart ? ` và nhận ${passStartBonus}$ khi đi qua Bắt đầu` : ''}.`;
 

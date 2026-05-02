@@ -28,16 +28,25 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     case 'ROLL_DICE': {
       if (state.phase !== Phase.WAITING_TO_ROLL) return state;
       const dice = action.payload?.dice || rollDice();
-      const steps = dice[0] + dice[1];
       
-      const movedState = applyMovement({
+      // If we only want to set the dice and not move yet (for step-by-step animation)
+      return {
         ...state,
         lastDiceRoll: dice,
-        phase: Phase.ROLLING,
-      }, steps);
+        phase: Phase.MOVING,
+      };
+    }
 
-      const currentPlayer = movedState.players.find(p => p.id === movedState.currentPlayerId)!;
-      const tile = movedState.board[currentPlayer.position];
+    case 'MOVE_ONE_STEP': {
+      return applyMovement(state, 1, true);
+    }
+
+    case 'RESOLVE_TILE': {
+      const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+      const tile = state.board[currentPlayer.position];
+      
+      const logEntry = `${currentPlayer.name} đã dừng lại tại ${tile.name}.`;
+      const stateWithLog = { ...state, log: [logEntry, ...state.log] };
 
       let nextPhase = Phase.RESOLVING_TILE;
       if (tile.type === TileType.PROPERTY) {
@@ -45,8 +54,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         if (!property.ownerId) {
           nextPhase = Phase.BUY_DECISION;
         } else if (property.ownerId !== currentPlayer.id) {
-          nextState = gameReducer(movedState, { type: 'PAY_RENT' });
-          break;
+          return gameReducer(stateWithLog, { type: 'PAY_RENT' });
         } else {
           nextPhase = Phase.END_TURN;
         }
@@ -54,8 +62,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         nextPhase = Phase.END_TURN;
       }
 
-      nextState = { ...movedState, phase: nextPhase };
-      break;
+      return { ...stateWithLog, phase: nextPhase };
     }
 
     case 'BUY_PROPERTY': {

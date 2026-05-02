@@ -3,11 +3,14 @@ import { useGameStore } from '../../app/store/useGameStore';
 import { Phase, TileType, type Property } from '../../game-engine/types/game';
 import { canMortgage, canUnmortgage, canSellBuilding } from '../../game-engine/rules/financeRules';
 import { canBuild } from '../../game-engine/rules/buildingRules';
+import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { motion } from 'framer-motion';
-import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake } from 'lucide-react';
+import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, RotateCcw } from 'lucide-react';
+import { rollDice } from '../../game-engine/rules/diceRules';
 
 export const ActionPanel: React.FC = () => {
   const { state, dispatch, setShowTradeModal } = useGameStore();
+  const { enqueue } = useAnimationQueue();
   const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId)!;
   const currentTile = state.board[currentPlayer.position];
 
@@ -49,7 +52,25 @@ export const ActionPanel: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => dispatch({ type: 'ROLL_DICE' })}
+            onClick={() => {
+              const result = rollDice();
+              enqueue({
+                type: 'DICE_ROLL',
+                payload: { result },
+                onComplete: async () => {
+                  dispatch({ type: 'ROLL_DICE', payload: { dice: result } });
+                  
+                  const totalSteps = result[0] + result[1];
+                  for (let i = 0; i < totalSteps; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 400));
+                    dispatch({ type: 'MOVE_ONE_STEP' });
+                  }
+                  
+                  await new Promise(resolve => setTimeout(resolve, 300));
+                  dispatch({ type: 'RESOLVE_TILE' });
+                }
+              });
+            }}
             className="flex-1 min-w-[150px] px-6 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
           >
             <Dices size={24} />
@@ -62,7 +83,12 @@ export const ActionPanel: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => dispatch({ type: 'BUY_PROPERTY', payload: { propertyId: currentTile.id } })}
+              onClick={() => {
+                enqueue({
+                  type: 'PURCHASE_SPARKLE',
+                  onComplete: () => dispatch({ type: 'BUY_PROPERTY', payload: { propertyId: currentTile.id } })
+                });
+              }}
               disabled={currentPlayer.cash < (currentTile as Property).price}
               className="flex-1 px-6 py-4 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 disabled:opacity-40 transition-all shadow-lg shadow-green-100 flex items-center justify-center gap-2"
             >

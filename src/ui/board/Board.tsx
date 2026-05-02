@@ -73,7 +73,7 @@ export const Board: React.FC = () => {
               {owner && (
                 <div className="w-full h-1 mt-auto flex" style={{ backgroundColor: owner.color }} title={`Sở hữu bởi ${owner.name}`}>
                   {property?.isMortgaged && (
-                    <div className="flex-1 bg-red-600 bg-opacity-80 flex items-center justify-center">
+                    <div className="flex-1 bg-gray-900 bg-opacity-80 flex items-center justify-center grayscale blur-[1px]">
                       <span className="text-[6px] text-white font-bold">M</span>
                     </div>
                   )}
@@ -99,9 +99,9 @@ export const Board: React.FC = () => {
                       initial={false}
                       transition={{ 
                         type: "spring", 
-                        stiffness: 300, 
-                        damping: 30,
-                        mass: 1
+                        stiffness: 400,
+                        damping: 15,
+                        mass: 0.8
                       }}
                       className="w-5 h-5 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white bg-slate-800 m-0.5"
                       style={{ backgroundColor: p.color }}

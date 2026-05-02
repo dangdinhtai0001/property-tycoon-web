@@ -1,6 +1,7 @@
 import React from 'react';
 import { Board } from './ui/board/Board';
-import { Board3D } from './ui/board/Board3D';
+import { DiceRollAnimation } from './ui/animation/DiceRollAnimation';
+import { ParticleSystem } from './ui/animation/ParticleSystem';
 import { PlayerListPanel } from './ui/panels/PlayerListPanel';
 import { ActionPanel } from './ui/panels/ActionPanel';
 import { GameLogPanel } from './ui/panels/GameLogPanel';
@@ -12,13 +13,12 @@ import { AuctionModal } from './ui/modals/AuctionModal';
 import { TradeModal } from './ui/modals/TradeModal';
 import { PauseMenu } from './ui/modals/PauseMenu';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
-import { Menu, Info, Box } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 function App() {
   const { state, dispatch, showTradeModal, setShowTradeModal } = useGameStore();
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
-  const [is3DMode, setIs3DMode] = React.useState(true);
 
   if (state.phase === Phase.SETUP) {
     return (
@@ -51,19 +51,6 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIs3DMode(!is3DMode)}
-              className={`p-3 border rounded-2xl transition-all shadow-sm flex items-center gap-2 ${
-                is3DMode 
-                  ? 'bg-blue-600 border-blue-700 text-white hover:bg-blue-700' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Box size={20} />
-              <span className="font-bold text-sm hidden sm:inline">3D</span>
-            </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -79,7 +66,7 @@ function App() {
 
         {/* Left Side: Board */}
         <main className="lg:col-span-8 flex flex-col gap-6">
-          {is3DMode ? <Board3D /> : <Board />}
+          <Board />
           <GameLogPanel />
         </main>
 
@@ -122,6 +109,8 @@ function App() {
         )}
         <PauseMenu isOpen={isPauseOpen} onClose={() => setIsPauseOpen(false)} />
         {state.phase === Phase.GAME_OVER && <EndGameScreen />}
+        <DiceRollAnimation />
+        <ParticleSystem />
       </div>
     </div>
   );
