@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp .claude/CLAUDE.md ./CLAUDE.md)",
+      "Bash(rm .claude/CLAUDE.md)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(bd dolt *)",
+      "Bash(python -m tools.llm_agent_workflow start \"Design ActivateDrawRuleVersion inbound write command: bind/activate DrawRuleVersion to PoolSnapshot, validate pool/rule existence, mode match, scope, freshness token, retire PREGENERATED batch on material change, bump pool_execution_context_version, return current rule context\" --mode implement --budget large)"
+    ]
+  }
+}
