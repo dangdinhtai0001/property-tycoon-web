@@ -42,10 +42,10 @@ Dễ bắt đầu
 → Có đủ chiều sâu tài chính để tạo drama
 → Chơi được local trên browser
 → Không cần backend, không cần đăng nhập
-→ Có thể phát triển dần lên 3D hoặc online sau này
+→ Có hoạt ảnh 2D chất lượng cao làm tăng cảm giác chơi
 ````
 
-MVP mới được định hướng là một bản **Ambitious MVP**: chưa làm 3D, chưa online, chưa AI, chưa trade tự do giữa người chơi; nhưng có thêm lớp tài chính nâng cao như bán nhà, thế chấp, gỡ thế chấp, lãi suất và Debt Resolution.
+MVP được định hướng là một bản **Ambitious MVP 2D thuần**: chưa online, chưa AI, chưa trade tự do giữa người chơi; nhưng có thêm lớp tài chính nâng cao như bán nhà, thế chấp, gỡ thế chấp, lãi suất và Debt Resolution. Đặc biệt, MVP ưu tiên hoạt ảnh 2D/2.5D chất lượng cao (high-quality 2D animations) với các hiệu ứng đặc biệt cho xúc xắc, di chuyển token và tương tác UI để tăng cảm giác hồi hộp và thỏa mãn khi chơi.
 
 ---
 
@@ -106,7 +106,7 @@ Tôi có thể bán công trình, thế chấp tài sản hoặc vay khẩn cấ
 Tôi thắng khi quản lý tài sản và dòng tiền tốt hơn người khác.
 ```
 
-MVP nên ưu tiên cảm giác rõ ràng, ổn định, dễ chơi hơn là animation phức tạp hoặc hình ảnh 3D.
+MVP cần vừa rõ ràng, ổn định, dễ chơi mà vừa có hoạt ảnh chất lượng cao làm điểm nhấn (đặc biệt là khi tung xúc xắc và di chuyển token) để tăng độ thỏa mãn khi chơi.
 
 ---
 
@@ -298,7 +298,7 @@ Lý do:
 * Dễ test rule bằng unit test.
 * Dễ debug game state.
 * Dễ thay UI sau này.
-* Có thể nâng cấp lên 3D mà không viết lại toàn bộ logic.
+* Có thể thêm hoạt ảnh phức tạp hơn mà không viết lại toàn bộ logic.
 * Có thể thêm online multiplayer sau này bằng cách reuse game engine.
 
 Chi tiết technical design được mô tả trong:
@@ -509,13 +509,15 @@ Phase 4 — Advanced Rules
 - Rule presets nâng cao
 - Multiple save slots
 
-Phase 5 — Visual Upgrade / 3D
-- Three.js board
-- 3D token
-- 3D dice
-- Camera
-- 3D building
-- HTML UI overlay
+Phase 5 — Advanced 2D Polish & Juicy Animations
+- Particle effects (xúc xắc, token di chuyển)
+- Sprite sheet animation cho xúc xắc
+- Token hop/bounce với easing
+- Trail effect khi token chạy nhanh
+- Glow effect cho building và mortgaged property
+- Card reveal animation
+- Sound effects nâng cao
+- Visual feedback cho mỗi hành động
 
 Phase 6 — Online Multiplayer
 - Lobby

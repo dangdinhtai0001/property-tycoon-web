@@ -1927,21 +1927,48 @@ These can be closed more freely.
 
 ## 23. Animation Scope
 
-## 23.1 MVP Animation
+## 23.1 MVP Animation — Core UI Features
 
-MVP animations:
+MVP animations là một trong những điểm nhấn cốt lõi, không chỉ decoration:
 
 ```txt
-Dice roll/luck animation
-Token movement tile by tile
-Current tile highlight
-Card flip/reveal
-Money gain/loss floating text
-Modal transition
-Building added/removed small effect
-Mortgage overlay change
-Bankruptcy effect
-Winner celebration
+Dice roll animation sinh động:
+- Sprite-sheet animation hoặc 3D-like 2D physics
+- Spin effect 360° hoặc flip multiple times
+- Kết thúc tại số xúc xắc hiện tại
+- Bounce/shake effect khi dừng lại
+
+Token movement với hiệu ứng:
+- Move tile by tile với easing (không chỉ linear)
+- Hop/bounce effect khi di chuyển
+- Xoay nhẹ token khi đến góc board
+- Trail effect khi tung xúc xắc được số lớn (>8)
+- Glow/shine effect khi token đặt vào tile
+
+Current tile highlight:
+- Glow effect quanh tile hiện tại
+
+Card flip/reveal:
+- 3D-like flip hoặc reveal animation
+
+Money gain/loss floating text:
+- Floating + fade out animation
+
+Modal transition:
+- Smooth fade in/scale in
+
+Building added/removed effect:
+- Sparkle/glow animation
+
+Mortgage overlay change:
+- Shimmer effect
+
+Bankruptcy effect:
+- Dramatic glow effect
+
+Winner celebration:
+- Confetti-like effect
+- Token spin/bounce
 ```
 
 ## 23.2 Animation Principles
@@ -1967,37 +1994,69 @@ Change rule state by themselves
 
 ## 23.3 Recommended Timing
 
-Suggested timing:
+Suggested timing (prioritize "juicy" feel over speed):
 
-| Animation           | Recommended Duration |
-| ------------------- | -------------------: |
-| Button feedback     |             80–150ms |
-| Modal transition    |            150–250ms |
-| Card reveal         |            300–600ms |
-| Dice roll           |            500–900ms |
-| Token move per tile |            100–180ms |
-| Money change        |            500–900ms |
-| Bankruptcy effect   |           800–1500ms |
-| Winner effect       |          1000–2500ms |
+| Animation           | Recommended Duration | Notes                                  |
+| ------------------- | -------------------: | -------------------------------------- |
+| Button feedback     |             80–150ms | Quick response                         |
+| Modal transition    |            150–250ms | Smooth fade in                         |
+| Card reveal         |            300–600ms | Let card flip be satisfying            |
+| Dice roll           |          1000–1500ms | Thrill moment - let it linger          |
+| Token move per tile |            150–250ms | Hop/bounce takes time to feel good     |
+| Token trail effect  |            800–1200ms | Trail fades gradually                  |
+| Money change        |            600–1000ms | Floating text drifts upward            |
+| Bankruptcy effect   |          1000–1500ms | Dramatic event                         |
+| Winner effect       |          2000–3000ms | Celebration should feel substantial    |
+
+Note: Animations không nên làm người chơi chờ vô lý, nhưng cũng không nên quá nhanh đến mức mất đi cảm giác thỏa mãn (juicy feel).
 
 ## 23.4 Token Movement Animation
 
-Token should move step by step.
+Token phải di chuyển từng ô một với hiệu ứng sinh động.
 
-Example:
+### Basic Movement
 
 ```txt
 Position 4 → dice total 5
-Animate:
+Animate tile-by-tile:
 4 → 5 → 6 → 7 → 8 → 9
 Then resolve tile 9.
 ```
 
-If movement is forced teleport:
+### Token Effects During Movement
+
+**Hop/Bounce:**
+- Token nhảy lên một chút khi di chuyển sang ô tiếp theo
+- Bounce curve phải có easing (ease-out khi lên, ease-in khi xuống)
+- Độ cao bounce giảm dần nếu tung xúc xắc số nhỏ (<5)
+- Độ cao bounce tăng nếu tung xúc xắc số lớn (>8)
+
+**Trail Effect:**
+- Khi dice tung được số lớn (8+), token để lại trail/shadow
+- Trail fade out từ từ sau khi token dừng
+- Có thể dùng blur hoặc duplicate token với opacity giảm
+
+**Rotation:**
+- Token xoay nhẹ (~10-15°) khi đến góc board
+- Xoay mượt (easing) để tạo cảm giác tự nhiên
+- Reset xoay khi dừng lại
+
+**Glow Effect:**
+- Khi token đặt vào tile, glow effect phát từ tile
+- Glow intensity tùy vào tile type:
+  - Property của người chơi: vàng
+  - Mortgaged property: xám
+  - Trạm/tiện ích: cam
+  - Thuế/Cơ Hội/Khí Vận: đỏ
+
+### Teleport/Forced Movement
+
+Nếu movement bị force (card, jail):
 
 ```txt
-Use different visual effect.
-Do not imply pass-start bonus if not eligible.
+Use different visual effect (không phải hop).
+Có thể dùng fade out → fade in hoặc warp effect.
+Do not imply pass-start bonus nếu không eligible.
 ```
 
 ## 23.5 Reduced Motion

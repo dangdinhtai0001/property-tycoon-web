@@ -160,7 +160,7 @@ Token di chuyển quanh viền
 Khu trung tâm dùng cho dice, log, card hoặc action panel
 ```
 
-Cách render này phù hợp với 2D/2.5D và vẫn có đường nâng cấp lên 3D sau này.
+Cách render này được tối ưu cho 2D/2.5D với các hiệu ứng hạt (particle effects), glow effects và shadow effects để tạo chiều sâu và cảm giác "juicy".
 
 ---
 
@@ -1341,27 +1341,44 @@ Property tile phải trỏ tới property hợp lệ
 
 ---
 
-## 11.4 3D Board
+## 11.4 2D Visual Enhancement Guidelines
 
-3D board không nằm trong MVP.
-
-Phase sau có thể dùng:
+Board design nên hỗ trợ các hiệu ứng 2D/2.5D chất lượng cao:
 
 ```txt
-Three.js board
-3D token
-3D dice
-3D buildings
-Camera follow
-HTML UI overlay
+Particle effects:
+- Xúc xắc landing (dust/puff effect)
+- Token movement trail khi di chuyển nhanh
+- Property purchase sparkle
+- Building completed glow
+- Mortgage/unmortgage shimmer
+
+Glow effects:
+- Tile highlight khi token sắp landed
+- Mortgaged property dimmer/darker visual
+- Building silhouette glow
+- Owned property ownership glow
+
+Shadow effects:
+- Token drop shadow khi di chuyển
+- Building cast shadow
+- Tile depth shadow cho 2.5D effect
+
+Easing & Animation:
+- Token hop animation với bounce
+- Card flip/reveal animation
+- Money change floating text
+- Building construction animation (level increase)
 ```
 
 Nguyên tắc:
 
 ```txt
-Không thay đổi game logic.
-Chỉ thay render layer.
-BoardConfig vẫn là nguồn dữ liệu chính.
+Board data structure phải hỗ trợ visual effect layers.
+BoardConfig xác định tile position, type, group.
+Visual system áp dụng effect dựa trên state (owned, mortgaged, building level).
+Không hard-code effect vào board data.
+Tách visual layer khỏi game logic.
 ```
 
 ---
@@ -1519,7 +1536,7 @@ Bãi Đỗ Xe / Nghỉ: 1
 
 Board 40 ô được chọn vì đủ lớn để hỗ trợ gameplay property-trading có chiều sâu, đủ không gian cho tài sản và special tiles, nhưng vẫn vừa sức cho MVP 2D/2.5D trên desktop browser.
 
-Board phải được thiết kế theo hướng data-driven để sau này có thể mở rộng sang board khác, board editor hoặc 3D renderer mà không viết lại game logic.
+Board phải được thiết kế theo hướng data-driven để sau này có thể mở rộng sang board khác, board editor hoặc visual enhancement system mà không viết lại game logic.
 
 ```
 ::contentReference[oaicite:2]{index=2}

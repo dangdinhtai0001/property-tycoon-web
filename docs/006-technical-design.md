@@ -2015,7 +2015,36 @@ UI animation interpolates from previous to new position.
 No rule should wait on CSS animation to become true.
 ```
 
-If needed, use UI-only animation queue.
+## 15.3 Animation Queue System (UI Layer)
+
+MVP phải có Animation Queue ở phía UI để quản lý sequential animations từ game events:
+
+**Why Animation Queue:**
+- Nếu engine dispatch nhiều events cùng lúc, UI không cập nhật chớp nhoáng
+- Queue các events và chơi animations từ từ, từ event này sang event khác
+- Tạo cảm giác storytelling từng bước thay vì cập nhật state đột ngột
+
+**Example Flow:**
+```txt
+DICE_ROLLED → dice animation 1000ms → wait
+PLAYER_MOVED → token hop animation 600ms → wait
+RENT_CHARGED → money float animation 800ms → wait
+[check if need Debt Resolution] → open modal
+```
+
+**Architecture:**
+```txt
+game-engine/
+  reducer → returns { state, events[] }
+
+ui/
+  AnimationQueue
+    .enqueue(event)
+    .play(event) → Promise<void>
+    .playSequential(events[]) → Promise<void>
+```
+
+Điều này giúp tạo momentum và cảm giác "juicy" cho game.
 
 ---
 
@@ -2073,138 +2102,6 @@ dispatch({
   type: "ROLL_DICE",
   payload: { die1: 6, die2: 6 }
 });
-```
-
----
-
-## 17. Future 3D Compatibility
-
-## 17.1 Core Rule
-
-Future 3D must not require rewriting game rules.
-
-Current architecture should allow:
-
-```txt
-React 2D board renderer
-↓ replace with
-Three.js board renderer
-```
-
-while keeping:
-
-```txt
-GameState
-GameAction
-Game engine
-Rules
-Save/load
-BoardConfig
-Property data
-Card data
-```
-
-## 17.2 Renderer-Agnostic Board
-
-Board state should not store pixel coordinates.
-
-Good:
-
-```ts
-player.position = 12;
-tile.index = 12;
-```
-
-Bad:
-
-```ts
-player.x = 823;
-player.y = 412;
-```
-
-Renderer maps board index to visual position.
-
-2D renderer:
-
-```ts
-getTileScreenPosition(tile.index);
-```
-
-3D renderer:
-
-```ts
-getTileWorldPosition(tile.index);
-```
-
-## 17.3 Token and Building Rendering
-
-GameState stores semantic data:
-
-```txt
-Player position
-Building level
-Owner color
-Mortgage state
-```
-
-Renderer decides:
-
-```txt
-2D icon
-2.5D sprite
-3D model
-Shader/material
-Camera angle
-```
-
-## 17.4 Future Three.js Layer
-
-Possible future structure:
-
-```txt
-src/
-  renderers/
-    react-2d/
-      Board2D.tsx
-    three-3d/
-      Board3D.tsx
-      TokenMesh.tsx
-      BuildingMesh.tsx
-      CameraController.ts
-```
-
-Shared:
-
-```txt
-game-engine/
-data/
-types/
-selectors/
-```
-
-## 17.5 UI Overlay
-
-Even in 3D phase, keep HTML UI overlay for:
-
-```txt
-Player list
-Dice
-Action buttons
-Modals
-Debt Resolution
-Asset management
-Game log
-```
-
-3D should focus on:
-
-```txt
-Board
-Tokens
-Dice
-Buildings
-Camera
-Visual polish
 ```
 
 ---

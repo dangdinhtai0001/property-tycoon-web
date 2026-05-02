@@ -627,18 +627,22 @@ Chi tiết nằm trong:
 
 ## 5.13 Animation and Audio
 
-MVP có animation/audio nhẹ, không phải trọng tâm chính.
+MVP có animation chất lượng cao như **một trong những điểm nhấn cốt lõi của UI**, không chỉ là decoration.
 
 In scope animation:
 
 ```txt
-Dice roll animation đơn giản
-Token move từng ô
-Highlight ô hiện tại
-Card reveal
+Dice roll animation với sprite-sheet hoặc vật lý 2D sinh động
+Token move không chỉ step-by-step mà có easing và bounce effect
+Token nhảy (hop) với momentum khi di chuyển qua nhiều ô
+Token có trail effect khi chạy nhanh (do tung xúc xắc được số lớn)
+Token xoay nhẹ khi đến góc board
+Highlight ô hiện tại với glow effect
+Card reveal animation
 Money change effect
 Modal transition
-Win effect đơn giản
+Property ownership highlight khi mua/thế chấp
+Win effect đặc biệt
 ```
 
 In scope audio:
@@ -995,7 +999,9 @@ Seasonal board
 Map events
 ```
 
-## 9.6 3D and Advanced Visuals
+## 9.6 3D and Advanced Visuals — PERMANENT NON-GOAL
+
+Property Tycoon Web được commit là một **game 2D/2.5D thuần túy**. 3D graphics hoàn toàn KHÔNG phải là hướng đi của project này, không phải "out of scope cho MVP nhưng xem xét sau", mà là **permanent non-goal** cho cả vòng đời dự án.
 
 ```txt
 3D board
@@ -1005,9 +1011,12 @@ Camera follow
 Cinematic camera
 3D card reveal
 3D building
+3D assets
 Cutscene
-Complex particle effects
+Advanced 3D effects
 ```
+
+Thay vào đó, project ưu tiên hoàn thiện hoạt ảnh 2D/2.5D chất lượng cao với các hiệu ứng như particle effects, sprite animation, easing, trail effects và glow effects để tạo cảm giác "juicy" và thỏa mãn cho game 2D thuần.
 
 ## 9.7 Mobile and Accessibility Advanced Scope
 

@@ -140,7 +140,7 @@ Phase 1 — Core Playable
 Phase 2 — Ambitious MVP Finance
 Phase 3 — MVP Polish
 Phase 4 — Advanced Rules
-Phase 5 — 3D
+Phase 5 — Advanced 2D Polish & Juicy Animations
 Phase 6 — Online
 ```
 
@@ -148,15 +148,15 @@ Phase 6 — Online
 
 ## 4. Phase Summary
 
-| Phase                           | Goal                                              | Release Type            |
-| ------------------------------- | ------------------------------------------------- | ----------------------- |
-| P0 — Playable Prototype         | Chứng minh core loop chạy được                    | Internal prototype      |
-| Phase 1 — Core Playable         | Chơi được ván cơ bản từ đầu tới cuối              | Internal alpha          |
-| Phase 2 — Ambitious MVP Finance | Thêm finance nâng cao và Debt Resolution          | MVP core complete       |
-| Phase 3 — MVP Polish            | UI, save/load, animation, audio, test hardening   | MVP release candidate   |
-| Phase 4 — Advanced Rules        | Trade, auction, quick mode, rule presets nâng cao | Post-MVP                |
-| Phase 5 — 3D                    | 3D board/token/dice/building                      | Post-MVP visual upgrade |
-| Phase 6 — Online                | Lobby, room, sync, reconnect                      | Post-MVP multiplayer    |
+| Phase                                       | Goal                                                        | Release Type            |
+| ------------------------------------------- | ----------------------------------------------------------- | ----------------------- |
+| P0 — Playable Prototype                     | Chứng minh core loop chạy được                              | Internal prototype      |
+| Phase 1 — Core Playable                     | Chơi được ván cơ bản từ đầu tới cuối                        | Internal alpha          |
+| Phase 2 — Ambitious MVP Finance             | Thêm finance nâng cao và Debt Resolution                    | MVP core complete       |
+| Phase 3 — MVP Polish                        | UI, save/load, animation, audio, test hardening             | MVP release candidate   |
+| Phase 4 — Advanced Rules                    | Trade, auction, quick mode, rule presets nâng cao           | Post-MVP                |
+| Phase 5 — Advanced 2D Polish & Juicy Anim   | Particle effects, sprite animation, easing, trail, glow     | Post-MVP visual polish  |
+| Phase 6 — Online                            | Lobby, room, sync, reconnect                                | Post-MVP multiplayer    |
 
 ---
 
@@ -587,33 +587,52 @@ Không đưa vào MVP vì dễ tăng scope và kẹt UI.
 
 ---
 
-## 10. Phase 5 — 3D
+## 10. Phase 5 — Advanced 2D Polish & Juicy Animations
 
 ## 10.1 Goal
 
-Phase 5 thay hoặc bổ sung board renderer 3D mà không viết lại game logic.
+Phase 5 nâng cấp visual experience và animation quality để tạo cảm giác "juicy" và thỏa mãn cho game 2D thuần.
 
 ---
 
 ## 10.2 Candidate Features
 
 ```txt
-Three.js board
-3D token
-3D dice
-3D buildings
-Camera controls
-Tile hover/pick in 3D
-HTML UI overlay
-3D animation
-Lighting/materials
+Particle effects:
+- Dice landing dust/puff
+- Token movement trail
+- Property purchase sparkle
+- Building completed glow
+- Mortgage shimmer
+
+Sprite-based animations:
+- Dice sprite-sheet animation
+- Token hop/bounce with easing
+- Card flip/reveal animation
+
+Glow & shadow effects:
+- Tile highlight glow
+- Mortgaged property dimmer visual
+- Building construction glow
+- Token drop shadow during movement
+
+Advanced easing:
+- Token movement with ease-out/ease-in
+- Bounce curves for hop effect
+- Trail fade-out animation
+
+Juice & polish:
+- Visual feedback cho mỗi action
+- Smooth transitions giữa states
+- Cumulative animation queue
+- Reduced motion option
 ```
 
 ---
 
-## 10.3 3D Constraints
+## 10.3 2D Enhancement Constraints
 
-3D phase phải giữ:
+Phase 5 phải giữ:
 
 ```txt
 Same GameState
@@ -621,22 +640,26 @@ Same GameAction
 Same BoardConfig
 Same rule engine
 Same save/load data
+Animation layer tách khỏi game logic
 ```
 
-3D không được nhét rule vào renderer.
+Animation không được chứa rule hay thay đổi game state.
 
 ---
 
-## 10.4 3D Acceptance Criteria
+## 10.4 Phase 5 Acceptance Criteria
 
 ```txt
-1. 3D board render đúng 40 ô.
-2. Token position lấy từ player.position.
-3. Building level render từ property.buildingLevel.
-4. Mortgage state render từ property.isMortgaged.
-5. Click/select tile hoạt động.
-6. Rule engine không đổi.
-7. Save/load cũ vẫn dùng được hoặc có migration rõ.
+1. Dice animation tốn 1-1.5s, có sprite sheet hoặc 2D physics.
+2. Token movement có hop/bounce effect.
+3. Token trail effect khi di chuyển nhanh.
+4. Token xoay nhẹ khi đến góc board.
+5. Particle effects phát sáng khi có major action.
+6. Glow effects cho tiles, buildings, mortgaged properties.
+7. All animations skippable hoặc không block gameplay.
+8. Reduced motion mode hoạt động.
+9. Animation Queue system quản lý sequential events.
+10. Game vẫn chơi được, vẫn save/load được (animation không ảnh hưởng state).
 ```
 
 ---
@@ -1972,7 +1995,7 @@ Phase 1 — Core Playable
 Phase 2 — Ambitious MVP Finance
 Phase 3 — MVP Polish
 Phase 4 — Advanced Rules
-Phase 5 — 3D
+Phase 5 — Advanced 2D Polish & Juicy Animations
 Phase 6 — Online
 ```
 
