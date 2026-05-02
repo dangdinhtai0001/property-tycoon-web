@@ -1,33 +1,26 @@
 import { type GameState, type GameAction, Phase, TileType, type Property } from '../types/game';
-import { BASIC_BOARD } from '../data/boards/basicBoard';
+import { createInitialGame } from './setupGame';
 import { rollDice } from '../rules/diceRules';
 import { applyMovement } from '../rules/movementRules';
 import { buyProperty } from '../rules/propertyRules';
 import { payRent } from '../rules/rentRules';
+import { buildProperty } from '../rules/buildingRules';
+import { payJailFine } from '../rules/jailRules';
 
-export const createInitialGame = (playerConfigs: { name: string; color: string }[]): GameState => {
-  const players = playerConfigs.map((config, index) => ({
-    id: `player-${index}`,
-    name: config.name,
-    cash: 1500,
-    position: 0,
-    isBankrupt: false,
-    color: config.color,
-  }));
-
-  return {
-    players,
-    currentPlayerId: players[0].id,
-    phase: Phase.WAITING_TO_ROLL,
-    board: BASIC_BOARD,
-    log: ['Game đã bắt đầu!'],
-  };
-};
+export function assertGameInvariants(state: GameState): void {
+  for (const player of state.players) {
+    if (player.cash < 0 && !player.isBankrupt && state.phase !== Phase.GAME_OVER && state.phase !== Phase.DEBT_RESOLUTION) {
+      console.warn(`Invariant violated: Player ${player.name} has negative cash (${player.cash}) but is not bankrupt and game is not in Debt Resolution or Game Over.`);
+    }
+  }
+}
 
 export const gameReducer = (state: GameState, action: GameAction): GameState => {
+  let nextState = state;
   switch (action.type) {
     case 'START_GAME':
-      return createInitialGame(action.payload.players);
+      nextState = createInitialGame(action.payload.players);
+      break;
 
     case 'ROLL_DICE': {
       if (state.phase !== Phase.WAITING_TO_ROLL) return state;
@@ -49,7 +42,8 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         if (!property.ownerId) {
           nextPhase = Phase.BUY_DECISION;
         } else if (property.ownerId !== currentPlayer.id) {
-          return gameReducer(movedState, { type: 'PAY_RENT' });
+          nextState = gameReducer(movedState, { type: 'PAY_RENT' });
+          break;
         } else {
           nextPhase = Phase.END_TURN;
         }
@@ -57,18 +51,21 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         nextPhase = Phase.END_TURN;
       }
 
-      return { ...movedState, phase: nextPhase };
+      nextState = { ...movedState, phase: nextPhase };
+      break;
     }
 
     case 'BUY_PROPERTY': {
       if (state.phase !== Phase.BUY_DECISION) return state;
       const boughtState = buyProperty(state, action.payload.propertyId);
-      return { ...boughtState, phase: Phase.END_TURN };
+      nextState = { ...boughtState, phase: Phase.END_TURN };
+      break;
     }
 
     case 'DECLINE_BUY_PROPERTY': {
       if (state.phase !== Phase.BUY_DECISION) return state;
-      return { ...state, phase: Phase.END_TURN };
+      nextState = { ...state, phase: Phase.END_TURN };
+      break;
     }
 
     case 'PAY_RENT': {
@@ -76,15 +73,28 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const currentPlayer = rentedState.players.find(p => p.id === rentedState.currentPlayerId)!;
       
       if (currentPlayer.cash < 0) {
-        return {
+        nextState = {
           ...rentedState,
           phase: Phase.GAME_OVER,
           winnerId: rentedState.players.find(p => p.id !== currentPlayer.id)?.id,
           log: [`${currentPlayer.name} đã phá sản!`, ...rentedState.log],
         };
+      } else {
+        nextState = { ...rentedState, phase: Phase.END_TURN };
       }
-      
-      return { ...rentedState, phase: Phase.END_TURN };
+      break;
+    }
+
+    case 'BUILD': {
+      if (state.phase !== Phase.WAITING_TO_ROLL && state.phase !== Phase.END_TURN) return state;
+      nextState = buildProperty(state, action.payload.propertyId);
+      break;
+    }
+
+    case 'PAY_FINE': {
+      if (state.phase !== Phase.WAITING_TO_ROLL) return state;
+      nextState = payJailFine(state);
+      break;
     }
 
     case 'END_TURN': {
@@ -93,15 +103,19 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const currentIndex = state.players.findIndex(p => p.id === state.currentPlayerId);
       const nextIndex = (currentIndex + 1) % state.players.length;
       
-      return {
+      nextState = {
         ...state,
         currentPlayerId: state.players[nextIndex].id,
         phase: Phase.WAITING_TO_ROLL,
         lastDiceRoll: undefined,
       };
+      break;
     }
 
     default:
-      return state;
+      nextState = state;
   }
+  
+  assertGameInvariants(nextState);
+  return nextState;
 };
