@@ -7,7 +7,7 @@ export const GameLogPanel: React.FC = () => {
   const { state } = useGameStore();
 
   return (
-    <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden min-h-[150px]">
+    <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden min-h-[300px] h-full">
       <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
         <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
           <ScrollText size={16} className="text-blue-600" />

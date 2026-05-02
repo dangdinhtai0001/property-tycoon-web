@@ -31,10 +31,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-[1800px] mx-auto flex flex-col gap-6 px-4 md:px-6">
         
         {/* Header */}
-        <header className="lg:col-span-12 flex items-center justify-between mb-2">
+        <header className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-6">
             <div>
               <h1 className="text-3xl font-black tracking-tight text-slate-800">
@@ -65,38 +65,44 @@ function App() {
           </div>
         </header>
 
-        {/* Left Side: Board */}
-        <main className="lg:col-span-8 flex flex-col gap-6">
-          <Board />
-          <GameLogPanel />
-        </main>
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+          {/* Column 1: Game Log (History) */}
+          <aside className="flex-[0.8] flex flex-col gap-6 w-full lg:min-w-[280px] lg:h-[800px]">
+            <GameLogPanel />
+          </aside>
 
-        {/* Right Side: Panels */}
-        <aside className="lg:col-span-4 flex flex-col gap-6">
-          <PlayerListPanel />
-          <ActionPanel />
-          
-          <div className="p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Info size={80} />
+          {/* Column 2: Board (Center) */}
+          <main className="flex-[3] w-full max-w-[1000px] flex justify-center">
+            <Board />
+          </main>
+
+          {/* Column 3: Panels (Actions) */}
+          <aside className="flex-[1] flex flex-col gap-6 w-full lg:min-w-[320px]">
+            <PlayerListPanel />
+            <ActionPanel />
+            
+            <div className="p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-100 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Info size={80} />
+              </div>
+              <h3 className="font-black mb-2 uppercase tracking-tight">Hướng dẫn nhanh</h3>
+              <ul className="text-sm space-y-2 text-blue-50">
+                <li className="flex gap-2">
+                  <span className="font-black opacity-50">01</span>
+                  <span>Mua đất để bắt đầu xây dựng đế chế.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-black opacity-50">02</span>
+                  <span>Thu thập đủ bộ màu để xây nhà/khách sạn.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-black opacity-50">03</span>
+                  <span>Thế chấp hoặc bán bớt nhà nếu kẹt tiền.</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="font-black mb-2 uppercase tracking-tight">Hướng dẫn nhanh</h3>
-            <ul className="text-sm space-y-2 text-blue-50">
-              <li className="flex gap-2">
-                <span className="font-black opacity-50">01</span>
-                <span>Mua đất để bắt đầu xây dựng đế chế.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-black opacity-50">02</span>
-                <span>Thu thập đủ bộ màu để xây nhà/khách sạn.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-black opacity-50">03</span>
-                <span>Thế chấp hoặc bán bớt nhà nếu kẹt tiền.</span>
-              </li>
-            </ul>
-          </div>
-        </aside>
+          </aside>
+        </div>
 
         <DebtResolutionModal />
         <AuctionModal />

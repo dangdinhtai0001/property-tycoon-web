@@ -34,7 +34,7 @@ export const Board: React.FC = () => {
 
   return (
     <div className="flex-1 flex items-center justify-center bg-green-50 p-4">
-      <div className="grid grid-cols-11 grid-rows-11 gap-0.5 w-[800px] h-[800px] bg-gray-300 border-2 border-gray-800 shadow-xl">
+      <div className="grid grid-cols-11 grid-rows-11 gap-0.5 w-full max-w-[1000px] aspect-square bg-gray-300 border-2 border-gray-800 shadow-xl">
         {/* Center content */}
         <div className="col-start-2 col-end-11 row-start-2 row-end-11 bg-green-100 flex flex-col items-center justify-center p-8 text-center shadow-inner">
           <h1 className="text-6xl font-black text-red-600 tracking-tighter transform -rotate-12 uppercase drop-shadow-md">
