@@ -21,6 +21,9 @@ export const PlayerListPanel: React.FC = () => {
               {state.currentPlayerId === player.id && (
                 <span className="text-[10px] bg-blue-500 text-white px-1 rounded">Lượt này</span>
               )}
+              {player.jailTurns > 0 && (
+                <span className="text-[10px] bg-yellow-500 text-white px-1 rounded">Ở tù ({player.jailTurns}/3)</span>
+              )}
             </span>
             <span className="text-sm text-gray-600">Vị trí: {player.position}</span>
           </div>
