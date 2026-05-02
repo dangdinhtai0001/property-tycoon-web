@@ -1,0 +1,56 @@
+import { type GameState, type Property, TileType } from '../types/game';
+
+export const canBuild = (state: GameState, propertyId: string): boolean => {
+  const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
+  const property = state.board.find(t => t.id === propertyId) as Property | undefined;
+
+  if (!currentPlayer || !property || property.type !== TileType.PROPERTY) return false;
+  if (property.ownerId !== currentPlayer.id) return false;
+  if (property.buildingLevel >= 5) return false; // Max 5 (Hotel)
+  if (currentPlayer.cash < property.buildingCost) return false;
+
+  // Check if owner has all properties in the group
+  const propertiesInGroup = state.board.filter(
+    t => t.type === TileType.PROPERTY && (t as Property).groupId === property.groupId
+  ) as Property[];
+
+  const ownsAll = propertiesInGroup.every(p => p.ownerId === currentPlayer.id);
+  if (!ownsAll) return false;
+
+  // Optional even-build rule: Cannot build if this building level is > any other property in group
+  const minLevelInGroup = Math.min(...propertiesInGroup.map(p => p.buildingLevel));
+  if (property.buildingLevel > minLevelInGroup) return false;
+
+  return true;
+};
+
+export const buildProperty = (state: GameState, propertyId: string): GameState => {
+  if (!canBuild(state, propertyId)) return state;
+
+  const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+  const property = state.board.find(t => t.id === propertyId) as Property;
+
+  const updatedPlayers = state.players.map(p => {
+    if (p.id === currentPlayer.id) {
+      return { ...p, cash: p.cash - property.buildingCost };
+    }
+    return p;
+  });
+
+  const updatedBoard = state.board.map(t => {
+    if (t.id === propertyId) {
+      return { ...t, buildingLevel: property.buildingLevel + 1 };
+    }
+    return t;
+  });
+
+  const buildingName = property.buildingLevel === 4 ? 'Khách sạn' : `Nhà cấp ${property.buildingLevel + 1}`;
+  const logEntry = `${currentPlayer.name} đã xây ${buildingName} tại ${property.name} với chi phí ${property.buildingCost}$.`;
+
+  return {
+    ...state,
+    players: updatedPlayers,
+    board: updatedBoard,
+    log: [logEntry, ...state.log],
+  };
+};
