@@ -18,10 +18,8 @@ export const canBuild = (state: GameState, propertyId: string): boolean => {
 
   const ownsAll = propertiesInGroup.every(p => p.ownerId === currentPlayer.id);
   const anyMortgaged = propertiesInGroup.some(p => p.isMortgaged);
-  const isLandedOn = currentPlayer.position === property.position;
-
-  // Rule: Must own all OR currently landed on it
-  if (!isLandedOn && (!ownsAll || anyMortgaged)) return false;
+  // Rule: Must own all properties in the group AND none can be mortgaged
+  if (!ownsAll || anyMortgaged) return false;
 
   // Optional even-build rule: Cannot build if this building level is > any other property in group (that you own)
   const ownedPropertiesInGroup = propertiesInGroup.filter(p => p.ownerId === currentPlayer.id);

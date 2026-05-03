@@ -1,44 +1,372 @@
 import { type BoardTile, TileType, type Property, PropertyGroup } from '../../types/game';
 
-export const BASIC_BOARD: BoardTile[] = [
-  { id: 'tile-0', type: TileType.START, name: 'Bắt đầu', position: 0, imageUrl: '/assets/tiles/start.png' },
-  { id: 'tile-1', type: TileType.PROPERTY, name: 'Phố cổ Hội An', position: 1, price: 60, rent: 2, groupId: PropertyGroup.BROWN, buildingLevel: 0, buildingCost: 50, rentLevels: [2, 10, 30, 90, 160, 250], isMortgaged: false, mortgageValue: 30 } as Property,
-  { id: 'tile-2', type: TileType.CHANCE, name: 'Khí Vận', position: 2, imageUrl: '/assets/tiles/chance-vertical.png' },
-  { id: 'tile-3', type: TileType.PROPERTY, name: 'Chợ Bến Thành', position: 3, price: 60, rent: 4, groupId: PropertyGroup.BROWN, buildingLevel: 0, buildingCost: 50, rentLevels: [4, 20, 60, 180, 320, 450], isMortgaged: false, mortgageValue: 30 } as Property,
-  { id: 'tile-4', type: TileType.TAX, name: 'Thuế thu nhập', position: 4, imageUrl: '/assets/tiles/tax.png' },
-  { id: 'tile-5', type: TileType.PROPERTY, name: 'Bến xe Miền Đông', position: 5, price: 200, rent: 25, groupId: PropertyGroup.STATION, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 100, imageUrl: '/assets/tiles/station.png' } as Property,
-  { id: 'tile-6', type: TileType.PROPERTY, name: 'Hồ Hoàn Kiếm', position: 6, price: 100, rent: 6, groupId: PropertyGroup.LIGHT_BLUE, buildingLevel: 0, buildingCost: 50, rentLevels: [6, 30, 90, 270, 400, 550], isMortgaged: false, mortgageValue: 50 } as Property,
-  { id: 'tile-7', type: TileType.FORTUNE, name: 'Cơ Hội', position: 7, imageUrl: '/assets/tiles/fortune-vertical.png' },
-  { id: 'tile-8', type: TileType.PROPERTY, name: 'Văn Miếu - Quốc Tử Giám', position: 8, price: 100, rent: 6, groupId: PropertyGroup.LIGHT_BLUE, buildingLevel: 0, buildingCost: 50, rentLevels: [6, 30, 90, 270, 400, 550], isMortgaged: false, mortgageValue: 50 } as Property,
-  { id: 'tile-9', type: TileType.PROPERTY, name: 'Cầu Long Biên', position: 9, price: 120, rent: 8, groupId: PropertyGroup.LIGHT_BLUE, buildingLevel: 0, buildingCost: 50, rentLevels: [8, 40, 100, 300, 450, 600], isMortgaged: false, mortgageValue: 60 } as Property,
-  { id: 'tile-10', type: TileType.JAIL, name: 'Nhà tù / Thăm nuôi', position: 10, imageUrl: '/assets/tiles/jail.png' },
-  { id: 'tile-11', type: TileType.PROPERTY, name: 'Cố đô Huế', position: 11, price: 140, rent: 10, groupId: PropertyGroup.PINK, buildingLevel: 0, buildingCost: 100, rentLevels: [10, 50, 150, 450, 625, 750], isMortgaged: false, mortgageValue: 70 } as Property,
-  { id: 'tile-12', type: TileType.PROPERTY, name: 'Nhà máy Thủy điện Hòa Bình', position: 12, price: 150, rent: 0, groupId: PropertyGroup.UTILITY, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 75 } as Property,
-  { id: 'tile-13', type: TileType.PROPERTY, name: 'Chùa Thiên Mụ', position: 13, price: 140, rent: 10, groupId: PropertyGroup.PINK, buildingLevel: 0, buildingCost: 100, rentLevels: [10, 50, 150, 450, 625, 750], isMortgaged: false, mortgageValue: 70 } as Property,
-  { id: 'tile-14', type: TileType.PROPERTY, name: 'Đại Nội Huế', position: 14, price: 160, rent: 12, groupId: PropertyGroup.PINK, buildingLevel: 0, buildingCost: 100, rentLevels: [12, 60, 180, 500, 700, 900], isMortgaged: false, mortgageValue: 80 } as Property,
-  { id: 'tile-15', type: TileType.PROPERTY, name: 'Ga Hà Nội', position: 15, price: 200, rent: 25, groupId: PropertyGroup.STATION, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 100, imageUrl: '/assets/tiles/station.png' } as Property,
-  { id: 'tile-16', type: TileType.PROPERTY, name: 'Phố cổ Hà Nội', position: 16, price: 180, rent: 14, groupId: PropertyGroup.ORANGE, buildingLevel: 0, buildingCost: 100, rentLevels: [14, 70, 200, 550, 750, 950], isMortgaged: false, mortgageValue: 90 } as Property,
-  { id: 'tile-17', type: TileType.CHANCE, name: 'Khí Vận', position: 17, imageUrl: '/assets/tiles/chance-horizontal.png' },
-  { id: 'tile-18', type: TileType.PROPERTY, name: 'Vịnh Hạ Long', position: 18, price: 180, rent: 14, groupId: PropertyGroup.ORANGE, buildingLevel: 0, buildingCost: 100, rentLevels: [14, 70, 200, 550, 750, 950], isMortgaged: false, mortgageValue: 90 } as Property,
-  { id: 'tile-19', type: TileType.PROPERTY, name: 'Quần thể Tràng An', position: 19, price: 200, rent: 16, groupId: PropertyGroup.ORANGE, buildingLevel: 0, buildingCost: 100, rentLevels: [16, 80, 220, 600, 800, 1000], isMortgaged: false, mortgageValue: 100 } as Property,
-  { id: 'tile-20', type: TileType.REST, name: 'Bãi đỗ xe miễn phí', position: 20, imageUrl: '/assets/tiles/rest.png' },
-  { id: 'tile-21', type: TileType.PROPERTY, name: 'Bà Nà Hills', position: 21, price: 220, rent: 18, groupId: PropertyGroup.RED, buildingLevel: 0, buildingCost: 150, rentLevels: [18, 90, 250, 700, 875, 1050], isMortgaged: false, mortgageValue: 110 } as Property,
-  { id: 'tile-22', type: TileType.FORTUNE, name: 'Cơ Hội', position: 22, imageUrl: '/assets/tiles/fortune-vertical.png' },
-  { id: 'tile-23', type: TileType.PROPERTY, name: 'Biển Mỹ Khê', position: 23, price: 220, rent: 18, groupId: PropertyGroup.RED, buildingLevel: 0, buildingCost: 150, rentLevels: [18, 90, 250, 700, 875, 1050], isMortgaged: false, mortgageValue: 110 } as Property,
-  { id: 'tile-24', type: TileType.PROPERTY, name: 'Cầu Rồng Đà Nẵng', position: 24, price: 240, rent: 20, groupId: PropertyGroup.RED, buildingLevel: 0, buildingCost: 150, rentLevels: [20, 100, 300, 750, 925, 1100], isMortgaged: false, mortgageValue: 120 } as Property,
-  { id: 'tile-25', type: TileType.PROPERTY, name: 'Ga Sài Gòn', position: 25, price: 200, rent: 25, groupId: PropertyGroup.STATION, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 100, imageUrl: '/assets/tiles/station.png' } as Property,
-  { id: 'tile-26', type: TileType.PROPERTY, name: 'Chợ nổi Cái Răng', position: 26, price: 260, rent: 22, groupId: PropertyGroup.YELLOW, buildingLevel: 0, buildingCost: 150, rentLevels: [22, 110, 330, 800, 975, 1150], isMortgaged: false, mortgageValue: 130 } as Property,
-  { id: 'tile-27', type: TileType.PROPERTY, name: 'Đảo Phú Quốc', position: 27, price: 260, rent: 22, groupId: PropertyGroup.YELLOW, buildingLevel: 0, buildingCost: 150, rentLevels: [22, 110, 330, 800, 975, 1150], isMortgaged: false, mortgageValue: 130 } as Property,
-  { id: 'tile-28', type: TileType.PROPERTY, name: 'Nhà máy Nước Thủ Đức', position: 28, price: 150, rent: 0, groupId: PropertyGroup.UTILITY, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 75 } as Property,
-  { id: 'tile-29', type: TileType.PROPERTY, name: 'Mũi Né', position: 29, price: 280, rent: 24, groupId: PropertyGroup.YELLOW, buildingLevel: 0, buildingCost: 150, rentLevels: [24, 120, 360, 850, 1025, 1200], isMortgaged: false, mortgageValue: 140 } as Property,
-  { id: 'tile-30', type: TileType.GO_TO_JAIL, name: 'Vào tù', position: 30, imageUrl: '/assets/tiles/go_to_jail.png' },
-  { id: 'tile-31', type: TileType.PROPERTY, name: 'Sa Pa', position: 31, price: 300, rent: 26, groupId: PropertyGroup.GREEN, buildingLevel: 0, buildingCost: 200, rentLevels: [26, 130, 390, 900, 1100, 1275], isMortgaged: false, mortgageValue: 150 } as Property,
-  { id: 'tile-32', type: TileType.PROPERTY, name: 'Đỉnh Fansipan', position: 32, price: 300, rent: 26, groupId: PropertyGroup.GREEN, buildingLevel: 0, buildingCost: 200, rentLevels: [26, 130, 390, 900, 1100, 1275], isMortgaged: false, mortgageValue: 150 } as Property,
-  { id: 'tile-33', type: TileType.CHANCE, name: 'Khí Vận', position: 33, imageUrl: '/assets/tiles/chance-horizontal.png' },
-  { id: 'tile-34', type: TileType.PROPERTY, name: 'Thác Bản Giốc', position: 34, price: 320, rent: 28, groupId: PropertyGroup.GREEN, buildingLevel: 0, buildingCost: 200, rentLevels: [28, 150, 450, 1000, 1200, 1400], isMortgaged: false, mortgageValue: 160 } as Property,
-  { id: 'tile-35', type: TileType.PROPERTY, name: 'Ga Đà Nẵng', position: 35, price: 200, rent: 25, groupId: PropertyGroup.STATION, buildingLevel: 0, buildingCost: 0, isMortgaged: false, mortgageValue: 100, imageUrl: '/assets/tiles/station.png' } as Property,
-  { id: 'tile-36', type: TileType.FORTUNE, name: 'Cơ Hội', position: 36, imageUrl: '/assets/tiles/fortune-horizontal.png' },
-  { id: 'tile-37', type: TileType.PROPERTY, name: 'Dinh Độc Lập', position: 37, price: 350, rent: 35, groupId: PropertyGroup.DARK_BLUE, buildingLevel: 0, buildingCost: 200, rentLevels: [35, 175, 500, 1100, 1300, 1500], isMortgaged: false, mortgageValue: 175 } as Property,
-  { id: 'tile-38', type: TileType.TAX, name: 'Thuế xa xỉ', position: 38, imageUrl: '/assets/tiles/luxury_tax.png' },
-  { id: 'tile-39', type: TileType.PROPERTY, name: 'Nhà thờ Đức Bà Sài Gòn', position: 39, price: 400, rent: 50, groupId: PropertyGroup.DARK_BLUE, buildingLevel: 0, buildingCost: 200, rentLevels: [50, 200, 600, 1400, 1700, 2000], isMortgaged: false, mortgageValue: 200 } as Property,
-];
+const MORTGAGE_RATIO = 0.5;
+
+const tileId = (position: number) => `tile-${position}`;
+
+type RentLevels = readonly [number, number, number, number, number, number];
+type NonPropertyTileType = Exclude<TileType, TileType.PROPERTY>;
+
+type BaseTileConfig = {
+  type: TileType;
+  name: string;
+  position: number;
+  imageUrl: string;
+};
+
+type PropertyTileConfig = BaseTileConfig & {
+  type: TileType.PROPERTY;
+  price: number;
+  groupId: PropertyGroup;
+  rent?: number;
+  rentLevels?: RentLevels;
+  buildingCost?: number;
+};
+
+type SpecialTileConfig = BaseTileConfig & {
+  type: NonPropertyTileType;
+};
+
+type BoardTileConfig = PropertyTileConfig | SpecialTileConfig;
+
+const BUILDING_COST_BY_GROUP: Partial<Record<PropertyGroup, number>> = {
+  [PropertyGroup.BROWN]: 50,
+  [PropertyGroup.LIGHT_BLUE]: 50,
+  [PropertyGroup.PINK]: 100,
+  [PropertyGroup.ORANGE]: 100,
+  [PropertyGroup.RED]: 150,
+  [PropertyGroup.YELLOW]: 150,
+  [PropertyGroup.GREEN]: 200,
+  [PropertyGroup.DARK_BLUE]: 200,
+};
+
+const BOARD_TILE_CONFIGS = [
+  { type: TileType.START, name: 'Hồ Gươm - Xuất phát', position: 0, imageUrl: '/assets/tiles/start.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Làng cổ Đường Lâm',
+    position: 1,
+    imageUrl: '',
+    price: 60,
+    groupId: PropertyGroup.BROWN,
+    rentLevels: [2, 10, 30, 90, 160, 250],
+  },
+  { type: TileType.CHANCE, name: 'Khí Vận', position: 2, imageUrl: '/assets/tiles/chance-vertical.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Thành Cổ Loa',
+    position: 3,
+    imageUrl: '',
+    price: 60,
+    groupId: PropertyGroup.BROWN,
+    rentLevels: [4, 20, 60, 180, 320, 450],
+  },
+  { type: TileType.TAX, name: 'Thuế thu nhập', position: 4, imageUrl: '/assets/tiles/tax.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Bến xe Giáp Bát',
+    position: 5,
+    imageUrl: '/assets/tiles/station.png',
+    price: 200,
+    rent: 25,
+    groupId: PropertyGroup.STATION,
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Làng gốm Bát Tràng',
+    position: 6,
+    imageUrl: '',
+    price: 100,
+    groupId: PropertyGroup.LIGHT_BLUE,
+    rentLevels: [6, 30, 90, 270, 400, 550],
+  },
+  { type: TileType.FORTUNE, name: 'Cơ Hội', position: 7, imageUrl: '/assets/tiles/fortune-vertical.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Chùa Tây Phương',
+    position: 8,
+    imageUrl: '',
+    price: 100,
+    groupId: PropertyGroup.LIGHT_BLUE,
+    rentLevels: [6, 30, 90, 270, 400, 550],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Vườn quốc gia Ba Vì',
+    position: 9,
+    imageUrl: '',
+    price: 120,
+    groupId: PropertyGroup.LIGHT_BLUE,
+    rentLevels: [8, 40, 100, 300, 450, 600],
+  },
+  { type: TileType.JAIL, name: 'Nhà tù Hỏa Lò / Thăm nuôi', position: 10, imageUrl: '/assets/tiles/jail.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Ngọc Lâm',
+    position: 11,
+    imageUrl: '',
+    price: 140,
+    groupId: PropertyGroup.PINK,
+    rentLevels: [10, 50, 150, 450, 625, 750],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Nhà máy nước Yên Phụ',
+    position: 12,
+    imageUrl: '',
+    price: 150,
+    rent: 0,
+    groupId: PropertyGroup.UTILITY,
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Khu đô thị Việt Hưng',
+    position: 13,
+    imageUrl: '',
+    price: 140,
+    groupId: PropertyGroup.PINK,
+    rentLevels: [10, 50, 150, 450, 625, 750],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Nguyễn Văn Cừ',
+    position: 14,
+    imageUrl: '',
+    price: 160,
+    groupId: PropertyGroup.PINK,
+    rentLevels: [12, 60, 180, 500, 700, 900],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Ga Hà Nội',
+    position: 15,
+    imageUrl: '/assets/tiles/station.png',
+    price: 200,
+    rent: 25,
+    groupId: PropertyGroup.STATION,
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Văn Miếu - Quốc Tử Giám',
+    position: 16,
+    imageUrl: '',
+    price: 180,
+    groupId: PropertyGroup.ORANGE,
+    rentLevels: [14, 70, 200, 550, 750, 950],
+  },
+  { type: TileType.CHANCE, name: 'Khí Vận', position: 17, imageUrl: '/assets/tiles/chance-horizontal.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Xã Đàn',
+    position: 18,
+    imageUrl: '',
+    price: 180,
+    groupId: PropertyGroup.ORANGE,
+    rentLevels: [14, 70, 200, 550, 750, 950],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Royal City Nguyễn Trãi',
+    position: 19,
+    imageUrl: '',
+    price: 200,
+    groupId: PropertyGroup.ORANGE,
+    rentLevels: [16, 80, 220, 600, 800, 1000],
+  },
+  { type: TileType.REST, name: 'Công viên Thống Nhất', position: 20, imageUrl: '/assets/tiles/rest.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Sân vận động Mỹ Đình',
+    position: 21,
+    imageUrl: '',
+    price: 220,
+    groupId: PropertyGroup.RED,
+    rentLevels: [18, 90, 250, 700, 875, 1050],
+  },
+  { type: TileType.FORTUNE, name: 'Cơ Hội', position: 22, imageUrl: '/assets/tiles/fortune-vertical.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Trung tâm Hội nghị Quốc gia',
+    position: 23,
+    imageUrl: '',
+    price: 220,
+    groupId: PropertyGroup.RED,
+    rentLevels: [18, 90, 250, 700, 875, 1050],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Keangnam Landmark 72',
+    position: 24,
+    imageUrl: '',
+    price: 240,
+    groupId: PropertyGroup.RED,
+    rentLevels: [20, 100, 300, 750, 925, 1100],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Bến xe Mỹ Đình',
+    position: 25,
+    imageUrl: '/assets/tiles/station.png',
+    price: 200,
+    rent: 25,
+    groupId: PropertyGroup.STATION,
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Trần Duy Hưng',
+    position: 26,
+    imageUrl: '',
+    price: 260,
+    groupId: PropertyGroup.YELLOW,
+    rentLevels: [22, 110, 330, 800, 975, 1150],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Duy Tân',
+    position: 27,
+    imageUrl: '',
+    price: 260,
+    groupId: PropertyGroup.YELLOW,
+    rentLevels: [22, 110, 330, 800, 975, 1150],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Nhà máy nước Pháp Vân',
+    position: 28,
+    imageUrl: '',
+    price: 150,
+    rent: 0,
+    groupId: PropertyGroup.UTILITY,
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Xuân Diệu',
+    position: 29,
+    imageUrl: '',
+    price: 280,
+    groupId: PropertyGroup.YELLOW,
+    rentLevels: [24, 120, 360, 850, 1025, 1200],
+  },
+  { type: TileType.GO_TO_JAIL, name: 'Vào Nhà tù Hỏa Lò', position: 30, imageUrl: '/assets/tiles/go_to_jail.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Liễu Giai',
+    position: 31,
+    imageUrl: '',
+    price: 300,
+    groupId: PropertyGroup.GREEN,
+    rentLevels: [26, 130, 390, 900, 1100, 1275],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Kim Mã',
+    position: 32,
+    imageUrl: '',
+    price: 300,
+    groupId: PropertyGroup.GREEN,
+    rentLevels: [26, 130, 390, 900, 1100, 1275],
+  },
+  { type: TileType.CHANCE, name: 'Khí Vận', position: 33, imageUrl: '/assets/tiles/chance-horizontal.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Nguyễn Chí Thanh',
+    position: 34,
+    imageUrl: '',
+    price: 320,
+    groupId: PropertyGroup.GREEN,
+    rentLevels: [28, 150, 450, 1000, 1200, 1400],
+  },
+  {
+    type: TileType.PROPERTY,
+    name: 'Ga Gia Lâm',
+    position: 35,
+    imageUrl: '/assets/tiles/station.png',
+    price: 200,
+    rent: 25,
+    groupId: PropertyGroup.STATION,
+  },
+  { type: TileType.FORTUNE, name: 'Cơ Hội', position: 36, imageUrl: '/assets/tiles/fortune-horizontal.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Tràng Tiền',
+    position: 37,
+    imageUrl: '',
+    price: 350,
+    groupId: PropertyGroup.DARK_BLUE,
+    rentLevels: [35, 175, 500, 1100, 1300, 1500],
+  },
+  { type: TileType.TAX, name: 'Thuế xa xỉ', position: 38, imageUrl: '/assets/tiles/luxury_tax.png' },
+  {
+    type: TileType.PROPERTY,
+    name: 'Phố Hàng Đào',
+    position: 39,
+    imageUrl: '',
+    price: 400,
+    groupId: PropertyGroup.DARK_BLUE,
+    rentLevels: [50, 200, 600, 1400, 1700, 2000],
+  },
+] satisfies readonly BoardTileConfig[];
+
+const validateBoardTileConfigs = (configs: readonly BoardTileConfig[]) => {
+  const positions = new Set(configs.map(({ position }) => position));
+
+  if (positions.size !== configs.length) {
+    throw new Error('BOARD_TILE_CONFIGS has duplicated positions.');
+  }
+
+  for (let position = 0; position < configs.length; position += 1) {
+    if (!positions.has(position)) {
+      throw new Error(`BOARD_TILE_CONFIGS is missing position ${position}.`);
+    }
+  }
+
+  return configs;
+};
+
+const createSpecialTile = ({ type, name, position, imageUrl }: SpecialTileConfig): BoardTile => ({
+  id: tileId(position),
+  type,
+  name,
+  position,
+  imageUrl,
+});
+
+const createPropertyTile = ({
+  name,
+  position,
+  imageUrl,
+  price,
+  groupId,
+  rent,
+  rentLevels,
+  buildingCost,
+}: PropertyTileConfig): Property => ({
+  id: tileId(position),
+  type: TileType.PROPERTY,
+  name,
+  position,
+  price,
+  rent: rent ?? rentLevels?.[0] ?? 0,
+  groupId,
+  buildingLevel: 0,
+  buildingCost: buildingCost ?? BUILDING_COST_BY_GROUP[groupId] ?? 0,
+  ...(rentLevels ? { rentLevels: [...rentLevels] } : {}),
+  isMortgaged: false,
+  mortgageValue: price * MORTGAGE_RATIO,
+  ...(imageUrl ? { imageUrl } : {}),
+});
+
+const createBoardTile = (config: BoardTileConfig): BoardTile => {
+  if (config.type === TileType.PROPERTY) {
+    return createPropertyTile(config);
+  }
+
+  return createSpecialTile(config);
+};
+
+const buildBoard = (configs: readonly BoardTileConfig[]): BoardTile[] =>
+  [...validateBoardTileConfigs(configs)]
+    .sort((current, next) => current.position - next.position)
+    .map(createBoardTile);
+
+export const BASIC_BOARD: BoardTile[] = buildBoard(BOARD_TILE_CONFIGS);
