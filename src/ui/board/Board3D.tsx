@@ -8,19 +8,19 @@ import { Building3D } from './Building3D';
 import { type Property, TileType } from '../../game-engine/types/game';
 
 const getTilePositionAndRotation = (position: number): { pos: [number, number, number]; rot: number } => {
-  const SIZE = 5;
+  const SIZE = 5.5;
   
   if (position === 0) return { pos: [SIZE, 0, SIZE], rot: 0 };
-  if (position < 10) return { pos: [SIZE - position, 0, SIZE], rot: 0 };
+  if (position < 11) return { pos: [SIZE - position, 0, SIZE], rot: 0 };
   
-  if (position === 10) return { pos: [-SIZE, 0, SIZE], rot: Math.PI / 2 };
-  if (position < 20) return { pos: [-SIZE, 0, SIZE - (position - 10)], rot: Math.PI / 2 };
+  if (position === 11) return { pos: [-SIZE, 0, SIZE], rot: Math.PI / 2 };
+  if (position < 22) return { pos: [-SIZE, 0, SIZE - (position - 11)], rot: Math.PI / 2 };
   
-  if (position === 20) return { pos: [-SIZE, 0, -SIZE], rot: Math.PI };
-  if (position < 30) return { pos: [-SIZE + (position - 20), 0, -SIZE], rot: Math.PI };
+  if (position === 22) return { pos: [-SIZE, 0, -SIZE], rot: Math.PI };
+  if (position < 33) return { pos: [-SIZE + (position - 22), 0, -SIZE], rot: Math.PI };
   
-  if (position === 30) return { pos: [SIZE, 0, -SIZE], rot: -Math.PI / 2 };
-  if (position < 40) return { pos: [SIZE, 0, -SIZE + (position - 30)], rot: -Math.PI / 2 };
+  if (position === 33) return { pos: [SIZE, 0, -SIZE], rot: -Math.PI / 2 };
+  if (position < 44) return { pos: [SIZE, 0, -SIZE + (position - 33)], rot: -Math.PI / 2 };
   
   return { pos: [0, 0, 0], rot: 0 };
 };
@@ -45,7 +45,7 @@ export const Board3D: React.FC = () => {
           <group position={[0, -0.5, 0]}>
             {/* Center Logo/Board Area */}
             <mesh position={[0, -0.1, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-              <planeGeometry args={[12, 12]} />
+              <planeGeometry args={[13, 13]} />
               <meshStandardMaterial color="#1e293b" />
             </mesh>
 
