@@ -13,6 +13,7 @@ type BaseTileConfig = {
   shortName?: string;
   position: number;
   imageUrl: string;
+  backgroundColor?: number;
 };
 
 type PropertyTileConfig = BaseTileConfig & {
@@ -39,6 +40,13 @@ const BUILDING_COST_BY_GROUP: Partial<Record<PropertyGroup, number>> = {
   [PropertyGroup.YELLOW]: 150,
   [PropertyGroup.GREEN]: 200,
   [PropertyGroup.DARK_BLUE]: 200,
+};
+
+const getSpecialTileColor = (type: TileType): number | undefined => {
+  if (type === TileType.CHANCE) return 0xFEF08A; // Yellow-200
+  if (type === TileType.FORTUNE) return 0xFECACA; // Red-200
+  if (type === TileType.TAX) return 0xFFFBEB;
+  return undefined;
 };
 
 const BOARD_TILE_CONFIGS = [
@@ -412,13 +420,14 @@ const validateBoardTileConfigs = (configs: readonly BoardTileConfig[]) => {
   return configs;
 };
 
-const createSpecialTile = ({ type, name, shortName, position, imageUrl }: SpecialTileConfig): BoardTile => ({
+const createSpecialTile = ({ type, name, shortName, position, imageUrl, backgroundColor }: SpecialTileConfig): BoardTile => ({
   id: tileId(position),
   type,
   name,
   shortName: shortName || name,
   position,
   imageUrl,
+  backgroundColor: backgroundColor ?? getSpecialTileColor(type),
 });
 
 const createPropertyTile = ({
@@ -431,6 +440,7 @@ const createPropertyTile = ({
   rent,
   rentLevels,
   buildingCost,
+  backgroundColor,
 }: PropertyTileConfig): Property => ({
   id: tileId(position),
   type: TileType.PROPERTY,
@@ -442,6 +452,7 @@ const createPropertyTile = ({
   groupId,
   buildingLevel: 0,
   buildingCost: buildingCost ?? BUILDING_COST_BY_GROUP[groupId] ?? 0,
+  backgroundColor: backgroundColor ?? getSpecialTileColor(TileType.PROPERTY),
   ...(rentLevels ? { rentLevels: [...rentLevels] } : {}),
   isMortgaged: false,
   mortgageValue: price * MORTGAGE_RATIO,

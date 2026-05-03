@@ -50,6 +50,7 @@ export interface BoardTile {
   shortName?: string;
   position: number;
   imageUrl?: string;
+  backgroundColor?: number;
 }
 
 export interface Property extends BoardTile {
