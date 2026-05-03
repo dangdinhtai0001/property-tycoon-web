@@ -5,7 +5,8 @@ import { PreloaderScene } from './scenes/PreloaderScene';
 export const getGameConfig = (containerId: string): Phaser.Types.Core.GameConfig => ({
   type: Phaser.AUTO,
   parent: containerId,
-  backgroundColor: '#f8fafc', // slate-50
+  backgroundColor: 'rgba(0,0,0,0)',
+  transparent: true,
   scale: {
     mode: Phaser.Scale.FILL,
     autoCenter: Phaser.Scale.CENTER_BOTH,

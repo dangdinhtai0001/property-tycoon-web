@@ -40,20 +40,8 @@ export class BoardScene extends Phaser.Scene {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
     
-    // Modern stylized logo
-    this.add.text(centerX, centerY, 'PROPERTY', {
-      fontSize: '80px',
-      color: '#1e293b',
-      fontWeight: '900',
-      fontStyle: 'italic'
-    }).setOrigin(0.5, 0.8).setAlpha(0.05);
+    // Center logo is now handled by React overlay (BoardStatus component)
 
-    this.add.text(centerX, centerY, 'TYCOON', {
-      fontSize: '80px',
-      color: '#2563eb',
-      fontWeight: '900',
-      fontStyle: 'italic'
-    }).setOrigin(0.5, 0.2).setAlpha(0.05);
 
     this.events.on('update-state', (state: GameState) => {
       this.updateBoard(state);

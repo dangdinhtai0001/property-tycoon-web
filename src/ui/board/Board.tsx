@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { getGameConfig } from '../../phaser/GameConfig';
 import { PhaserBridge } from '../../phaser/bridge/PhaserBridge';
+import { BoardStatus } from './BoardStatus';
 
 export const Board: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,11 +34,17 @@ export const Board: React.FC = () => {
           border-radius: 2rem;
         }
       `}</style>
-      <div
-        id="phaser-game-container"
-        ref={containerRef}
-        className="w-full h-full max-w-[1200px] max-h-[1200px] aspect-square bg-white shadow-[0_50px_100px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden border-8 border-white"
-      />
+      <div className="relative w-full h-full max-w-[1200px] max-h-[1200px] aspect-square bg-white shadow-[0_50px_100px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden border-8 border-white">
+        {/* React Status Display - Rendered BEHIND the Phaser canvas */}
+        <BoardStatus />
+        
+        {/* Phaser Game Container - Rendered ON TOP of the React Status */}
+        <div
+          id="phaser-game-container"
+          ref={containerRef}
+          className="w-full h-full absolute inset-0 z-10"
+        />
+      </div>
     </div>
   );
 };
