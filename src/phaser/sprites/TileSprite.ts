@@ -33,8 +33,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
     const pos = tile.position;
 
     // Determine Layout Type
-    const isCorner = pos === 0 || pos === 10 || pos === 20 || pos === 30;
-    const isVerticalSide = (pos > 10 && pos < 20) || (pos > 30 && pos < 40);
+    const isCorner = pos === 0 || pos === 11 || pos === 22 || pos === 33;
+    const isVerticalSide = (pos > 11 && pos < 22) || (pos > 33 && pos < 44);
 
     // 1. Background
     this.background = scene.add.rectangle(0, 0, width, height, 0xffffff)
@@ -97,7 +97,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
   }
 
   private renderHorizontalLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile, property: Property | null) {
-    const isTop = tile.position > 20 && tile.position < 30;
+    const isTop = tile.position > 22 && tile.position < 33;
     const hasColorBar = property && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY;
 
     // Color Bar (Faces Board Center)
@@ -140,7 +140,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
   }
 
   private renderVerticalLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile, property: Property | null) {
-    const isLeft = tile.position > 10 && tile.position < 20;
+    const isLeft = tile.position > 11 && tile.position < 22;
     const hasColorBar = property && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY;
 
     // Color Bar (Faces Board Center)
@@ -211,16 +211,16 @@ export class TileSprite extends Phaser.GameObjects.Container {
         // Determine position based on board side
         let lx = 0, ly = 0, lw = this.background.width, lh = this.background.height;
         
-        if (pos > 0 && pos < 10) { // Bottom
+        if (pos > 0 && pos < 11) { // Bottom
           ly = this.background.height / 2 - thickness / 2;
           lh = thickness;
-        } else if (pos > 10 && pos < 20) { // Left
+        } else if (pos > 11 && pos < 22) { // Left
           lx = -this.background.width / 2 + thickness / 2;
           lw = thickness;
-        } else if (pos > 20 && pos < 30) { // Top
+        } else if (pos > 22 && pos < 33) { // Top
           ly = -this.background.height / 2 + thickness / 2;
           lh = thickness;
-        } else if (pos > 30 && pos < 40) { // Right
+        } else if (pos > 33 && pos < 44) { // Right
           lx = this.background.width / 2 - thickness / 2;
           lw = thickness;
         }

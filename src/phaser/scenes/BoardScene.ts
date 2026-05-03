@@ -115,9 +115,9 @@ export class BoardScene extends Phaser.Scene {
 
   private updateBoard(state: GameState) {
     // Adjusted sizes to better fit the 1000x1000 coordinate space
-    const tileSize = 82;
-    const cornerSize = 130;
-    const boardWidth = cornerSize * 2 + tileSize * 9;
+    const tileSize = 80;
+    const cornerSize = 125;
+    const boardWidth = cornerSize * 2 + tileSize * 10;
     const offset = (this.cameras.main.width - boardWidth) / 2;
 
     // Clear and redraw tiles if board configuration changed or first load
@@ -181,17 +181,17 @@ export class BoardScene extends Phaser.Scene {
         let current = lastPos;
         
         // Determine direction: forward or backward
-        const forwardDist = (player.position - lastPos + 40) % 40;
-        const backwardDist = (lastPos - player.position + 40) % 40;
+        const forwardDist = (player.position - lastPos + 44) % 44;
+        const backwardDist = (lastPos - player.position + 44) % 44;
         
         // If backward distance is shorter and small, move backward (e.g. "Go back 3 spaces")
         const isBackward = backwardDist < forwardDist && backwardDist < 10;
         
         while (current !== player.position) {
           if (isBackward) {
-            current = (current - 1 + 40) % 40;
+            current = (current - 1 + 44) % 44;
           } else {
-            current = (current + 1) % 40;
+            current = (current + 1) % 44;
           }
           
           const p = this.getTilePosition(current, offset, tileSize, cornerSize);
@@ -203,7 +203,7 @@ export class BoardScene extends Phaser.Scene {
           path.push({ x: p.x + ox, y: p.y + oy });
           
           // Safety break
-          if (path.length > 40) break;
+          if (path.length > 44) break;
         }
 
         token.moveAlongPath(path);
@@ -242,7 +242,7 @@ export class BoardScene extends Phaser.Scene {
   }
 
   private getTilePosition(position: number, offset: number, tileSize: number, cornerSize: number) {
-    const boardSize = cornerSize * 2 + tileSize * 9;
+    const boardSize = cornerSize * 2 + tileSize * 10;
     let x: number, y: number;
     let w = tileSize, h = tileSize;
 
@@ -250,33 +250,33 @@ export class BoardScene extends Phaser.Scene {
       x = boardSize - cornerSize / 2;
       y = boardSize - cornerSize / 2;
       w = h = cornerSize;
-    } else if (position < 10) { // Bottom
+    } else if (position < 11) { // Bottom
       x = boardSize - cornerSize - (position - 0.5) * tileSize;
       y = boardSize - cornerSize / 2;
       h = cornerSize;
-    } else if (position === 10) { // Jail
+    } else if (position === 11) { // Jail
       x = cornerSize / 2;
       y = boardSize - cornerSize / 2;
       w = h = cornerSize;
-    } else if (position < 20) { // Left
+    } else if (position < 22) { // Left
       x = cornerSize / 2;
-      y = boardSize - cornerSize - (position - 10 - 0.5) * tileSize;
+      y = boardSize - cornerSize - (position - 11 - 0.5) * tileSize;
       w = cornerSize;
-    } else if (position === 20) { // Free Parking
+    } else if (position === 22) { // Free Parking
       x = cornerSize / 2;
       y = cornerSize / 2;
       w = h = cornerSize;
-    } else if (position < 30) { // Top
-      x = cornerSize + (position - 20 - 0.5) * tileSize;
+    } else if (position < 33) { // Top
+      x = cornerSize + (position - 22 - 0.5) * tileSize;
       y = cornerSize / 2;
       h = cornerSize;
-    } else if (position === 30) { // Go to Jail
+    } else if (position === 33) { // Go to Jail
       x = boardSize - cornerSize / 2;
       y = cornerSize / 2;
       w = h = cornerSize;
     } else { // Right
       x = boardSize - cornerSize / 2;
-      y = cornerSize + (position - 30 - 0.5) * tileSize;
+      y = cornerSize + (position - 33 - 0.5) * tileSize;
       w = cornerSize;
     }
 
