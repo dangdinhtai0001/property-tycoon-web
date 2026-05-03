@@ -193,35 +193,72 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }
   }
 
-  private ownerMarker?: Phaser.GameObjects.Arc;
+  private ownerLine?: Phaser.GameObjects.Rectangle;
+  private currentOwnerId: string | null = null;
 
   public updateStatus(tile: BoardTile, players: Player[] = []) {
     if (tile.type !== TileType.PROPERTY) return;
     const property = tile as Property;
+    const pos = tile.position;
     
-    // 1. Owner Marker & Border Glow
+    // 1. Ownership Indicator (Thick Line at Outer Edge)
     const owner = property.ownerId ? players.find(p => p.id === property.ownerId) : null;
     
     if (owner) {
       const ownerColor = Phaser.Display.Color.HexStringToColor(owner.color).color;
+      const thickness = 8;
       
-      if (!this.ownerMarker) {
-        // Position at bottom-right of the tile
-        const markerX = this.background.width / 2 - 12;
-        const markerY = this.background.height / 2 - 12;
-        this.ownerMarker = this.scene.add.arc(markerX, markerY, 8, 0, 360, false, ownerColor);
-        this.ownerMarker.setStrokeStyle(2, 0xffffff);
-        this.add(this.ownerMarker);
+      if (!this.ownerLine) {
+        // Determine position based on board side
+        let lx = 0, ly = 0, lw = this.background.width, lh = this.background.height;
+        
+        if (pos > 0 && pos < 10) { // Bottom
+          ly = this.background.height / 2 - thickness / 2;
+          lh = thickness;
+        } else if (pos > 10 && pos < 20) { // Left
+          lx = -this.background.width / 2 + thickness / 2;
+          lw = thickness;
+        } else if (pos > 20 && pos < 30) { // Top
+          ly = -this.background.height / 2 + thickness / 2;
+          lh = thickness;
+        } else if (pos > 30 && pos < 40) { // Right
+          lx = this.background.width / 2 - thickness / 2;
+          lw = thickness;
+        }
+
+        this.ownerLine = this.scene.add.rectangle(lx, ly, lw, lh, ownerColor);
+        this.add(this.ownerLine);
+        
+        // Initial animation
+        this.ownerLine.setScale(0);
+        this.scene.tweens.add({
+          targets: this.ownerLine,
+          scale: 1,
+          duration: 400,
+          ease: 'Back.easeOut'
+        });
       } else {
-        this.ownerMarker.setFillStyle(ownerColor);
-        this.ownerMarker.setVisible(true);
+        this.ownerLine.setFillStyle(ownerColor);
+        this.ownerLine.setVisible(true);
+        
+        // Animation if owner changed
+        if (this.currentOwnerId !== owner.id) {
+          this.ownerLine.setScale(1.5);
+          this.scene.tweens.add({
+            targets: this.ownerLine,
+            scale: 1,
+            duration: 300,
+            ease: 'Bounce.easeOut'
+          });
+        }
       }
       
-      // Highlight tile border with owner color
-      this.background.setStrokeStyle(4, ownerColor);
+      this.currentOwnerId = owner.id;
+      this.background.setStrokeStyle(2, 0xe2e8f0); // Revert to default border
     } else {
-      if (this.ownerMarker) this.ownerMarker.setVisible(false);
+      if (this.ownerLine) this.ownerLine.setVisible(false);
       this.background.setStrokeStyle(2, 0xe2e8f0);
+      this.currentOwnerId = null;
     }
     
     // 2. Building Level & Mortgage Status

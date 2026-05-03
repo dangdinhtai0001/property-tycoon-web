@@ -56,9 +56,16 @@ export const ActionPanel: React.FC = () => {
             whileTap={canAfford ? { scale: 0.98 } : {}}
             disabled={!canAfford}
             onClick={() => {
+              const remainingCash = currentPlayer.cash - property.price;
               enqueue({
                 type: 'PURCHASE_SPARKLE',
-                payload: { propertyName: property.name, color: currentPlayer.color },
+                payload: { 
+                  propertyName: property.name, 
+                  color: currentPlayer.color,
+                  price: property.price,
+                  rent: property.rent,
+                  remainingCash: remainingCash
+                },
                 onComplete: () => dispatch({ type: 'BUY_PROPERTY', payload: { propertyId: property.id } })
               });
             }}
@@ -207,7 +214,7 @@ export const ActionPanel: React.FC = () => {
     }
 
     // End Turn (Always available as a fallback after moving)
-    const canEndTurn = state.phase === Phase.END_TURN || state.phase === Phase.BUILD_DECISION;
+    const canEndTurn = (state.phase === Phase.END_TURN || state.phase === Phase.BUILD_DECISION) && state.phase !== Phase.END_TURN;
     if (canEndTurn) {
       actions.push(
         <button

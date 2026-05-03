@@ -23,6 +23,7 @@ import { BuildingWatcher } from './ui/animation/BuildingWatcher';
 import { BuildModal } from './ui/modals/BuildModal';
 import { PropertyInfoModal } from './ui/modals/PropertyInfoModal';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
+import { QuickGuidePanel } from './ui/panels/QuickGuidePanel';
 import { Menu, ScrollText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -59,8 +60,28 @@ function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pointer-events-auto opacity-0 pointer-events-none">
-          {/* Moved to bottom-left */}
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+            className={`p-4 rounded-[1.5rem] transition-all shadow-xl backdrop-blur-md flex items-center gap-2 border ${
+              isHistoryOpen ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
+            }`}
+          >
+            <ScrollText size={20} />
+            <span className="font-bold text-sm">LỊCH SỬ</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsPauseOpen(true)}
+            className="p-4 bg-white/80 border border-white text-slate-700 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
+          >
+            <Menu size={20} />
+            <span className="font-bold text-sm">MENU</span>
+          </motion.button>
         </div>
       </header>
 
@@ -70,7 +91,7 @@ function App() {
         <motion.div 
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="pointer-events-auto h-[70%] flex flex-col"
+          className="pointer-events-auto flex flex-col"
         >
           <PlayerListPanel />
         </motion.div>
@@ -107,30 +128,18 @@ function App() {
         </motion.div>
       </aside>
 
-      {/* Bottom Left Overlay: Global Actions */}
-      <div className="absolute left-8 bottom-8 z-20 flex items-center gap-3 pointer-events-none">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-          className={`pointer-events-auto p-4 rounded-[1.5rem] transition-all shadow-xl backdrop-blur-md flex items-center gap-2 border ${
-            isHistoryOpen ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
-          }`}
-        >
-          <ScrollText size={20} />
-          <span className="font-bold text-sm">LỊCH SỬ</span>
-        </motion.button>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsPauseOpen(true)}
-          className="pointer-events-auto p-4 bg-white/80 border border-white text-slate-700 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
+      {/* Bottom Left: Quick Guide Panel */}
+      <aside className="absolute left-8 bottom-8 z-10 w-80 pointer-events-none">
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="pointer-events-auto"
         >
-          <Menu size={20} />
-          <span className="font-bold text-sm">DANH MỤC</span>
-        </motion.button>
-      </div>
+          <QuickGuidePanel />
+        </motion.div>
+      </aside>
 
       {/* Game Log Overlay */}
       <AnimatePresence>

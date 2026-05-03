@@ -3,10 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { PartyPopper, Sparkles } from 'lucide-react';
 
+interface CelebrationData {
+  propertyName: string;
+  color: string;
+  price?: number;
+  rent?: number;
+  remainingCash?: number;
+}
+
 export const PurchaseCelebration: React.FC = () => {
   const { queue, dequeue, isAnimating, setAnimating } = useAnimationQueue();
   const [show, setShow] = useState(false);
-  const [data, setData] = useState<{ propertyName: string; color: string } | null>(null);
+  const [data, setData] = useState<CelebrationData | null>(null);
 
   useEffect(() => {
     if (queue.length > 0 && !isAnimating) {
@@ -28,7 +36,7 @@ export const PurchaseCelebration: React.FC = () => {
           setData(null);
           dequeue();
           setAnimating(false);
-        }, 500);
+        }, 300);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -43,9 +51,9 @@ export const PurchaseCelebration: React.FC = () => {
           setData(null);
           dequeue();
           setAnimating(false);
-        }, 500);
+        }, 300);
         return () => clearTimeout(exitTimer);
-      }, 2500);
+      }, 1500); // Reduced duration
       
       return () => clearTimeout(timer);
     }
@@ -58,106 +66,102 @@ export const PurchaseCelebration: React.FC = () => {
       <AnimatePresence>
         {show && (
           <>
-            {/* Background Asset with Shaking */}
+            {/* Background Glow (Replaces checkerboard asset) */}
             <motion.div
-              initial={{ scale: 0, opacity: 0, rotate: -10 }}
+              initial={{ opacity: 0, scale: 0.5 }}
               animate={{ 
-                scale: 1, 
-                opacity: 1, 
-                rotate: [0, 5, -5, 5, 0],
-                x: [0, 10, -10, 10, 0],
-                y: [0, -10, 10, -10, 0]
+                opacity: [0, 0.4, 0.2], 
+                scale: [0.8, 1.1, 1],
               }}
-              transition={{ 
-                scale: { type: 'spring', damping: 10 },
-                opacity: { duration: 0.5 },
-                rotate: { repeat: Infinity, duration: 2 },
-                x: { repeat: Infinity, duration: 0.15 },
-                y: { repeat: Infinity, duration: 0.1 }
-              }}
-              style={{ background: 'none', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
-              className="absolute z-0 pointer-events-none flex items-center justify-center"
+              exit={{ opacity: 0, scale: 1.5 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="absolute inset-0 flex items-center justify-center"
             >
-              <img 
-                src="/assets/celebration/success.png" 
-                alt="" 
-                className="max-w-[800px] max-h-[800px] w-auto h-auto object-contain opacity-90"
-                style={{ background: 'none', border: 'none', outline: 'none', boxShadow: 'none' }}
-                onError={(e) => (e.currentTarget.style.display = 'none')}
+              <div 
+                className="w-[600px] h-[600px] rounded-full blur-[120px] opacity-30"
+                style={{ background: `radial-gradient(circle, ${data.color} 0%, transparent 70%)` }}
               />
             </motion.div>
 
-            {/* Confetti-like particles */}
-            {Array.from({ length: 80 }).map((_, i) => (
+            {/* Confetti-like particles (Subtler) */}
+            {Array.from({ length: 40 }).map((_, i) => (
               <motion.div
                 key={`p-${i}`}
                 initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
                 animate={{ 
-                  x: (Math.random() - 0.5) * 1200, 
-                  y: (Math.random() - 0.5) * 1200, 
-                  scale: Math.random() * 2 + 0.5,
-                  rotate: Math.random() * 720,
+                  x: (Math.random() - 0.5) * 800, 
+                  y: (Math.random() - 0.5) * 800, 
+                  scale: Math.random() * 1.5 + 0.5,
+                  rotate: Math.random() * 360,
                   opacity: [1, 1, 0]
                 }}
-                transition={{ duration: 2.5, ease: "easeOut", delay: Math.random() * 0.2 }}
-                className="absolute w-4 h-4 z-20"
+                transition={{ duration: 1.5, ease: "easeOut", delay: Math.random() * 0.1 }}
+                className="absolute w-3 h-3 z-20"
                 style={{ 
                   backgroundColor: [data.color, '#FFD700', '#FFFFFF', '#FF69B4', '#00FFFF'][Math.floor(Math.random() * 5)],
-                  borderRadius: Math.random() > 0.5 ? '50%' : '4px',
-                  boxShadow: '0 0 10px rgba(255,255,255,0.5)'
+                  borderRadius: Math.random() > 0.5 ? '50%' : '2px',
                 }}
               />
             ))}
 
-            {/* Central Badge */}
+            {/* Central Badge (Medium Celebration) */}
             <motion.div
-              initial={{ scale: 0, rotate: -45, opacity: 0 }}
+              initial={{ scale: 0.8, y: 40, opacity: 0 }}
               animate={{ 
                 scale: 1, 
-                rotate: 0, 
+                y: 0, 
                 opacity: 1,
-                y: [0, -10, 0]
               }}
-              exit={{ scale: 2, opacity: 0, filter: 'blur(10px)' }}
+              exit={{ scale: 0.9, opacity: 0, filter: 'blur(10px)' }}
               transition={{ 
-                scale: { type: "spring", stiffness: 400, damping: 15 },
-                rotate: { type: "spring", stiffness: 200, damping: 10 },
-                y: { repeat: Infinity, duration: 2, ease: "easeInOut" }
+                type: "spring", stiffness: 300, damping: 20
               }}
-              className="relative z-10 flex flex-col items-center gap-6 p-12 bg-white rounded-[3rem] shadow-[0_50px_150px_rgba(0,0,0,0.5)] border-[12px] border-white ring-2 ring-slate-100"
+              className="relative z-10 flex flex-col items-center gap-4 p-8 bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.3)] border-8 border-white ring-1 ring-slate-100 max-w-sm w-full"
             >
               <motion.div 
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ repeat: Infinity, duration: 0.5 }}
-                className="w-24 h-24 rounded-full flex items-center justify-center text-white shadow-2xl mb-2"
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
+                className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg mb-1"
                 style={{ backgroundColor: data.color }}
               >
-                <PartyPopper size={56} />
+                <PartyPopper size={32} />
               </motion.div>
               
-              <div className="text-center">
-                <motion.h2 
-                  animate={{ scale: [1, 1.2, 1], rotate: [-2, 2, -2] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
-                  className="text-6xl font-black text-slate-800 uppercase tracking-tighter drop-shadow-md"
-                >
-                  TUYỆT VỜI!
-                </motion.h2>
-                <p className="text-slate-400 font-black mt-3 uppercase tracking-[0.3em] text-sm">
-                  Giao dịch thành công
+              <div className="text-center space-y-1">
+                <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tight">
+                  Mua thành công!
+                </h2>
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+                  Giao dịch đã hoàn tất
                 </p>
+              </div>
+
+              <div className="w-full bg-slate-900 rounded-[1.5rem] p-5 flex flex-col items-center gap-1 border-2 border-slate-800 shadow-inner">
+                <span className="text-amber-400 text-[10px] font-black uppercase tracking-widest">Tài sản mới</span>
+                <span className="text-xl font-black text-white text-center leading-tight">
+                  {data.propertyName}
+                </span>
                 
-                <div className="mt-8 relative group">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-amber-400 to-orange-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-                  <div className="relative px-10 py-5 bg-slate-900 rounded-[2rem] border-4 border-slate-800 flex flex-col items-center">
-                    <span className="text-amber-400 text-xs font-black uppercase tracking-widest mb-1">Bạn đã sở hữu</span>
-                    <span className="text-3xl font-black text-white flex items-center gap-3">
-                      <Sparkles className="text-amber-400" size={28} />
-                      {data.propertyName}
-                    </span>
+                <div className="w-full h-px bg-slate-700/50 my-2" />
+                
+                <div className="w-full grid grid-cols-2 gap-3">
+                  <div className="flex flex-col items-start">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase">Giá mua</span>
+                    <span className="text-sm font-black text-white">${data.price?.toLocaleString()}</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase">Tiền thuê</span>
+                    <span className="text-sm font-black text-emerald-400">${data.rent?.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
+
+              {data.remainingCash !== undefined && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">Tiền còn lại:</span>
+                  <span className="text-xs font-black text-slate-700">${data.remainingCash.toLocaleString()}</span>
+                </div>
+              )}
             </motion.div>
           </>
         )}
@@ -165,3 +169,4 @@ export const PurchaseCelebration: React.FC = () => {
     </div>
   );
 };
+

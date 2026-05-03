@@ -28,7 +28,7 @@ export const BuildingCelebration: React.FC = () => {
           setData(null);
           dequeue();
           setAnimating(false);
-        }, 500);
+        }, 300);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -43,9 +43,9 @@ export const BuildingCelebration: React.FC = () => {
           setData(null);
           dequeue();
           setAnimating(false);
-        }, 500);
+        }, 300);
         return () => clearTimeout(exitTimer);
-      }, 2500);
+      }, 1500); // Reduced duration
       
       return () => clearTimeout(timer);
     }
@@ -56,49 +56,49 @@ export const BuildingCelebration: React.FC = () => {
       {show && data && (
         <div className="fixed inset-0 z-[200] pointer-events-none flex items-center justify-center">
           <motion.div
-            initial={{ scale: 0, opacity: 0, y: 50 }}
+            initial={{ scale: 0.8, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.5, opacity: 0, y: -50 }}
-            className="bg-white/95 backdrop-blur-xl p-10 rounded-[3rem] shadow-[0_40px_100px_rgba(16,185,129,0.3)] border-4 border-emerald-100 flex flex-col items-center gap-4"
+            exit={{ scale: 0.9, opacity: 0, y: -20 }}
+            className="bg-white/95 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-[0_30px_80px_rgba(16,185,129,0.2)] border-8 border-white ring-1 ring-slate-100 flex flex-col items-center gap-4 max-w-sm w-full"
           >
             <motion.div 
-              animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className={`p-6 ${data.level === 5 ? 'bg-red-500' : 'bg-emerald-500'} rounded-full text-white shadow-xl`}
+              animate={{ rotate: [0, 8, -8, 0], scale: [1, 1.05, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2 }}
+              className={`p-4 ${data.level === 5 ? 'bg-rose-500' : 'bg-emerald-500'} rounded-full text-white shadow-lg`}
             >
-              {data.level === 5 ? <Landmark size={48} /> : <Home size={48} />}
+              {data.level === 5 ? <Landmark size={32} /> : <Home size={32} />}
             </motion.div>
             
-            <div className="text-center">
-              <p className="text-emerald-600 font-black uppercase tracking-[0.3em] text-xs mb-1">Công trình mới!</p>
-              <h2 className="text-4xl font-black text-slate-800 tracking-tight">
+            <div className="text-center space-y-1">
+              <p className="text-emerald-600 font-black uppercase tracking-[0.2em] text-[10px]">Cập nhật công trình</p>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
                 {data.level === 5 ? 'Đã xây Khách sạn' : `Đã xây Nhà cấp ${data.level}`}
               </h2>
-              <p className="text-slate-400 font-bold mt-2">tại {data.name}</p>
+              <p className="text-slate-400 font-bold text-xs">tại {data.name}</p>
             </div>
 
-            <div className="flex gap-2 mt-2">
-              <Sparkles className="text-amber-400" size={24} />
-              <Sparkles className="text-emerald-400" size={24} />
-              <Sparkles className="text-amber-400" size={24} />
+            <div className="flex gap-2 py-1">
+              <Sparkles className="text-amber-400" size={18} />
+              <Sparkles className="text-emerald-400" size={18} />
+              <Sparkles className="text-amber-400" size={18} />
             </div>
           </motion.div>
           
-          {/* Sparkle particles */}
-          {Array.from({ length: 20 }).map((_, i) => (
+          {/* Sparkle particles (Subtler) */}
+          {Array.from({ length: 15 }).map((_, i) => (
             <motion.div
               key={i}
               initial={{ x: 0, y: 0, opacity: 0 }}
               animate={{ 
-                x: (Math.random() - 0.5) * 600, 
-                y: (Math.random() - 0.5) * 600, 
+                x: (Math.random() - 0.5) * 500, 
+                y: (Math.random() - 0.5) * 500, 
                 opacity: [0, 1, 0],
                 scale: [0, 1, 0]
               }}
-              transition={{ duration: 1 + Math.random(), delay: Math.random() * 0.5 }}
+              transition={{ duration: 1, delay: Math.random() * 0.3 }}
               className="absolute text-emerald-400"
             >
-              <Sparkles size={16 + Math.random() * 16} />
+              <Sparkles size={12 + Math.random() * 12} />
             </motion.div>
           ))}
         </div>
