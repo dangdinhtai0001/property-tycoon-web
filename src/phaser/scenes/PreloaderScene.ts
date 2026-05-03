@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 
 import {
   preloadTokenSpriteAssets,
-  createTokenSpriteAnimations,
 } from '../sprites/TokenSprite';
 
 export class PreloaderScene extends Phaser.Scene {

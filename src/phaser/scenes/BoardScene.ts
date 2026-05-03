@@ -1,16 +1,13 @@
 import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
-import { BuildingSprite } from '../sprites/BuildingSprite';
-import { TileType, Phase } from '../../game-engine/types/game';
-import type { GameState, Property, Player } from '../../game-engine/types/game';
+import { Phase } from '../../game-engine/types/game';
+import type { GameState, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
 import { useGameStore } from '../../app/store/useGameStore';
 import {
   getBoardTileCount,
   getBoardTileLayout,
-  getBoardCornerIndexes,
-  type BoardGeometry,
 } from '../../game-engine/utils/boardGeometry';
 
 export class BoardScene extends Phaser.Scene {
@@ -32,9 +29,7 @@ export class BoardScene extends Phaser.Scene {
   private static readonly CORNER_TILE_SIZE = 180;
 
   private static readonly VERTICAL_TILE_W = 130;   // Width of Top/Bot inner tiles
-  private static readonly VERTICAL_TILE_H = BoardScene.CORNER_TILE_SIZE;   // Height of Top/Bot inner tiles (depth)
 
-  private static readonly HORIZONTAL_TILE_W = BoardScene.CORNER_TILE_SIZE; // Width of Left/Right inner tiles (depth)
   private static readonly HORIZONTAL_TILE_H = 100;  // Height of Left/Right inner tiles
 
 
