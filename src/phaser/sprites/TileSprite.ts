@@ -28,7 +28,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
     const property = isProperty ? (tile as Property) : null;
 
     // 1. Background (Agnostic of type)
-    this.background = scene.add.rectangle(0, 0, width, height, THEME.colors.surface.DEFAULT);
+    const bgColor = tile.backgroundColor ?? THEME.colors.surface.DEFAULT;
+    this.background = scene.add.rectangle(0, 0, width, height, bgColor);
     this.add(this.background);
 
     this.background.setInteractive({ useHandCursor: true });
@@ -61,6 +62,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }
 
     this.updateStatus(tile);
+    this.applyTypeBackground(tile);
     this.drawBorder();
     scene.add.existing(this);
   }
@@ -164,7 +166,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }).setOrigin(0.5);
     this.add(this.priceText);
 
-    this.applyTypeBackground(tile);
+
   }
 
   private renderHorizontalLayout(
@@ -209,7 +211,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }).setOrigin(0, 0.5);
     this.add(this.priceText);
 
-    this.applyTypeBackground(tile);
+
   }
 
   private getStripColor(tile: BoardTile, property: Property | null): number | null {
@@ -225,6 +227,17 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private applyTypeBackground(tile: BoardTile) {
     if (tile.backgroundColor !== undefined) {
       this.background.setFillStyle(tile.backgroundColor);
+    } else {
+      // Fallback if data property is missing
+      if (tile.type === TileType.CHANCE) {
+        this.background.setFillStyle(0xFEF08A);
+      } else if (tile.type === TileType.FORTUNE) {
+        this.background.setFillStyle(0xFECACA);
+      } else if (tile.type === TileType.TAX) {
+        this.background.setFillStyle(0xFFFBEB);
+      } else {
+        this.background.setFillStyle(THEME.colors.surface.DEFAULT);
+      }
     }
   }
 
