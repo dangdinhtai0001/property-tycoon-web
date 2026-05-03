@@ -36,15 +36,15 @@ export const MainMenu: React.FC = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden bg-slate-50">
+    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-hidden bg-slate-50">
       {/* Ambient Background Image */}
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-[0.4] grayscale-[0.5] scale-105"
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-50"
         style={{ backgroundImage: 'url(/assets/bg/main-menu.png)' }}
       />
 
       {/* Soft Gradient Overlay */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-tr from-slate-200/50 via-transparent to-white" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-tr from-white/40 via-transparent to-white/60" />
 
       {/* Floating Elements for "Game" feel */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">

@@ -25,7 +25,7 @@ export const Board: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4 md:p-10 overflow-hidden bg-slate-50">
+    <div className="w-full h-full flex items-center justify-center p-4 md:p-10 overflow-hidden bg-transparent">
       <style>{`
         #phaser-game-container canvas {
           display: block;
