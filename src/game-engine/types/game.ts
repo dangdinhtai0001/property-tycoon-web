@@ -92,7 +92,7 @@ export interface GameConfig {
   startingCash: Money;
   passStartBonus: Money;
   enableAuction: boolean;
-  quickModeMultiplier: number;
+  rentMultiplier: number;
   enableDebug?: boolean;
 }
 

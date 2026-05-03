@@ -12,13 +12,13 @@ export const calculateRent = (state: GameState, property: Property, diceTotal: n
 
   if (property.groupId === PropertyGroup.STATION) {
     const stationCount = ownerProperties.filter(p => p.groupId === PropertyGroup.STATION).length;
-    return 25 * Math.pow(2, stationCount - 1) * (state.config?.quickModeMultiplier || 1);
+    return 25 * Math.pow(2, stationCount - 1) * (state.config?.rentMultiplier || 1);
   }
 
   if (property.groupId === PropertyGroup.UTILITY) {
     const utilityCount = ownerProperties.filter(p => p.groupId === PropertyGroup.UTILITY).length;
     const multiplier = utilityCount === 2 ? 10 : 4;
-    return diceTotal * multiplier * (state.config?.quickModeMultiplier || 1);
+    return diceTotal * multiplier * (state.config?.rentMultiplier || 1);
   }
 
   let baseRent = property.rent;
@@ -41,7 +41,7 @@ export const calculateRent = (state: GameState, property: Property, diceTotal: n
     }
   }
 
-  return baseRent * (state.config?.quickModeMultiplier || 1);
+  return baseRent * (state.config?.rentMultiplier || 1);
 };
 
 export const payRent = (state: GameState): GameState => {

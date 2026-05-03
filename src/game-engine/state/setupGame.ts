@@ -5,7 +5,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   startingCash: 1500,
   passStartBonus: 200,
   enableAuction: false,
-  quickModeMultiplier: 1,
+  rentMultiplier: 1,
   enableDebug: false,
 };
 
