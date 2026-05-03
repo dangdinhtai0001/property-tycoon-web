@@ -3,6 +3,7 @@ import { useGameStore } from '../../app/store/useGameStore';
 import { Phase, TileType } from '../../game-engine/types/game';
 import type { Property, GameState } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
+import { HelpCircle, Info, AlertTriangle, Lightbulb } from 'lucide-react';
 
 export const BoardStatus: React.FC = () => {
   const { state } = useGameStore();
@@ -32,37 +33,47 @@ export const BoardStatus: React.FC = () => {
       case Phase.WAITING_TO_ROLL:
         return {
           title: 'Đến lượt bạn',
-          text: 'Tung xúc xắc để di chuyển trên bàn cờ.',
+          text: 'Tung xúc xắc để di chuyển.',
+          icon: <Lightbulb className="text-amber-500" size={20} />,
           color: 'text-amber-600',
-          bg: 'bg-amber-50/90'
+          bg: 'bg-amber-50/95',
+          borderColor: 'border-amber-200'
         };
       case Phase.BUY_DECISION:
         return {
           title: 'Quyết định mua',
-          text: 'Bạn có muốn sở hữu ô đất này không?',
+          text: 'Bạn có muốn sở hữu ô đất này?',
+          icon: <Info className="text-blue-500" size={20} />,
           color: 'text-blue-600',
-          bg: 'bg-blue-50/90'
+          bg: 'bg-blue-50/95',
+          borderColor: 'border-blue-200'
         };
       case Phase.BUILD_DECISION:
         return {
           title: 'Nâng cấp nhà',
-          text: 'Xây thêm nhà để tối ưu hóa lợi nhuận.',
+          text: 'Xây thêm nhà để tăng lợi nhuận.',
+          icon: <HelpCircle className="text-emerald-500" size={20} />,
           color: 'text-emerald-600',
-          bg: 'bg-emerald-50/90'
+          bg: 'bg-emerald-50/95',
+          borderColor: 'border-emerald-200'
         };
       case Phase.DEBT_RESOLUTION:
         return {
           title: 'CẢNH BÁO NỢ',
-          text: 'Bạn đang nợ tiền! Hãy thế chấp hoặc bán nhà.',
+          text: 'Hãy thế chấp hoặc bán nhà để trả nợ.',
+          icon: <AlertTriangle className="text-rose-500" size={20} />,
           color: 'text-rose-600',
-          bg: 'bg-rose-50/90'
+          bg: 'bg-rose-50/95',
+          borderColor: 'border-rose-200'
         };
       default:
         return {
           title: 'Đang diễn ra',
-          text: 'Vui lòng chờ lượt chơi hoặc xử lý từ hệ thống...',
+          text: 'Vui lòng chờ lượt chơi...',
+          icon: <HelpCircle className="text-slate-400" size={20} />,
           color: 'text-slate-600',
-          bg: 'bg-white/90'
+          bg: 'bg-white/95',
+          borderColor: 'border-white'
         };
     }
   };
@@ -77,7 +88,7 @@ export const BoardStatus: React.FC = () => {
         className="flex flex-col items-center justify-center text-center space-y-4 max-w-sm w-full"
       >
         {/* Main Status Card */}
-        <div className={`backdrop-blur-md border-2 border-white rounded-[3rem] p-8 shadow-2xl shadow-slate-300/30 w-full transition-all duration-500 ${hint.bg}`}>
+        <div className={`backdrop-blur-md border-4 rounded-[3rem] p-8 shadow-2xl shadow-slate-300/30 w-full transition-all duration-500 ${hint.bg} ${hint.borderColor}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentPlayerId + phase + (currentTile?.id || '')}
@@ -88,13 +99,18 @@ export const BoardStatus: React.FC = () => {
               className="space-y-5"
             >
               {/* Turn Guide / Hint */}
-              <div className="space-y-1">
-                <p className={`text-[11px] font-black uppercase tracking-[0.2em] ${hint.color}`}>
-                  {hint.title}
-                </p>
-                <p className="text-sm font-bold text-slate-700 leading-tight">
-                  {hint.text}
-                </p>
+              <div className="flex flex-col items-center gap-2">
+                <div className="p-2 rounded-xl bg-white shadow-sm">
+                  {hint.icon}
+                </div>
+                <div className="space-y-1">
+                  <p className={`text-[11px] font-black uppercase tracking-[0.2em] ${hint.color}`}>
+                    {hint.title}
+                  </p>
+                  <p className="text-sm font-bold text-slate-700 leading-tight">
+                    {hint.text}
+                  </p>
+                </div>
               </div>
 
               <div className="h-px bg-slate-200/60 w-3/4 mx-auto" />

@@ -58,7 +58,14 @@ export const CurrentTilePanel: React.FC = () => {
           <div className="flex items-start justify-between">
             <div className="flex flex-col">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ô hiện tại</span>
-              <h3 className="text-lg font-black text-slate-800 leading-tight mt-1">{currentTile.name}</h3>
+              <div className="flex items-center gap-2 mt-1">
+                <h3 className="text-lg font-black text-slate-800 leading-tight">{currentTile.name}</h3>
+                {state.config.enableDebug && (
+                  <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                    POS: {currentTile.position}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
               <MapPin size={20} />

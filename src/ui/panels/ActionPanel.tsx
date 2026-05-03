@@ -319,6 +319,49 @@ export const ActionPanel: React.FC = () => {
           </div>
         </div>
       </div>
+      {state.config.enableDebug && (
+        <div className="mt-8 pt-6 border-t border-slate-100">
+          <details className="group">
+            <summary className="list-none cursor-pointer flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-blue-500 transition-colors">
+              <span>Chế độ Debug</span>
+              <span className="group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Nhảy đến ô (0-39)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="number" 
+                    min="0" 
+                    max="39"
+                    defaultValue="0"
+                    id="debug-jump-input"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold"
+                  />
+                  <button 
+                    onClick={() => {
+                      const val = parseInt((document.getElementById('debug-jump-input') as HTMLInputElement).value);
+                      if (!isNaN(val)) dispatch({ type: 'TELEPORT_PLAYER', payload: { position: val } });
+                    }}
+                    className="bg-slate-900 text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase"
+                  >
+                    Go
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Tiền mặt</label>
+                <button 
+                  onClick={() => dispatch({ type: 'DEBUG_ADD_CASH', payload: { amount: 1000 } })}
+                  className="w-full bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg py-1 text-[10px] font-black uppercase hover:bg-emerald-100 transition-colors"
+                >
+                  + $1000
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>
+      )}
     </div>
   );
 };
