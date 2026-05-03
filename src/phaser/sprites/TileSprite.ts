@@ -2,10 +2,12 @@ import Phaser from 'phaser';
 import { TileType, PropertyGroup } from '../../game-engine/types/game';
 import type { BoardTile, Property, Player } from '../../game-engine/types/game';
 import { THEME, getTileIcon, getCornerHint } from '../../ui/theme/tokens';
+import { type BoardTileLayout } from '../../game-engine/utils/boardGeometry';
 
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
   private border?: Phaser.GameObjects.Graphics;
+  private layout: BoardTileLayout;
 
   private colorStrip?: Phaser.GameObjects.Rectangle;
   private iconText?: Phaser.GameObjects.Text;
@@ -17,19 +19,13 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private mortgageOverlay?: Phaser.GameObjects.Rectangle;
   private mortgageIcon?: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile) {
+  constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile, layout: BoardTileLayout) {
     super(scene, x, y);
+    this.layout = layout;
 
+    const { sideIndex, isCorner } = layout;
     const isProperty = tile.type === TileType.PROPERTY;
     const property = isProperty ? (tile as Property) : null;
-    const pos = tile.position;
-
-    // Determine Orientation & Layout
-    const isCorner = pos === 0 || pos === 11 || pos === 22 || pos === 33;
-    const isBottom = pos > 0 && pos < 11;
-    const isLeft = pos > 11 && pos < 22;
-    const isTop = pos > 22 && pos < 33;
-    const isRight = pos > 33 && pos < 44;
 
     // 1. Background (Agnostic of type)
     this.background = scene.add.rectangle(0, 0, width, height, THEME.colors.surface.DEFAULT);
@@ -59,7 +55,13 @@ export class TileSprite extends Phaser.GameObjects.Container {
     if (isCorner) {
       this.renderCornerLayout(scene, width, height, tile);
     } else {
-      this.renderStandardLayout(scene, width, height, tile, property, { isTop, isBottom, isLeft, isRight });
+      const sideInfo = { 
+        isBottom: sideIndex === 0, 
+        isLeft: sideIndex === 1, 
+        isTop: sideIndex === 2, 
+        isRight: sideIndex === 3 
+      };
+      this.renderStandardLayout(scene, width, height, tile, property, sideInfo);
     }
 
     this.updateStatus(tile);
@@ -75,17 +77,21 @@ export class TileSprite extends Phaser.GameObjects.Container {
     this.background.setFillStyle(style.bg);
 
     // 2. Accent Bar (Small strip at the outer corner)
-    const pos = tile.position;
     let ax = 0, ay = 0, aw = 0, ah = 0;
     const strip = 10;
+    const { col, row } = this.layout;
+    const isBot = row > 0;
+    const isTop = row === 0;
+    const isLeft = col === 0;
+    const isRight = col > 0;
 
-    if (pos === 0) { // Bottom Right
+    if (isBot && isRight) { // Bottom Right
       ax = width / 2 - strip / 2; ay = height / 2 - strip / 2; aw = strip; ah = strip;
-    } else if (pos === 11) { // Bottom Left
+    } else if (isBot && isLeft) { // Bottom Left
       ax = -width / 2 + strip / 2; ay = height / 2 - strip / 2; aw = strip; ah = strip;
-    } else if (pos === 22) { // Top Left
+    } else if (isTop && isLeft) { // Top Left
       ax = -width / 2 + strip / 2; ay = -height / 2 + strip / 2; aw = strip; ah = strip;
-    } else if (pos === 33) { // Top Right
+    } else if (isTop && isRight) { // Top Right
       ax = width / 2 - strip / 2; ay = -height / 2 + strip / 2; aw = strip; ah = strip;
     }
 
@@ -217,10 +223,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
         const thickness = 6;
         if (!this.ownerMarker) {
           let mx = 0, my = 0, mw = this.background.width, mh = this.background.height;
-          if (pos > 0 && pos < 11) { my = this.background.height / 2 - thickness / 2; mh = thickness; }
-          else if (pos > 11 && pos < 22) { mx = -this.background.width / 2 + thickness / 2; mw = thickness; }
-          else if (pos > 22 && pos < 33) { my = -this.background.height / 2 + thickness / 2; mh = thickness; }
-          else if (pos > 33 && pos < 44) { mx = this.background.width / 2 - thickness / 2; mw = thickness; }
+          if (this.layout.sideIndex === 0) { my = this.background.height / 2 - thickness / 2; mh = thickness; }
+          else if (this.layout.sideIndex === 1) { mx = -this.background.width / 2 + thickness / 2; mw = thickness; }
+          else if (this.layout.sideIndex === 2) { my = -this.background.height / 2 + thickness / 2; mh = thickness; }
+          else if (this.layout.sideIndex === 3) { mx = this.background.width / 2 - thickness / 2; mw = thickness; }
           this.ownerMarker = this.scene.add.rectangle(mx, my, mw, mh, ownerColor);
           this.statusContainer.add(this.ownerMarker);
         } else {
@@ -249,7 +255,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.buildingPips = [];
 
       if (property.buildingLevel > 0) {
-        const isHorizontal = (pos > 0 && pos < 11) || (pos > 22 && pos < 33);
+        const isHorizontal = this.layout.sideIndex === 0 || this.layout.sideIndex === 2;
         const bx = this.background.width / 2 - 15;
         const by = this.background.height / 2 - 15;
 

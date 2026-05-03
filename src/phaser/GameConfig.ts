@@ -10,8 +10,8 @@ export const getGameConfig = (containerId: string): Phaser.Types.Core.GameConfig
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 1420,
-    height: 1120,
+    width: 1940,
+    height: 1380,
   },
   physics: {
     default: 'arcade',

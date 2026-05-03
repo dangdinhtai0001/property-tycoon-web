@@ -5,6 +5,12 @@ import { BuildingSprite } from '../sprites/BuildingSprite';
 import { TileType } from '../../game-engine/types/game';
 import type { GameState, Property, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
+import {
+  getBoardTileCount,
+  getBoardTileLayout,
+  getBoardCornerIndexes,
+  type BoardGeometry,
+} from '../../game-engine/utils/boardGeometry';
 
 export class BoardScene extends Phaser.Scene {
   private tiles: TileSprite[] = [];
@@ -17,18 +23,24 @@ export class BoardScene extends Phaser.Scene {
   private boardContainer!: Phaser.GameObjects.Container;
   private boardSurface!: Phaser.GameObjects.Rectangle;
 
-  private static readonly CORNER_TILE_SIZE = 150;  // Kích thước ô Góc
+  // --- Dynamic Geometry Configuration ---
+  public static readonly GEOMETRY = { cols: 14, rows: 12 };
 
-  private static readonly VERTICAL_TILE_W = 110;   // Chiều ngang ô hàng Top/Bot
-  private static readonly VERTICAL_TILE_H = BoardScene.CORNER_TILE_SIZE;   // Chiều cao ô hàng Top/Bot
+  private static readonly CORNER_TILE_SIZE = 180;
 
-  private static readonly HORIZONTAL_TILE_W = BoardScene.CORNER_TILE_SIZE; // Chiều ngang ô hàng Left/Right
-  private static readonly HORIZONTAL_TILE_H = 80;  // Chiều cao ô hàng Left/Right
+  private static readonly VERTICAL_TILE_W = 130;   // Width of Top/Bot inner tiles
+  private static readonly VERTICAL_TILE_H = BoardScene.CORNER_TILE_SIZE;   // Height of Top/Bot inner tiles (depth)
+
+  private static readonly HORIZONTAL_TILE_W = BoardScene.CORNER_TILE_SIZE; // Width of Left/Right inner tiles (depth)
+  private static readonly HORIZONTAL_TILE_H = 100;  // Height of Left/Right inner tiles
 
 
+  private static readonly BOARD_W = BoardScene.CORNER_TILE_SIZE * 2 + BoardScene.VERTICAL_TILE_W * (BoardScene.GEOMETRY.cols - 2);
+  private static readonly BOARD_H = BoardScene.CORNER_TILE_SIZE * 2 + BoardScene.HORIZONTAL_TILE_H * (BoardScene.GEOMETRY.rows - 2);
 
-  private static readonly BOARD_W = BoardScene.CORNER_TILE_SIZE * 2 + BoardScene.VERTICAL_TILE_W * 10;
-  private static readonly BOARD_H = BoardScene.CORNER_TILE_SIZE * 2 + BoardScene.HORIZONTAL_TILE_H * 10;
+  public static getTileLayout(index: number) {
+    return getBoardTileLayout(index, BoardScene.GEOMETRY);
+  }
 
   constructor() {
     super('BoardScene');
@@ -145,9 +157,10 @@ export class BoardScene extends Phaser.Scene {
 
     // Clear and redraw tiles if board configuration changed or first load
     if (this.tiles.length === 0) {
-      state.board.forEach((tile) => {
-        const pos = this.getTilePosition(tile.position);
-        const sprite = new TileSprite(this, pos.x, pos.y, pos.w, pos.h, tile);
+      state.board.forEach((tile, index) => {
+        const layout = BoardScene.getTileLayout(index);
+        const pos = this.getTilePosition(layout);
+        const sprite = new TileSprite(this, pos.x, pos.y, pos.w, pos.h, tile, layout);
         this.tiles.push(sprite);
         this.tilesContainer.add(sprite);
       });
@@ -179,7 +192,8 @@ export class BoardScene extends Phaser.Scene {
     });
 
     state.players.forEach((player) => {
-      const tilePos = this.getTilePosition(player.position);
+      const layout = BoardScene.getTileLayout(player.position);
+      const tilePos = this.getTilePosition(layout);
 
       // Calculate stacking offset (Phase 4: Mini-grid / Fan-out)
       const playersOnThisTile = playersByPosition[player.position] || [];
@@ -233,17 +247,19 @@ export class BoardScene extends Phaser.Scene {
         // Path movement...
         const path: { x: number, y: number }[] = [];
         let current = lastPos;
-        const forwardDist = (player.position - lastPos + 44) % 44;
-        const backwardDist = (lastPos - player.position + 44) % 44;
+        const totalTiles = getBoardTileCount(BoardScene.GEOMETRY);
+        const forwardDist = (player.position - lastPos + totalTiles) % totalTiles;
+        const backwardDist = (lastPos - player.position + totalTiles) % totalTiles;
         const isBackward = backwardDist < forwardDist && backwardDist < 10;
 
         while (current !== player.position) {
-          current = isBackward ? (current - 1 + 44) % 44 : (current + 1) % 44;
-          const p = this.getTilePosition(current);
+          current = isBackward ? (current - 1 + totalTiles) % totalTiles : (current + 1) % totalTiles;
+          const layout = BoardScene.getTileLayout(current);
+          const p = this.getTilePosition(layout);
           const ox = (current === player.position) ? stackOffsetX : 0;
           const oy = (current === player.position) ? stackOffsetY : 0;
           path.push({ x: p.x + ox, y: p.y + oy });
-          if (path.length > 44) break;
+          if (path.length > totalTiles) break;
         }
         token.moveAlongPath(path);
         this.playerPositions.set(player.id, player.position);
@@ -257,51 +273,35 @@ export class BoardScene extends Phaser.Scene {
     this.buildingsContainer.removeAll(true);
   }
 
-  private getTilePosition(position: number) {
-    const {
-      VERTICAL_TILE_W, VERTICAL_TILE_H,
-      HORIZONTAL_TILE_W, HORIZONTAL_TILE_H,
-      CORNER_TILE_SIZE, BOARD_W, BOARD_H
-    } = BoardScene;
+  private getTilePosition(layout: { col: number, row: number }) {
+    const { col, row } = layout;
+    const { cols, rows } = BoardScene.GEOMETRY;
+    const { VERTICAL_TILE_W, HORIZONTAL_TILE_H, CORNER_TILE_SIZE, BOARD_W, BOARD_H } = BoardScene;
 
     let x: number, y: number;
     let w: number, h: number;
 
-    if (position === 0) { // Start (Bottom-Right)
+    // Horizontal Position (X)
+    if (col === 0) {
+      x = CORNER_TILE_SIZE / 2;
+      w = CORNER_TILE_SIZE;
+    } else if (col === cols - 1) {
       x = BOARD_W - CORNER_TILE_SIZE / 2;
-      y = BOARD_H - CORNER_TILE_SIZE / 2;
-      w = h = CORNER_TILE_SIZE;
-    } else if (position < 11) { // Bottom Row (Vertical Tiles)
-      x = BOARD_W - CORNER_TILE_SIZE - (position - 0.5) * VERTICAL_TILE_W;
-      y = BOARD_H - CORNER_TILE_SIZE / 2;
+      w = CORNER_TILE_SIZE;
+    } else {
+      x = CORNER_TILE_SIZE + (col - 0.5) * VERTICAL_TILE_W;
       w = VERTICAL_TILE_W;
-      h = VERTICAL_TILE_H;
-    } else if (position === 11) { // Jail (Bottom-Left)
-      x = CORNER_TILE_SIZE / 2;
+    }
+
+    // Vertical Position (Y)
+    if (row === 0) {
+      y = CORNER_TILE_SIZE / 2;
+      h = CORNER_TILE_SIZE;
+    } else if (row === rows - 1) {
       y = BOARD_H - CORNER_TILE_SIZE / 2;
-      w = h = CORNER_TILE_SIZE;
-    } else if (position < 22) { // Left Row (Horizontal Tiles)
-      x = CORNER_TILE_SIZE / 2;
-      y = BOARD_H - CORNER_TILE_SIZE - (position - 11 - 0.5) * HORIZONTAL_TILE_H;
-      w = HORIZONTAL_TILE_W;
-      h = HORIZONTAL_TILE_H;
-    } else if (position === 22) { // Free Parking (Top-Left)
-      x = CORNER_TILE_SIZE / 2;
-      y = CORNER_TILE_SIZE / 2;
-      w = h = CORNER_TILE_SIZE;
-    } else if (position < 33) { // Top Row (Vertical Tiles)
-      x = CORNER_TILE_SIZE + (position - 22 - 0.5) * VERTICAL_TILE_W;
-      y = CORNER_TILE_SIZE / 2;
-      w = VERTICAL_TILE_W;
-      h = VERTICAL_TILE_H;
-    } else if (position === 33) { // Go to Jail (Top-Right)
-      x = BOARD_W - CORNER_TILE_SIZE / 2;
-      y = CORNER_TILE_SIZE / 2;
-      w = h = CORNER_TILE_SIZE;
-    } else { // Right Row (Horizontal Tiles)
-      x = BOARD_W - CORNER_TILE_SIZE / 2;
-      y = CORNER_TILE_SIZE + (position - 33 - 0.5) * HORIZONTAL_TILE_H;
-      w = HORIZONTAL_TILE_W;
+      h = CORNER_TILE_SIZE;
+    } else {
+      y = CORNER_TILE_SIZE + (row - 0.5) * HORIZONTAL_TILE_H;
       h = HORIZONTAL_TILE_H;
     }
 
