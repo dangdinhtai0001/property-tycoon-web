@@ -22,7 +22,7 @@ export const useGameStore = create<GameStore>((set) => ({
     board: [],
     doublesCount: 0,
     log: [],
-    config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, quickModeMultiplier: 1 },
+    config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, rentMultiplier: 1 },
   },
   activeSlotId: '1',
   showTradeModal: false,

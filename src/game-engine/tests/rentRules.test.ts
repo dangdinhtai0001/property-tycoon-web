@@ -45,7 +45,7 @@ describe('Rent Rules', () => {
     ],
     doublesCount: 0,
     log: [],
-    config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, quickModeMultiplier: 1 },
+    config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, rentMultiplier: 1 },
   };
 
   it('should transfer rent from current player to owner', () => {
