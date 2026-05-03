@@ -5,6 +5,8 @@ import { THEME, getTileIcon, getCornerHint } from '../../ui/theme/tokens';
 
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
+  private border?: Phaser.GameObjects.Graphics;
+
   private colorStrip?: Phaser.GameObjects.Rectangle;
   private iconText?: Phaser.GameObjects.Text;
   private nameText!: Phaser.GameObjects.Text;
@@ -30,8 +32,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     const isRight = pos > 33 && pos < 44;
 
     // 1. Background (Agnostic of type)
-    this.background = scene.add.rectangle(0, 0, width, height, THEME.colors.surface.DEFAULT)
-      .setStrokeStyle(1.5, THEME.colors.surface.BORDER);
+    this.background = scene.add.rectangle(0, 0, width, height, THEME.colors.surface.DEFAULT);
     this.add(this.background);
 
     this.background.setInteractive({ useHandCursor: true });
@@ -41,11 +42,12 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
     // Hover effects
     this.background.on('pointerover', () => {
-      this.background.setStrokeStyle(2, THEME.colors.surface.HOVER);
+      this.drawBorder(THEME.colors.surface.HOVER, 2);
       scene.tweens.add({ targets: this, scale: 1.02, duration: 100 });
     });
+
     this.background.on('pointerout', () => {
-      this.background.setStrokeStyle(1.5, THEME.colors.surface.BORDER);
+      this.drawBorder(THEME.colors.surface.BORDER, 1.5);
       scene.tweens.add({ targets: this, scale: 1, duration: 100 });
     });
 
@@ -61,21 +63,22 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }
 
     this.updateStatus(tile);
+    this.drawBorder();
     scene.add.existing(this);
   }
 
   private renderCornerLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile) {
     const type = tile.type as keyof typeof THEME.colors.corners;
     const style = THEME.colors.corners[type] || THEME.colors.corners.JAIL;
-    
+
     // 1. Background Tint
     this.background.setFillStyle(style.bg);
-    
+
     // 2. Accent Bar (Small strip at the outer corner)
     const pos = tile.position;
     let ax = 0, ay = 0, aw = 0, ah = 0;
     const strip = 10;
-    
+
     if (pos === 0) { // Bottom Right
       ax = width / 2 - strip / 2; ay = height / 2 - strip / 2; aw = strip; ah = strip;
     } else if (pos === 11) { // Bottom Left
@@ -85,7 +88,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     } else if (pos === 33) { // Top Right
       ax = width / 2 - strip / 2; ay = -height / 2 + strip / 2; aw = strip; ah = strip;
     }
-    
+
     const accent = scene.add.rectangle(ax, ay, aw, ah, style.accent);
     this.add(accent);
 
@@ -116,10 +119,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
   }
 
   private renderStandardLayout(
-    scene: Phaser.Scene, 
-    width: number, 
-    height: number, 
-    tile: BoardTile, 
+    scene: Phaser.Scene,
+    width: number,
+    height: number,
+    tile: BoardTile,
     property: Property | null,
     side: { isTop: boolean, isBottom: boolean, isLeft: boolean, isRight: boolean }
   ) {
@@ -200,16 +203,16 @@ export class TileSprite extends Phaser.GameObjects.Container {
   public updateStatus(tile: BoardTile, players: Player[] = []) {
     const pos = tile.position;
     const isProperty = tile.type === TileType.PROPERTY;
-    
+
     // 1. Property-Specific Status
     if (isProperty) {
       const property = tile as Property;
       const owner = property.ownerId ? players.find(p => p.id === property.ownerId) : null;
-      
+
       // Ownership Indicators
       if (owner) {
         const ownerColor = Phaser.Display.Color.HexStringToColor(owner.color).color;
-        
+
         // A. Strip highlight
         const thickness = 6;
         if (!this.ownerMarker) {
@@ -260,7 +263,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
           const pipSize = THEME.effects.markers.buildingPipSize;
           const gap = THEME.effects.markers.buildingPipGap;
           const totalWidth = (property.buildingLevel * pipSize) + ((property.buildingLevel - 1) * gap);
-          
+
           for (let i = 0; i < property.buildingLevel; i++) {
             const px = bx - totalWidth / 2 + (i * (pipSize + gap)) + pipSize / 2;
             const pip = this.scene.add.arc(px, by, pipSize / 2, 0, 360, false, 0x334155).setStrokeStyle(1, 0xffffff);
@@ -276,7 +279,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
           this.mortgageOverlay = this.scene.add.rectangle(0, 0, this.background.width, this.background.height, 0x000000, 0.2);
           this.statusContainer.add(this.mortgageOverlay);
         }
-        
+
         if (!this.mortgageStamp) {
           this.mortgageStamp = this.scene.add.container(0, 0);
           const bg = this.scene.add.rectangle(0, 0, 70, 18, THEME.effects.markers.mortgageStampColor, 0.9)
@@ -286,7 +289,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
           this.mortgageStamp.add([bg, txt]);
           this.statusContainer.add(this.mortgageStamp);
         }
-        
+
         this.mortgageOverlay.setVisible(true);
         this.mortgageStamp.setVisible(true);
         this.background.setAlpha(0.6);
@@ -307,7 +310,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     if (tile.type === TileType.JAIL) {
       const playersOnTile = players.filter(p => p.position === pos);
       const isAnyoneJailed = playersOnTile.some(p => p.jailTurns > 0);
-      
+
       if (isAnyoneJailed) {
         if (!this.jailedBadge) {
           this.jailedBadge = this.scene.add.container(0, -this.background.height / 2 + 15);
@@ -321,9 +324,34 @@ export class TileSprite extends Phaser.GameObjects.Container {
         this.jailedBadge?.setVisible(false);
       }
     }
+
+    // Cập nhật border dựa trên trạng thái hiện tại
+    this.drawBorder();
   }
 
   private highlight?: Phaser.GameObjects.Graphics;
+
+  private drawBorder(
+    color: number = THEME.colors.surface.BORDER,
+    width: number = 1.5
+  ) {
+    if (!this.border) {
+      this.border = this.scene.add.graphics();
+      this.add(this.border);
+    }
+
+    this.border.clear();
+    this.border.lineStyle(width, color, 1);
+
+    this.border.strokeRect(
+      -this.background.width / 2,
+      -this.background.height / 2,
+      this.background.width,
+      this.background.height
+    );
+
+    this.bringToTop(this.border);
+  }
 
   public setHighlighted(active: boolean, color: number = 0xffffff) {
     if (active) {
@@ -334,19 +362,19 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.highlight.clear();
       this.highlight.lineStyle(THEME.effects.tileHighlightWidth, color, 0.8);
       this.highlight.strokeRect(
-        -this.background.width / 2, 
-        -this.background.height / 2, 
-        this.background.width, 
+        -this.background.width / 2,
+        -this.background.height / 2,
+        this.background.width,
         this.background.height
       );
-      
+
       // Outer glow effect using rectangle with alpha gradient if possible, 
       // but for simplicity, we use a thicker stroke for now.
       this.highlight.lineStyle(THEME.effects.tileHighlightWidth * 2, color, 0.3);
       this.highlight.strokeRect(
-        -this.background.width / 2 - 2, 
-        -this.background.height / 2 - 2, 
-        this.background.width + 4, 
+        -this.background.width / 2 - 2,
+        -this.background.height / 2 - 2,
+        this.background.width + 4,
         this.background.height + 4
       );
       this.highlight.setVisible(true);

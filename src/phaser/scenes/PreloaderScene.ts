@@ -9,7 +9,7 @@ export class PreloaderScene extends Phaser.Scene {
     // Create loading bar
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
-    
+
     const progressBar = this.add.graphics();
     const progressBox = this.add.graphics();
     progressBox.fillStyle(0x222222, 0.8);
