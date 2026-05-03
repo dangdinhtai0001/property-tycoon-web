@@ -1,61 +1,32 @@
 import Phaser from 'phaser';
 import type { Player } from '../../game-engine/types/game';
 import { THEME } from '../../ui/theme/tokens';
-
-const CHARACTER_CONFIGS: Record<string, { key: string, path: string, frameWidth: number, frameHeight: number }> = {
-  ghost: { 
-    key: 'ghost_character', 
-    path: '/assets/characters/ghost_character.png',
-    frameWidth: 251,
-    frameHeight: 251
-  },
-  cat: {
-    key: 'cat_character',
-    path: '/assets/characters/charming-chibi-cat.png',
-    frameWidth: 251,
-    frameHeight: 251
-  },
-  magician: {
-    key: 'magician_character',
-    path: '/assets/characters/chibi-cat-magican.png',
-    frameWidth: 251,
-    frameHeight: 251
-  }
-};
-
-const CHARACTER_MAP: Record<string, string> = {
-  ghost: CHARACTER_CONFIGS.ghost.key,
-  cat: CHARACTER_CONFIGS.cat.key,
-  magician: CHARACTER_CONFIGS.magician.key,
-};
+import { CHARACTERS, getCharacter } from '../../game-engine/data/characters';
 
 // Tăng / giảm số này nếu nhân vật quá to hoặc quá nhỏ trên bàn cờ
-const TOKEN_SPRITE_SCALE_MULTIPLIER = 3.12;
+const TOKEN_SPRITE_SCALE_MULTIPLIER = 3.10;
 
 type TokenAnimationState = 'idle' | 'run' | 'win' | 'sad';
 
 function getAnimationKey(charId: string, state: TokenAnimationState) {
-  const textureKey = CHARACTER_MAP[charId] || CHARACTER_MAP.ghost;
+  const textureKey = getCharacter(charId).phaserKey;
   return `${textureKey}_${state}`;
 }
 
 export function preloadTokenSpriteAssets(scene: Phaser.Scene) {
-  Object.values(CHARACTER_CONFIGS).forEach(config => {
+  CHARACTERS.forEach(char => {
     scene.load.spritesheet(
-      config.key,
-      config.path,
-      {
-        frameWidth: config.frameWidth,
-        frameHeight: config.frameHeight,
-      }
+      char.phaserKey,
+      char.image,
+      { frameWidth: char.frameWidth, frameHeight: char.frameHeight }
     );
   });
 }
 
 export function createTokenSpriteAnimations(scene: Phaser.Scene) {
-  Object.values(CHARACTER_CONFIGS).forEach(config => {
-    const key = config.key;
-    
+  CHARACTERS.forEach(char => {
+    const key = char.phaserKey;
+
     if (!scene.anims.exists(`${key}_idle`)) {
       scene.anims.create({
         key: `${key}_idle`,
@@ -99,9 +70,6 @@ export class TokenSprite extends Phaser.GameObjects.Container {
 
   private visualContainer: Phaser.GameObjects.Container;
   private shadow: Phaser.GameObjects.Ellipse;
-  private ring: Phaser.GameObjects.Arc;
-  private glow: Phaser.GameObjects.Arc;
-  private glowTween: Phaser.Tweens.Tween;
 
   private sprite?: Phaser.GameObjects.Sprite;
 
@@ -137,23 +105,9 @@ export class TokenSprite extends Phaser.GameObjects.Container {
     this.visualContainer = scene.add.container(0, 0);
     this.add(this.visualContainer);
 
-    // 3. Glow khi đang là lượt hiện tại
-    this.glow = scene.add.arc(
-      0,
-      0,
-      size * 1.5,
-      0,
-      360,
-      false,
-      color,
-      THEME.effects.tokenGlowAlpha
-    );
-    this.glow.setVisible(false);
-    this.visualContainer.add(this.glow);
-
-    // 4. Nhân vật 2D
+    // 3. Nhân vật 2D
     const charId = player.avatarUrl || 'ghost';
-    const textureKey = CHARACTER_MAP[charId] || CHARACTER_MAP.ghost;
+    const textureKey = getCharacter(charId).phaserKey;
 
     if (scene.textures.exists(textureKey)) {
       createTokenSpriteAnimations(scene);
@@ -210,31 +164,6 @@ export class TokenSprite extends Phaser.GameObjects.Container {
       this.visualContainer.add(this.fallbackText);
     }
 
-    // 5. Ring chọn player
-    this.ring = scene.add.arc(
-      0,
-      0,
-      size / 2 + 6,
-      0,
-      360,
-      false,
-      0xffffff,
-      0
-    );
-    this.ring.setStrokeStyle(0);
-    this.visualContainer.add(this.ring);
-
-    // 6. Glow tween
-    this.glowTween = scene.tweens.add({
-      targets: this.glow,
-      scale: 1.4,
-      alpha: 0,
-      duration: 1500,
-      repeat: -1,
-      ease: 'Quad.easeOut',
-    });
-    this.glowTween.pause();
-
     scene.add.existing(this);
 
     // 7. Floating animation
@@ -273,21 +202,9 @@ export class TokenSprite extends Phaser.GameObjects.Container {
 
   setSelected(selected: boolean) {
     if (selected) {
-      this.glow.setVisible(true);
-      this.glow.setAlpha(THEME.effects.tokenGlowAlpha);
-      this.glow.setScale(1);
-
-      this.glowTween.resume();
-
-      this.ring.setStrokeStyle(4, 0xffffff, 1);
-      this.ring.setAlpha(1);
+      this.visualContainer.setScale(1.1);
     } else {
-      this.glow.setVisible(false);
-      this.glowTween.pause();
-
-      this.ring.setStrokeStyle(0);
-      this.ring.setScale(1);
-      this.ring.setAlpha(1);
+      this.visualContainer.setScale(1);
     }
   }
 

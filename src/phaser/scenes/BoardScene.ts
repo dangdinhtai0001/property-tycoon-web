@@ -5,6 +5,7 @@ import { BuildingSprite } from '../sprites/BuildingSprite';
 import { TileType, Phase } from '../../game-engine/types/game';
 import type { GameState, Property, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
+import { useGameStore } from '../../app/store/useGameStore';
 import {
   getBoardTileCount,
   getBoardTileLayout,
@@ -249,6 +250,9 @@ export class BoardScene extends Phaser.Scene {
         token.setSelected(isCurrentPlayer);
         token.setJailed(player.jailTurns > 0);
         token.setBankrupt(player.isBankrupt || false);
+        if (isCurrentPlayer && (player.jailTurns > 0 || player.isBankrupt)) {
+          useGameStore.getState().setTokenAnimState('sad');
+        }
 
         // Ensure current player is always on top
         if (isCurrentPlayer) {
@@ -260,11 +264,22 @@ export class BoardScene extends Phaser.Scene {
         const hasNewPurchase = state.lastPurchaseId !== this.lastGlobalPurchaseId && state.lastPurchaseId !== undefined;
         const isBuyer = hasNewPurchase && state.currentPlayerId === player.id;
 
+        const { setTokenAnimState } = useGameStore.getState();
+        const isCurrentPlayerToken = player.id === state.currentPlayerId;
+
         if (lastState) {
           if (isBuyer) {
             token.setWinTemporarily(2000);
+            if (isCurrentPlayerToken) {
+              setTokenAnimState('win');
+              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+            }
           } else if (player.cash < lastState.cash && !isBuyer) {
             token.setSadTemporarily(2000);
+            if (isCurrentPlayerToken) {
+              setTokenAnimState('sad');
+              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+            }
           }
         }
         this.lastPlayersState.set(player.id, { cash: player.cash });
@@ -288,10 +303,21 @@ export class BoardScene extends Phaser.Scene {
             if (path.length > totalTiles) break;
           }
           token.moveAlongPath(path);
+          if (isCurrentPlayerToken) {
+            const moveDuration = path.length * 300;
+            setTokenAnimState('run');
+            setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), moveDuration);
+          }
           this.playerPositions.set(player.id, player.position);
         } else {
           const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
-          if (dist > 1) token.moveToPosition(targetX, targetY, 300);
+          if (dist > 1) {
+            token.moveToPosition(targetX, targetY, 300);
+            if (isCurrentPlayerToken) {
+              setTokenAnimState('run');
+              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 300);
+            }
+          }
         }
       }
     });

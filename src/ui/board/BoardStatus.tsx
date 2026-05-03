@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
+import type { TokenAnimState } from '../../app/store/useGameStore';
 import { Phase, TileType } from '../../game-engine/types/game';
 import type { Property, GameState, BoardTile, Player } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Dices, 
-  MapPin, 
-  Wallet, 
-  ShieldAlert, 
-  HelpCircle, 
-  ArrowRightCircle, 
+import {
+  Dices,
+  MapPin,
+  Wallet,
+  ShieldAlert,
+  HelpCircle,
+  ArrowRightCircle,
   Lock,
   Construction
 } from 'lucide-react';
+import { CharacterSprite } from '../shared/CharacterSprite';
 
 export const BoardStatus: React.FC = () => {
-  const { state } = useGameStore();
+  const { state, tokenAnimState } = useGameStore();
   const [displayedState, setDisplayedState] = useState<GameState>(state);
   const [isReady, setIsReady] = useState(false);
 
@@ -112,94 +114,116 @@ export const BoardStatus: React.FC = () => {
     return null;
   }
 
+  const charId = currentPlayer?.avatarUrl || 'ghost';
+  const spriteAnimState: TokenAnimState = tokenAnimState;
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-8 md:p-12 lg:p-16">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className={`w-full max-w-[340px] md:max-w-sm rounded-[2.5rem] border-2 shadow-2xl ${themeColors.bg} ${themeColors.border} overflow-hidden`}
-      >
-        <div className="p-5 md:p-7 space-y-4 md:space-y-6 bg-white">
-          {/* A. Turn Header */}
-          <div className="flex flex-col items-center text-center space-y-3">
-            <div className="flex items-center gap-3 bg-white/80 px-4 py-1.5 rounded-full shadow-sm border border-white/50">
-              <div className="w-2.5 h-2.5 rounded-full ring-2 ring-offset-2 ring-slate-100" style={{ backgroundColor: currentPlayer?.color }} />
-              <span className="text-sm font-black tracking-tight text-slate-800">{currentPlayer?.name}</span>
-            </div>
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg ${themeColors.badge} text-white`}>
-              {info.icon}
-              <span className="text-[10px] font-black uppercase tracking-widest leading-none">{info.label}</span>
-            </div>
-            <p className="text-[13px] font-bold text-slate-500 italic leading-snug">{info.hint}</p>
+    <>
+      {/* Character sprite — between status panel and right tiles */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentPlayerId}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1.3 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="absolute pointer-events-none flex flex-col items-center"
+          style={{ left: '70%', top: '40%', transform: 'translate(-50%, -50%)' }}
+        >
+          <div style={{ width: 180, height: 180, position: 'relative' }}>
+            <CharacterSprite charId={charId} animState={spriteAnimState} />
           </div>
+        </motion.div>
+      </AnimatePresence>
 
-          <div className="h-px bg-slate-200/50 w-full" />
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-8 md:p-12 lg:p-16">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`w-full max-w-[300px] md:max-w-sm rounded-[2.5rem] border-2 shadow-2xl ${themeColors.bg} ${themeColors.border} overflow-hidden`}
+        >
+          <div className="p-5 md:p-7 space-y-4 md:space-y-6 bg-white">
+            {/* A. Turn Header */}
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="flex items-center gap-3 bg-white/80 px-4 py-1.5 rounded-full shadow-sm border border-white/50">
+                <div className="w-2.5 h-2.5 rounded-full ring-2 ring-offset-2 ring-slate-100" style={{ backgroundColor: currentPlayer?.color }} />
+                <span className="text-sm font-black tracking-tight text-slate-800">{currentPlayer?.name}</span>
+              </div>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg ${themeColors.badge} text-white`}>
+                {info.icon}
+                <span className="text-[10px] font-black uppercase tracking-widest leading-none">{info.label}</span>
+              </div>
+              <p className="text-[13px] font-bold text-slate-500 italic leading-snug">{info.hint}</p>
+            </div>
 
-          {/* B. Dice & Tile Summary */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPlayerId + phase + (currentTile?.id || '')}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
-            >
-              {/* Dice Focus */}
-              {lastDiceRoll && (phase === Phase.WAITING_TO_ROLL || phase === Phase.MOVING || phase === Phase.RESOLVING_TILE) && (
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="flex items-center justify-center gap-3">
-                    {[lastDiceRoll[0], lastDiceRoll[1]].map((val, i) => (
-                      <div key={i} className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-lg font-black text-slate-700">
-                        {val}
-                      </div>
-                    ))}
-                  </div>
-                  {lastDiceRoll[0] === lastDiceRoll[1] && (
-                    <span className="text-[9px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded uppercase tracking-tighter">Tung đôi!</span>
-                  )}
-                </div>
-              )}
+            <div className="h-px bg-slate-200/50 w-full" />
 
-              {/* Current Tile Card */}
-              {currentTile && (
-                <div className="bg-white/50 rounded-3xl p-4 border border-white/80 shadow-inner text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="p-2 bg-white rounded-xl shadow-sm text-slate-400">
-                      <MapPin size={16} />
-                    </div>
-                    <div className="flex-1 text-center">
-                      <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Vị trí hiện tại</p>
-                      <h3 className="text-sm font-black text-slate-800 leading-tight">{currentTile.name}</h3>
-                      
-                      {currentTile.type === TileType.PROPERTY && (
-                        <div className="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center text-left">
-                          <PropertyInfo tile={currentTile as Property} players={players} />
+            {/* B. Dice & Tile Summary */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPlayerId + phase + (currentTile?.id || '')}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-4"
+              >
+                {/* Dice Focus */}
+                {lastDiceRoll && (phase === Phase.WAITING_TO_ROLL || phase === Phase.MOVING || phase === Phase.RESOLVING_TILE) && (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="flex items-center justify-center gap-3">
+                      {[lastDiceRoll[0], lastDiceRoll[1]].map((val, i) => (
+                        <div key={i} className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-lg font-black text-slate-700">
+                          {val}
                         </div>
-                      )}
+                      ))}
+                    </div>
+                    {lastDiceRoll[0] === lastDiceRoll[1] && (
+                      <span className="text-[9px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded uppercase tracking-tighter">Tung đôi!</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Current Tile Card */}
+                {currentTile && (
+                  <div className="bg-white/50 rounded-3xl p-4 border border-white/80 shadow-inner text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="p-2 bg-white rounded-xl shadow-sm text-slate-400">
+                        <MapPin size={16} />
+                      </div>
+                      <div className="flex-1 text-center">
+                        <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Vị trí hiện tại</p>
+                        <h3 className="text-sm font-black text-slate-800 leading-tight">{currentTile.name}</h3>
+
+                        {currentTile.type === TileType.PROPERTY && (
+                          <div className="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center text-left">
+                            <PropertyInfo tile={currentTile as Property} players={players} />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                )}
+              </motion.div>
+            </AnimatePresence>
 
-          {/* C. Mini Log */}
-          <div className="pt-2 border-t border-slate-200/50">
-            <div className="flex items-center gap-2 mb-2">
-              <ArrowRightCircle size={12} className="text-slate-400" />
-              <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">Gần nhất</span>
-            </div>
-            <div className="space-y-1">
-              {log.slice(0, 2).map((entry, i) => (
-                <p key={i} className={`text-[11px] font-bold leading-tight ${i === 0 ? 'text-slate-600' : 'text-slate-400 opacity-60'}`}>
-                  {entry}
-                </p>
-              ))}
+            {/* C. Mini Log */}
+            <div className="pt-2 border-t border-slate-200/50">
+              <div className="flex items-center gap-2 mb-2">
+                <ArrowRightCircle size={12} className="text-slate-400" />
+                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">Gần nhất</span>
+              </div>
+              <div className="space-y-1">
+                {log.slice(0, 2).map((entry, i) => (
+                  <p key={i} className={`text-[11px] font-bold leading-tight ${i === 0 ? 'text-slate-600' : 'text-slate-400 opacity-60'}`}>
+                    {entry}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </>
   );
 };
 
@@ -227,3 +251,4 @@ const PropertyInfo: React.FC<{ tile: Property, players: Player[] }> = ({ tile, p
     </>
   );
 };
+

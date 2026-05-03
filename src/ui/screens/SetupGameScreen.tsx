@@ -4,38 +4,16 @@ import { type GameConfig } from '../../game-engine/types/game';
 import { DEFAULT_CONFIG } from '../../game-engine/state/setupGame';
 import { Users, Shield, Zap, Trash2, Plus, Info, CheckCircle2, AlertCircle, Landmark, Dices } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CHARACTERS } from '../../game-engine/data/characters';
+import { CharacterSprite } from '../shared/CharacterSprite';
 
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-const CHARACTERS = [
-  { id: 'ghost', name: 'Ghosty', icon: '👻', image: '/assets/characters/ghost_character.png' },
-  { id: 'cat', name: 'Chibi Cat', icon: '🐱', image: '/assets/characters/charming-chibi-cat.png' },
-  { id: 'magician', name: 'Cat Magician', icon: '🧙‍♂️', image: '/assets/characters/chibi-cat-magican.png' },
-];
-
-const CharacterAvatar: React.FC<{ charId: string; className?: string }> = ({ charId, className = "" }) => {
-  const char = CHARACTERS.find(c => c.id === charId) || CHARACTERS[0];
-  
-  return (
-    <div className={`relative overflow-hidden bg-slate-100/50 rounded-2xl border-2 border-slate-200 shadow-inner ${className}`}>
-      <div 
-        className="absolute inset-0"
-        style={{ 
-          backgroundImage: `url(${char.image})`,
-          backgroundSize: '400% 400%',
-          backgroundPosition: '0% 0%',
-          imageRendering: 'pixelated',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-    </div>
-  );
-};
 
 export const SetupGameScreen: React.FC = () => {
   const { dispatch } = useGameStore();
   const [players, setPlayers] = useState<{ name: string; color: string; token: string }[]>([
-    { name: 'Người chơi 1', color: COLORS[0], token: CHARACTERS[0].id },
-    { name: 'Người chơi 2', color: COLORS[1], token: CHARACTERS[0].id },
+    { name: CHARACTERS[0].name, color: COLORS[0], token: CHARACTERS[0].id },
+    { name: CHARACTERS[0].name, color: COLORS[1], token: CHARACTERS[0].id },
   ]);
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
 
@@ -46,8 +24,8 @@ export const SetupGameScreen: React.FC = () => {
       const nextColor = COLORS.find(c => !usedColors.has(c)) || COLORS[players.length];
       const nextToken = CHARACTERS[0].id;
 
-      setPlayers([...players, { 
-        name: `Người chơi ${players.length + 1}`, 
+      setPlayers([...players, {
+        name: CHARACTERS[0].name,
         color: nextColor,
         token: nextToken
       }]);
@@ -62,7 +40,12 @@ export const SetupGameScreen: React.FC = () => {
 
   const updatePlayer = (index: number, field: 'name' | 'color' | 'token', value: string) => {
     const newPlayers = [...players];
-    newPlayers[index] = { ...newPlayers[index], [field]: value };
+    const updates: Partial<typeof newPlayers[0]> = { [field]: value };
+    if (field === 'token') {
+      const char = CHARACTERS.find(c => c.id === value);
+      if (char) updates.name = char.name;
+    }
+    newPlayers[index] = { ...newPlayers[index], ...updates };
     setPlayers(newPlayers);
   };
 
@@ -198,7 +181,9 @@ export const SetupGameScreen: React.FC = () => {
                     {/* Token Selection */}
                     <div className="relative group/token">
                       <button className="relative w-16 h-16 group cursor-pointer outline-none">
-                        <CharacterAvatar charId={p.token} className="w-full h-full group-hover:border-blue-400 transition-colors" />
+                        <div className="relative w-full h-full overflow-hidden bg-slate-100/50 rounded-2xl border-2 border-slate-200 shadow-inner group-hover:border-blue-400 transition-colors">
+                          <CharacterSprite charId={p.token} />
+                        </div>
                       </button>
                       
                       <div className="absolute top-full left-0 mt-2 p-4 bg-white shadow-2xl rounded-[2rem] border border-slate-100 z-50 flex flex-wrap gap-4 opacity-0 pointer-events-none group-focus-within/token:opacity-100 group-focus-within/token:pointer-events-auto transition-all transform scale-95 group-focus-within/token:scale-100 min-w-[200px]">
@@ -209,7 +194,9 @@ export const SetupGameScreen: React.FC = () => {
                             className={`relative w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all ${p.token === c.id ? 'border-blue-500 scale-110 shadow-lg' : 'border-slate-50 hover:border-blue-200'}`}
                             title={c.name}
                           >
-                            <CharacterAvatar charId={c.id} className="w-full h-full border-none shadow-none bg-transparent" />
+                            <div className="relative w-full h-full">
+                              <CharacterSprite charId={c.id} />
+                            </div>
                           </button>
                         ))}
                       </div>
