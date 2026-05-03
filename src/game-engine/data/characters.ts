@@ -45,6 +45,15 @@ export const CHARACTERS: CharacterDef[] = [
     frameWidth: 250,
     frameHeight: 250,
   },
+  {
+    id: 'light knight',
+    name: 'Light Knight',
+    icon: '🕵️',
+    image: '/assets/characters/chibi-architect-knight.png',
+    phaserKey: 'light_knight_character',
+    frameWidth: 250,
+    frameHeight: 250,
+  },
 ];
 
 export const getCharacter = (id: string): CharacterDef =>
