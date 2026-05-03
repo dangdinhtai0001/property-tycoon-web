@@ -17,6 +17,13 @@ import {
 export const BoardStatus: React.FC = () => {
   const { state } = useGameStore();
   const [displayedState, setDisplayedState] = useState<GameState>(state);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Initial loading delay (1.2s)
+    const timer = setTimeout(() => setIsReady(true), 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // Sync display state when not actively animating movement
@@ -24,6 +31,8 @@ export const BoardStatus: React.FC = () => {
       setDisplayedState(state);
     }
   }, [state]);
+
+  if (!isReady) return null;
 
   const { players, currentPlayerId, phase, board, lastDiceRoll, log } = displayedState;
   const currentPlayer = players.find(p => p.id === currentPlayerId);
