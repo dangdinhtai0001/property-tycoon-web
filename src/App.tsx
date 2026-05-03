@@ -9,6 +9,7 @@ import { GameLogPanel } from './ui/panels/GameLogPanel';
 import { useGameStore } from './app/store/useGameStore';
 import { MainMenu } from './ui/screens/MainMenu';
 import { CurrentTilePanel } from './ui/panels/CurrentTilePanel';
+import { QuickGuidePanel } from './ui/panels/QuickGuidePanel';
 import { Phase } from './game-engine/types/game';
 import { DebtResolutionModal } from './ui/modals/DebtResolutionModal';
 import { AuctionModal } from './ui/modals/AuctionModal';
@@ -112,17 +113,9 @@ function App() {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="pointer-events-auto p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-200/50 relative overflow-hidden"
+          className="pointer-events-auto"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Info size={60} />
-          </div>
-          <h3 className="font-black mb-2 uppercase text-xs tracking-wider">Hướng dẫn nhanh</h3>
-          <ul className="text-[11px] space-y-1.5 text-blue-50">
-            <li className="flex gap-2"><span>•</span><span>Mua đất để bắt đầu đế chế.</span></li>
-            <li className="flex gap-2"><span>•</span><span>Thu thập đủ bộ màu để xây nhà.</span></li>
-            <li className="flex gap-2"><span>•</span><span>Thế chấp nếu kẹt tiền mặt.</span></li>
-          </ul>
+          <QuickGuidePanel />
         </motion.div>
       </aside>
 
