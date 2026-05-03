@@ -2,7 +2,34 @@ import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { TileType, type Property } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, Home, Lock, Timer, User, Skull, AlertCircle } from 'lucide-react';
+import { Building2, Home, Lock, User } from 'lucide-react';
+
+const CashDelta: React.FC<{ value: number }> = ({ value }) => {
+  const [prevValue, setPrevValue] = React.useState(value);
+  const [delta, setDelta] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (value !== prevValue) {
+      setDelta(value - prevValue);
+      setPrevValue(value);
+      const timer = setTimeout(() => setDelta(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [value, prevValue]);
+
+  if (delta === null) return null;
+
+  return (
+    <motion.span
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: -20 }}
+      exit={{ opacity: 0 }}
+      className={`absolute right-0 font-black text-xs ${delta > 0 ? 'text-emerald-500' : 'text-rose-500'}`}
+    >
+      {delta > 0 ? `+$${delta.toLocaleString()}` : `-$${Math.abs(delta).toLocaleString()}`}
+    </motion.span>
+  );
+};
 
 export const PlayerListPanel: React.FC = () => {
   const { state } = useGameStore();
@@ -14,7 +41,7 @@ export const PlayerListPanel: React.FC = () => {
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{state.players.length} PLAYERS</span>
       </div>
 
-      <div className="flex flex-col gap-5 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-10">
+      <div className="flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-10">
         {state.players.map((player) => {
           const isCurrent = state.currentPlayerId === player.id;
           const playerProperties = state.board.filter(t => 
@@ -38,67 +65,58 @@ export const PlayerListPanel: React.FC = () => {
               key={player.id}
               initial={false}
               animate={{ 
-                height: isCurrent ? 'auto' : '80px',
+                height: isCurrent ? '100px' : '70px',
                 opacity: player.isBankrupt ? 0.6 : 1
               }}
               className={`relative overflow-hidden rounded-[1.5rem] border-2 transition-all duration-300 ${
                 isCurrent 
-                  ? 'bg-white shadow-lg z-10' 
-                  : 'bg-slate-100/80 border-transparent'
+                  ? 'bg-white shadow-lg shadow-slate-200/50 z-10' 
+                  : 'bg-slate-100/60 border-transparent opacity-80'
               }`}
               style={{ 
                 borderColor: isCurrent ? player.color : 'transparent',
-                borderLeftWidth: '8px',
+                borderLeftWidth: '10px',
                 borderLeftColor: player.color
               }}
             >
-              <div className="p-3 flex flex-col gap-2">
-                {/* Main Row: Avatar, Name, Cash */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-sm"
-                      style={{ backgroundColor: player.color }}
-                    >
-                      <User size={16} strokeWidth={3} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className={`font-black text-sm tracking-tight ${isCurrent ? 'text-slate-900' : 'text-slate-600'}`}>
-                        {player.name}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <span className={`text-base font-black tracking-tight ${player.cash < 0 ? 'text-red-600' : 'text-slate-900'}`}>
+              <div className="p-4 flex flex-col justify-center h-full">
+                {/* Top Row: Name and Cash */}
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`font-black text-sm tracking-tight ${isCurrent ? 'text-slate-900' : 'text-slate-600'}`}>
+                    {player.name}
+                  </span>
+                  <div className="relative flex items-center gap-1">
+                    <CashDelta value={player.cash} />
+                    <span className={`text-sm font-black tracking-tighter ${player.cash < 0 ? 'text-rose-600' : 'text-slate-900'}`}>
                       ${player.cash.toLocaleString()}
                     </span>
                   </div>
                 </div>
 
-                {/* Sub Row: Status & Location */}
-                <div className="flex items-center gap-2">
+                {/* Status and Location Row */}
+                <div className="flex items-center gap-1 overflow-hidden">
                   <span 
-                    className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                      isCurrent ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'
+                    className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider flex-none ${
+                      isCurrent ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'
                     }`}
                     style={{ backgroundColor: isCurrent ? player.color : undefined }}
                   >
                     {statusLabel}
                   </span>
-                  <span className="text-[10px] font-bold text-slate-500 truncate">
-                    · Đang ở: <span className="text-slate-700">{currentTileName}</span>
+                  <span className="text-slate-300 mx-1">·</span>
+                  <span className={`text-[10px] font-black truncate ${isCurrent ? 'text-slate-700' : 'text-slate-400'}`}>
+                    {currentTileName}
                   </span>
                 </div>
 
-                {/* Expanded Section: Assets */}
+                {/* Wealth Indicators (Only if active or has assets) */}
                 <AnimatePresence>
                   {isCurrent && (
                     <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="flex items-center gap-4 pt-1 mt-1 border-t border-slate-50"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex items-center gap-3 pt-2 mt-2 border-t border-slate-50"
                     >
                       <div className="flex items-center gap-1">
                         <Building2 size={12} className="text-slate-400" />

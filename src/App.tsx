@@ -56,17 +56,17 @@ function App() {
             <h1 className="text-2xl font-black tracking-tight text-slate-800 leading-none">
               PROPERTY <span className="text-blue-600">TYCOON</span>
             </h1>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Immersive Board Engine</p>
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Immersive Board Engine</p>
           </div>
           
           <div className="hidden md:flex gap-4 items-center bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Trạng thái</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase">Trạng thái</span>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-sm font-black text-slate-800 uppercase leading-none">
                   Lượt của <span style={{ color: state.players.find(p => p.id === state.currentPlayerId)?.color }}>{state.players.find(p => p.id === state.currentPlayerId)?.name}</span>
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                 <span className="text-sm font-black text-blue-600 uppercase leading-none">{state.phase.replace(/_/g, ' ')}</span>
               </div>
             </div>
@@ -79,7 +79,7 @@ function App() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
             className={`p-4 rounded-[1.5rem] transition-all shadow-xl backdrop-blur-md flex items-center gap-2 ${
-              isHistoryOpen ? 'bg-blue-600 text-white' : 'bg-white/80 text-slate-600 border border-white hover:bg-white'
+              isHistoryOpen ? 'bg-blue-600 text-white' : 'bg-white/80 text-slate-700 border border-white hover:bg-white'
             }`}
           >
             <ScrollText size={20} />
@@ -90,7 +90,7 @@ function App() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsPauseOpen(true)}
-            className="p-4 bg-white/80 border border-white text-slate-600 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
+            className="p-4 bg-white/80 border border-white text-slate-700 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
           >
             <Menu size={20} />
             <span className="font-bold text-sm hidden sm:inline">MENU</span>

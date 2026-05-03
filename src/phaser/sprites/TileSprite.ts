@@ -119,8 +119,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
     // Layer 2: Short Name
     const displayName = tile.shortName || tile.name;
     this.nameText = scene.add.text(0, contentYOffset, displayName, {
-      fontSize: '11px',
-      color: '#1e293b',
+      fontSize: '12px',
+      color: '#0f172a',
       fontWeight: '900',
       align: 'center',
       wordWrap: { width: width - 10 }
@@ -133,10 +133,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
     else if (tile.type === TileType.TAX) info = tile.name.includes('xa xỉ') ? '$150' : '$200';
 
     const infoY = isTop ? -height / 2 + 35 : height / 2 - 35;
-    this.infoText = scene.add.text(0, infoY + contentYOffset, info, { fontSize: '10px', color: '#64748b', fontWeight: '900' }).setOrigin(0.5);
+    this.infoText = scene.add.text(0, infoY + contentYOffset, info, { fontSize: '11px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
     this.add(this.infoText);
 
-    this.statusText = scene.add.text(0, isTop ? height / 2 - 25 : -height / 2 + 25, '', { fontSize: '9px', fontWeight: 'bold' }).setOrigin(0.5);
+    this.statusText = scene.add.text(0, isTop ? height / 2 - 25 : -height / 2 + 25, '', { fontSize: '10px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
     this.add(this.statusText);
   }
 
@@ -156,14 +156,14 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
     // Layer 1: Icon
     const iconX = isLeft ? -width / 2 + 18 : width / 2 - 18;
-    this.iconText = scene.add.text(iconX + contentXOffset, 0, this.getTileIcon(tile, property), { fontSize: '18px' }).setOrigin(0.5);
+    this.iconText = scene.add.text(iconX + contentXOffset, 0, this.getTileIcon(tile, property), { fontSize: '20px' }).setOrigin(0.5);
     this.add(this.iconText);
 
     // Layer 2: Short Name
     const displayName = tile.shortName || tile.name;
     this.nameText = scene.add.text(contentXOffset, -10, displayName, {
-      fontSize: '11px',
-      color: '#1e293b',
+      fontSize: '12px',
+      color: '#0f172a',
       fontWeight: '900',
       align: 'center',
       wordWrap: { width: width - 25 }
@@ -173,10 +173,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
     // Layer 3: Price / Info
     let info = '';
     if (property) info = `$${property.price}`;
-    this.infoText = scene.add.text(contentXOffset, 10, info, { fontSize: '10px', color: '#64748b', fontWeight: '900' }).setOrigin(0.5);
+    this.infoText = scene.add.text(contentXOffset, 10, info, { fontSize: '11px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
     this.add(this.infoText);
 
-    this.statusText = scene.add.text(isLeft ? width / 2 - 25 : -width / 2 + 25, 0, '', { fontSize: '9px', fontWeight: 'bold' }).setOrigin(0.5);
+    this.statusText = scene.add.text(isLeft ? width / 2 - 25 : -width / 2 + 25, 0, '', { fontSize: '10px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
     this.add(this.statusText);
   }
 
@@ -193,17 +193,61 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }
   }
 
-  public updateStatus(tile: BoardTile) {
+  private ownerMarker?: Phaser.GameObjects.Arc;
+
+  public updateStatus(tile: BoardTile, players: Player[] = []) {
     if (tile.type !== TileType.PROPERTY) return;
     const property = tile as Property;
     
+    // 1. Owner Marker & Border Glow
+    const owner = property.ownerId ? players.find(p => p.id === property.ownerId) : null;
+    
+    if (owner) {
+      const ownerColor = Phaser.Display.Color.HexStringToColor(owner.color).color;
+      
+      if (!this.ownerMarker) {
+        // Position at bottom-right of the tile
+        const markerX = this.background.width / 2 - 12;
+        const markerY = this.background.height / 2 - 12;
+        this.ownerMarker = this.scene.add.arc(markerX, markerY, 8, 0, 360, false, ownerColor);
+        this.ownerMarker.setStrokeStyle(2, 0xffffff);
+        this.add(this.ownerMarker);
+      } else {
+        this.ownerMarker.setFillStyle(ownerColor);
+        this.ownerMarker.setVisible(true);
+      }
+      
+      // Highlight tile border with owner color
+      this.background.setStrokeStyle(4, ownerColor);
+    } else {
+      if (this.ownerMarker) this.ownerMarker.setVisible(false);
+      this.background.setStrokeStyle(2, 0xe2e8f0);
+    }
+    
+    // 2. Building Level & Mortgage Status
     let statusParts = [];
-    if (property.ownerId) statusParts.push('👤'); 
-    if (property.buildingLevel > 0) statusParts.push(`🏠x${property.buildingLevel}`);
-    if (property.isMortgaged) statusParts.push('🚫');
+    if (property.buildingLevel > 0) {
+      if (property.buildingLevel === 5) {
+        statusParts.push('🏨');
+      } else {
+        statusParts.push('🏠'.repeat(property.buildingLevel));
+      }
+    }
+    
+    if (property.isMortgaged) {
+      statusParts.push('🔒 TC');
+      this.background.setFillStyle(0xf1f5f9);
+      this.background.setAlpha(0.8);
+    } else {
+      this.background.setFillStyle(0xffffff);
+      this.background.setAlpha(1);
+    }
 
     if (this.statusText) {
-      this.statusText.setText(statusParts.join('\n'));
+      this.statusText.setText(statusParts.join(' '));
+      this.statusText.setColor('#64748b');
+      this.statusText.setFontStyle('900');
     }
   }
 }
+

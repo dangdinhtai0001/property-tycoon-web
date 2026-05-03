@@ -134,6 +134,13 @@ export class BoardScene extends Phaser.Scene {
       });
     }
 
+    // Update tile statuses (Ownership, Buildings, Mortgage)
+    state.board.forEach((tile, index) => {
+      if (this.tiles[index]) {
+        this.tiles[index].updateStatus(tile, state.players);
+      }
+    });
+
     // Update tokens with smooth movement and stacking
     const playersByPosition: Record<number, Player[]> = {};
     state.players.forEach(p => {
