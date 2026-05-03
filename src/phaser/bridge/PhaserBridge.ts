@@ -6,6 +6,14 @@ export class PhaserBridge {
   private static game: Phaser.Game | null = null;
   private static unsubscribe: (() => void) | null = null;
 
+  static showDiceRoll(result: number[]) {
+    if (!this.game) return;
+    const boardScene = this.game.scene.getScene('BoardScene');
+    if (boardScene) {
+      boardScene.events.emit('show-dice-roll', result);
+    }
+  }
+
   static initialize(game: Phaser.Game) {
     this.game = game;
 

@@ -2,8 +2,9 @@ import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
 import { BuildingSprite } from '../sprites/BuildingSprite';
-import { TileType } from '../../game-engine/types/game';
+import { TileType, Phase } from '../../game-engine/types/game';
 import type { GameState, Property, Player } from '../../game-engine/types/game';
+import { DiceSprite } from '../sprites/DiceSprite';
 
 export class BoardScene extends Phaser.Scene {
   private tiles: TileSprite[] = [];
@@ -12,6 +13,7 @@ export class BoardScene extends Phaser.Scene {
   private tilesContainer: Phaser.GameObjects.Container;
   private buildingsContainer: Phaser.GameObjects.Container;
   private tokensContainer: Phaser.GameObjects.Container;
+  private diceContainer: Phaser.GameObjects.Container;
   private boardContainer: Phaser.GameObjects.Container;
 
   constructor() {
@@ -23,11 +25,16 @@ export class BoardScene extends Phaser.Scene {
     this.tilesContainer = this.add.container(0, 0);
     this.buildingsContainer = this.add.container(0, 0);
     this.tokensContainer = this.add.container(0, 0);
+    this.diceContainer = this.add.container(0, 0);
     
-    // Add in order: Tiles (bottom) -> Buildings -> Tokens (top)
+    // Add in order: Tiles (bottom) -> Buildings -> Tokens -> Dice (top)
     this.boardContainer.add(this.tilesContainer);
     this.boardContainer.add(this.buildingsContainer);
     this.boardContainer.add(this.tokensContainer);
+    
+    // Dice should be above everything
+    this.add.existing(this.diceContainer);
+    this.diceContainer.setDepth(1000);
     
     // Background for center
     const centerX = this.cameras.main.width / 2;
@@ -52,9 +59,73 @@ export class BoardScene extends Phaser.Scene {
       this.updateBoard(state);
     });
 
+    this.events.on('show-dice-roll', (result: number[]) => {
+      this.showDiceRoll(result);
+    });
+
     // Scene-level click listener for better reliability
     this.events.on('tile-clicked', (tileId: string) => {
       this.game.events.emit('tile-clicked', tileId);
+    });
+  }
+
+  async showDiceRoll(result: number[]) {
+    const centerX = this.cameras.main.width / 2;
+    const centerY = this.cameras.main.height / 2;
+
+    this.diceContainer.removeAll(true);
+    
+    const dice1 = new DiceSprite(this, centerX - 60, centerY, 100);
+    const dice2 = new DiceSprite(this, centerX + 60, centerY, 100);
+    this.diceContainer.add([dice1, dice2]);
+
+    // Entrance animation
+    this.diceContainer.setAlpha(0);
+    this.diceContainer.setScale(0.5);
+    this.tweens.add({
+      targets: this.diceContainer,
+      alpha: 1,
+      scale: 1,
+      duration: 300,
+      ease: 'Back.easeOut'
+    });
+
+    await Promise.all([
+      dice1.roll(result[0], 100),
+      dice2.roll(result[1], 100)
+    ]);
+
+    // Show result text
+    const sumText = this.add.text(centerX, centerY + 100, (result[0] + result[1]).toString(), {
+      fontSize: '80px',
+      color: '#2563eb',
+      fontWeight: '900',
+      stroke: '#ffffff',
+      strokeThickness: 8
+    }).setOrigin(0.5).setAlpha(0).setScale(0);
+    
+    this.diceContainer.add(sumText);
+
+    this.tweens.add({
+      targets: sumText,
+      alpha: 1,
+      scale: 1,
+      duration: 500,
+      ease: 'Back.easeOut'
+    });
+
+    // Wait a bit then fade out
+    await new Promise(r => setTimeout(r, 1500));
+
+    this.tweens.add({
+      targets: [this.diceContainer],
+      alpha: 0,
+      scale: 0.8,
+      duration: 400,
+      ease: 'Power2.easeIn',
+      onComplete: () => {
+        this.diceContainer.removeAll(true);
+      }
     });
   }
 
@@ -114,9 +185,20 @@ export class BoardScene extends Phaser.Scene {
         const path: {x: number, y: number}[] = [];
         let current = lastPos;
         
-        // Handle normal movement (forward)
+        // Determine direction: forward or backward
+        const forwardDist = (player.position - lastPos + 40) % 40;
+        const backwardDist = (lastPos - player.position + 40) % 40;
+        
+        // If backward distance is shorter and small, move backward (e.g. "Go back 3 spaces")
+        const isBackward = backwardDist < forwardDist && backwardDist < 10;
+        
         while (current !== player.position) {
-          current = (current + 1) % 40;
+          if (isBackward) {
+            current = (current - 1 + 40) % 40;
+          } else {
+            current = (current + 1) % 40;
+          }
+          
           const p = this.getTilePosition(current, offset, tileSize, cornerSize);
           
           // Apply stacking offset only to the final destination
