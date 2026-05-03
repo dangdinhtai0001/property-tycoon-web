@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { SetupGameScreen } from './SetupGameScreen';
-import { listSaves, loadGame, hasSave, deleteSave } from '../../storage/gameStorage';
+import { listSaves, loadGame, deleteSave } from '../../storage/gameStorage';
 import { useGameStore } from '../../app/store/useGameStore';
 import { Play, RotateCcw, Settings, ScrollText, Volume2, HelpCircle, Dices, Landmark, Coins } from 'lucide-react';
 import { SaveSlotModal } from '../modals/SaveSlotModal';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export const MainMenu: React.FC = () => {
   const [showSetup, setShowSetup] = useState(false);
@@ -126,7 +126,7 @@ export const MainMenu: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.5 }}
-            whileHover={{ scale: 1.02, y: -4, shadow: "0 20px 40px -10px rgba(37, 99, 235, 0.4)" }}
+            whileHover={{ scale: 1.02, y: -4, boxShadow: "0 20px 40px -10px rgba(37, 99, 235, 0.4)" }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowSetup(true)}
             className="group w-full py-6 bg-blue-600 text-white text-xl font-black rounded-[2rem] shadow-xl shadow-blue-100 flex items-center justify-center gap-4 transition-colors hover:bg-blue-700"

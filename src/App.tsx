@@ -32,7 +32,6 @@ function App() {
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isActionExpanded, setIsActionExpanded] = React.useState(true);
-  const [isDebugOpen, setIsDebugOpen] = React.useState(false);
 
   React.useEffect(() => {
     (window as any).game = {

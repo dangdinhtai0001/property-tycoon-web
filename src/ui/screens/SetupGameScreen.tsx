@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { type GameConfig } from '../../game-engine/types/game';
 import { DEFAULT_CONFIG } from '../../game-engine/state/setupGame';
-import { Settings, Users, Shield, Zap, Trash2, Plus, Info, CheckCircle2, AlertCircle, Landmark, Dices } from 'lucide-react';
+import { Users, Shield, Zap, Trash2, Plus, Info, CheckCircle2, AlertCircle, Landmark, Dices } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
