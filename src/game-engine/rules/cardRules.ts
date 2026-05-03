@@ -119,25 +119,32 @@ export function drawCard(type: TileType.CHANCE | TileType.FORTUNE): Card {
 export function applyCardEffect(state: GameState): GameState {
   if (!state.activeCard) return state;
   
-  // Create deep copy to avoid direct mutation issues in reducer
-  const nextState = JSON.parse(JSON.stringify(state)) as GameState;
-  const card = nextState.activeCard!;
+  const card = state.activeCard;
+  const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+  const oldPosition = currentPlayer.position;
   
-  // Re-attach the function if needed or handle by ID/Type
-  // For simplicity here, we'll find the card by description in our lists
+  // Re-attach the function or handle by ID/Type
   const cardTemplate = [...CHANCE_CARDS, ...FORTUNE_CARDS].find(c => c.description === card.description);
   
   if (cardTemplate && cardTemplate.action) {
-    const stateAfterAction = cardTemplate.action(nextState);
+    // We must be careful about direct mutation. The actions in CHANCE_CARDS/FORTUNE_CARDS 
+    // are currently written to mutate the state they receive (which is bad but they were written that way).
+    // Let's create a copy.
+    const stateCopy = JSON.parse(JSON.stringify(state)) as GameState;
+    const resultState = cardTemplate.action(stateCopy);
+    
+    const newPlayer = resultState.players.find((p: any) => p.id === state.currentPlayerId)!;
+    const positionChanged = newPlayer.position !== oldPosition;
+
     return {
-      ...stateAfterAction,
+      ...resultState,
       activeCard: undefined,
-      phase: Phase.END_TURN
+      phase: positionChanged ? Phase.RESOLVING_TILE : Phase.END_TURN
     };
   }
   
   return {
-    ...nextState,
+    ...state,
     activeCard: undefined,
     phase: Phase.END_TURN
   };

@@ -7,7 +7,9 @@ interface GameStore {
   state: GameState;
   activeSlotId: string;
   showTradeModal: boolean;
+  inspectedPropertyId: string | null;
   setShowTradeModal: (show: boolean) => void;
+  setInspectedPropertyId: (id: string | null) => void;
   dispatch: (action: GameAction | { type: 'LOAD_GAME'; payload: GameState; slotId: string }) => void;
   setActiveSlot: (slotId: string) => void;
 }
@@ -24,7 +26,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   activeSlotId: '1',
   showTradeModal: false,
+  inspectedPropertyId: null,
   setShowTradeModal: (show) => set({ showTradeModal: show }),
+  setInspectedPropertyId: (id) => set({ inspectedPropertyId: id }),
   setActiveSlot: (slotId) => set({ activeSlotId: slotId }),
   dispatch: (action) =>
     set((store) => {

@@ -124,6 +124,7 @@ export interface GameState {
   auctionState?: AuctionState;
   tradeOffer?: TradeOffer;
   activeCard?: Card;
+  lastPurchaseId?: PropertyId;
   config: GameConfig;
 }
 

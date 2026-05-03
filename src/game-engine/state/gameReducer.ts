@@ -57,18 +57,20 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         } else if (property.ownerId !== currentPlayer.id) {
           return gameReducer(stateWithLog, { type: 'PAY_RENT' });
         } else {
-          nextPhase = Phase.END_TURN;
+          // Landed on own property - prompt for building
+          nextPhase = Phase.BUILD_DECISION;
         }
       } else if (tile.type === TileType.CHANCE || tile.type === TileType.FORTUNE) {
         return gameReducer(stateWithLog, { type: 'DRAW_CARD' });
       } else if (tile.type === TileType.TAX) {
-        // Simple tax logic: pay $200
         const taxAmount = tile.name.includes('xa xỉ') ? 150 : 200;
-        const player = stateWithLog.players.find(p => p.id === state.currentPlayerId)!;
-        player.cash -= taxAmount;
+        const updatedPlayers = stateWithLog.players.map(p => 
+          p.id === state.currentPlayerId ? { ...p, cash: p.cash - taxAmount } : p
+        );
         return {
           ...stateWithLog,
-          log: [`${player.name} nộp ${tile.name} $${taxAmount}.`, ...stateWithLog.log],
+          players: updatedPlayers,
+          log: [`${currentPlayer.name} nộp ${tile.name} $${taxAmount}.`, ...stateWithLog.log],
           phase: Phase.END_TURN
         };
       } else {
@@ -114,7 +116,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     case 'BUY_PROPERTY': {
       if (state.phase !== Phase.BUY_DECISION) return state;
       const boughtState = buyProperty(state, action.payload.propertyId);
-      nextState = { ...boughtState, phase: Phase.END_TURN };
+      nextState = { ...boughtState, phase: Phase.END_TURN, lastPurchaseId: action.payload.propertyId };
       break;
     }
 
@@ -236,7 +238,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'END_TURN': {
-      if (state.phase !== Phase.END_TURN) return state;
+      if (state.phase !== Phase.END_TURN && state.phase !== Phase.BUILD_DECISION) return state;
       
       const currentIndex = state.players.findIndex(p => p.id === state.currentPlayerId);
       const nextIndex = (currentIndex + 1) % state.players.length;
@@ -246,6 +248,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         currentPlayerId: state.players[nextIndex].id,
         phase: Phase.WAITING_TO_ROLL,
         lastDiceRoll: undefined,
+        lastPurchaseId: undefined,
       };
       break;
     }

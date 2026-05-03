@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { TileType, type Property, PropertyGroup, type BoardTile, type Player } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Home, Landmark } from 'lucide-react';
 
 const getTileGridStyles = (position: number) => {
   if (position <= 10) {
@@ -132,7 +133,7 @@ const PlayerToken: React.FC<{ player: Player }> = ({ player }) => {
 };
 
 export const Board: React.FC = () => {
-  const { state, dispatch } = useGameStore();
+  const { state, dispatch, setInspectedPropertyId } = useGameStore();
 
   return (
     <div className="flex-1 flex items-center justify-center bg-slate-50 p-4">
@@ -169,6 +170,11 @@ export const Board: React.FC = () => {
                   dispatch({ type: 'TELEPORT_PLAYER', payload: { position: tile.position } });
                 }
               }}
+              onDoubleClick={() => {
+                if (tile.type === TileType.PROPERTY) {
+                  setInspectedPropertyId(tile.id);
+                }
+              }}
               style={gridStyle}
               className={`relative flex flex-col items-center border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden transition-all hover:shadow-md cursor-default ${
                 tile.position % 10 === 0 ? 'justify-center text-center' : 'justify-between text-xs text-center'
@@ -192,12 +198,29 @@ export const Board: React.FC = () => {
                 </div>
               )}
 
-              {/* Building Level */}
+              {/* Building Level Visuals */}
               {property?.buildingLevel && property.buildingLevel > 0 ? (
-                <div className="absolute top-0 right-0 p-0.5 flex gap-px z-10">
-                  {Array.from({ length: property.buildingLevel }).map((_, i) => (
-                    <div key={i} className="w-1.5 h-1.5 bg-green-600 rounded-sm" />
-                  ))}
+                <div className="absolute top-0.5 right-0.5 flex flex-wrap justify-end gap-0.5 max-w-[45px] z-[30]">
+                  {property.buildingLevel === 5 ? (
+                    <motion.div 
+                      initial={{ scale: 0 }} 
+                      animate={{ scale: 1 }}
+                      className="bg-red-600 text-white p-0.5 rounded shadow-lg ring-1 ring-white/50"
+                    >
+                      <Landmark size={16} strokeWidth={3} />
+                    </motion.div>
+                  ) : (
+                    Array.from({ length: property.buildingLevel }).map((_, i) => (
+                      <motion.div 
+                        key={i} 
+                        initial={{ scale: 0 }} 
+                        animate={{ scale: 1 }}
+                        className="bg-emerald-600 text-white p-0.5 rounded shadow-md ring-1 ring-white/50"
+                      >
+                        <Home size={12} strokeWidth={3} />
+                      </motion.div>
+                    ))
+                  )}
                 </div>
               ) : null}
 
