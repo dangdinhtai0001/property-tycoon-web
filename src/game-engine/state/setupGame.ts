@@ -6,6 +6,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   passStartBonus: 200,
   enableAuction: false,
   quickModeMultiplier: 1,
+  enableDebug: false,
 };
 
 export const createInitialGame = (

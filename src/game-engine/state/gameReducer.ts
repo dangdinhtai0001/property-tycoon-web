@@ -100,17 +100,35 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'TELEPORT_PLAYER': {
+      const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+      const targetPos = action.payload.position;
+      
+      // Calculate steps to reach target position (forward)
+      const steps = (targetPos - currentPlayer.position + state.board.length) % state.board.length;
+      
+      // If same position, do nothing or just return state
+      if (steps === 0) return state;
+
+      // Apply movement logic (handles pass start bonus, etc)
+      // Note: we set silent=false to get the "Passed Start" log if applicable
+      const stateAfterMove = applyMovement(state, steps, false);
+      
+      return {
+        ...stateAfterMove,
+        phase: Phase.RESOLVING_TILE,
+        log: [`[DEBUG] Nhảy đến ${state.board[targetPos].name} (Vượt qua ${steps} ô)`, ...stateAfterMove.log]
+      };
+    }
+    
+    case 'DEBUG_ADD_CASH': {
       const players = state.players.map(p => 
-        p.id === state.currentPlayerId ? { ...p, position: action.payload.position } : p
+        p.id === state.currentPlayerId ? { ...p, cash: p.cash + action.payload.amount } : p
       );
-      const stateAfterTeleport = {
+      return {
         ...state,
         players,
-        phase: Phase.RESOLVING_TILE,
-        log: [`[DEBUG] Đã dịch chuyển người chơi đến ${state.board[action.payload.position].name}`, ...state.log]
+        log: [`[DEBUG] Đã thêm $${action.payload.amount} cho ${state.players.find(p => p.id === state.currentPlayerId)?.name}`, ...state.log]
       };
-      // Immediately resolve the tile we landed on
-      return gameReducer(stateAfterTeleport, { type: 'RESOLVE_TILE' });
     }
 
     case 'BUY_PROPERTY': {

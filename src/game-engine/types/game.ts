@@ -93,6 +93,7 @@ export interface GameConfig {
   passStartBonus: Money;
   enableAuction: boolean;
   quickModeMultiplier: number;
+  enableDebug?: boolean;
 }
 
 export interface AuctionState {
@@ -154,7 +155,8 @@ export type GameAction =
   | { type: 'DECLARE_BANKRUPTCY' }
   | { type: 'DRAW_CARD' }
   | { type: 'APPLY_CARD' }
-  | { type: 'TELEPORT_PLAYER'; payload: { position: number } };
+  | { type: 'TELEPORT_PLAYER'; payload: { position: number } }
+  | { type: 'DEBUG_ADD_CASH'; payload: { amount: number } };
 
 export interface GameEvent {
   type: string;
