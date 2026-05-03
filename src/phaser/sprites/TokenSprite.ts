@@ -2,79 +2,96 @@ import Phaser from 'phaser';
 import type { Player } from '../../game-engine/types/game';
 import { THEME } from '../../ui/theme/tokens';
 
-const GHOST_TEXTURE_KEY = 'ghost_character';
+const CHARACTER_CONFIGS: Record<string, { key: string, path: string, frameWidth: number, frameHeight: number }> = {
+  ghost: { 
+    key: 'ghost_character', 
+    path: '/assets/characters/ghost_character.png',
+    frameWidth: 251,
+    frameHeight: 251
+  },
+  cat: {
+    key: 'cat_character',
+    path: '/assets/characters/charming-chibi-cat.png',
+    frameWidth: 251,
+    frameHeight: 251
+  },
+  magician: {
+    key: 'magician_character',
+    path: '/assets/characters/chibi-cat-magican.png',
+    frameWidth: 251,
+    frameHeight: 251
+  }
+};
 
-const TOKEN_SPRITE_FRAME_WIDTH = 251;
-const TOKEN_SPRITE_FRAME_HEIGHT = 251;
+const CHARACTER_MAP: Record<string, string> = {
+  ghost: CHARACTER_CONFIGS.ghost.key,
+  cat: CHARACTER_CONFIGS.cat.key,
+  magician: CHARACTER_CONFIGS.magician.key,
+};
 
 // Tăng / giảm số này nếu nhân vật quá to hoặc quá nhỏ trên bàn cờ
-const TOKEN_SPRITE_SCALE_MULTIPLIER = 2.6;
+const TOKEN_SPRITE_SCALE_MULTIPLIER = 3.12;
 
 type TokenAnimationState = 'idle' | 'run' | 'win' | 'sad';
 
-function getAnimationKey(state: TokenAnimationState) {
-  return `${GHOST_TEXTURE_KEY}_${state}`;
+function getAnimationKey(charId: string, state: TokenAnimationState) {
+  const textureKey = CHARACTER_MAP[charId] || CHARACTER_MAP.ghost;
+  return `${textureKey}_${state}`;
 }
 
 export function preloadTokenSpriteAssets(scene: Phaser.Scene) {
-  scene.load.spritesheet(
-    GHOST_TEXTURE_KEY,
-    '/assets/characters/ghost_character.png',
-    {
-      frameWidth: TOKEN_SPRITE_FRAME_WIDTH,
-      frameHeight: TOKEN_SPRITE_FRAME_HEIGHT,
-    }
-  );
+  Object.values(CHARACTER_CONFIGS).forEach(config => {
+    scene.load.spritesheet(
+      config.key,
+      config.path,
+      {
+        frameWidth: config.frameWidth,
+        frameHeight: config.frameHeight,
+      }
+    );
+  });
 }
 
 export function createTokenSpriteAnimations(scene: Phaser.Scene) {
-  if (!scene.anims.exists(getAnimationKey('idle'))) {
-    scene.anims.create({
-      key: getAnimationKey('idle'),
-      frames: scene.anims.generateFrameNumbers(GHOST_TEXTURE_KEY, {
-        start: 0,
-        end: 3,
-      }),
-      frameRate: 6,
-      repeat: -1,
-    });
-  }
+  Object.values(CHARACTER_CONFIGS).forEach(config => {
+    const key = config.key;
+    
+    if (!scene.anims.exists(`${key}_idle`)) {
+      scene.anims.create({
+        key: `${key}_idle`,
+        frames: scene.anims.generateFrameNumbers(key, { start: 0, end: 3 }),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
 
-  if (!scene.anims.exists(getAnimationKey('run'))) {
-    scene.anims.create({
-      key: getAnimationKey('run'),
-      frames: scene.anims.generateFrameNumbers(GHOST_TEXTURE_KEY, {
-        start: 4,
-        end: 7,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
-  }
+    if (!scene.anims.exists(`${key}_run`)) {
+      scene.anims.create({
+        key: `${key}_run`,
+        frames: scene.anims.generateFrameNumbers(key, { start: 4, end: 7 }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
 
-  if (!scene.anims.exists(getAnimationKey('win'))) {
-    scene.anims.create({
-      key: getAnimationKey('win'),
-      frames: scene.anims.generateFrameNumbers(GHOST_TEXTURE_KEY, {
-        start: 8,
-        end: 11,
-      }),
-      frameRate: 6,
-      repeat: -1,
-    });
-  }
+    if (!scene.anims.exists(`${key}_win`)) {
+      scene.anims.create({
+        key: `${key}_win`,
+        frames: scene.anims.generateFrameNumbers(key, { start: 8, end: 11 }),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
 
-  if (!scene.anims.exists(getAnimationKey('sad'))) {
-    scene.anims.create({
-      key: getAnimationKey('sad'),
-      frames: scene.anims.generateFrameNumbers(GHOST_TEXTURE_KEY, {
-        start: 12,
-        end: 15,
-      }),
-      frameRate: 6,
-      repeat: -1,
-    });
-  }
+    if (!scene.anims.exists(`${key}_sad`)) {
+      scene.anims.create({
+        key: `${key}_sad`,
+        frames: scene.anims.generateFrameNumbers(key, { start: 12, end: 15 }),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
+  });
 }
 
 export class TokenSprite extends Phaser.GameObjects.Container {
@@ -135,18 +152,21 @@ export class TokenSprite extends Phaser.GameObjects.Container {
     this.visualContainer.add(this.glow);
 
     // 4. Nhân vật 2D
-    if (scene.textures.exists(GHOST_TEXTURE_KEY)) {
+    const charId = player.avatarUrl || 'ghost';
+    const textureKey = CHARACTER_MAP[charId] || CHARACTER_MAP.ghost;
+
+    if (scene.textures.exists(textureKey)) {
       createTokenSpriteAnimations(scene);
 
-      this.sprite = scene.add.sprite(0, 0, GHOST_TEXTURE_KEY, 0);
+      this.sprite = scene.add.sprite(0, 0, textureKey, 0);
       this.sprite.setOrigin(0.5);
 
-      // Vì mỗi frame 512x512 có khá nhiều khoảng trắng,
+      // Vì mỗi frame có khá nhiều khoảng trắng,
       // nên displaySize cần lớn hơn token gốc một chút.
       const displaySize = size * TOKEN_SPRITE_SCALE_MULTIPLIER;
       this.sprite.setDisplaySize(displaySize, displaySize);
 
-      this.sprite.play(getAnimationKey('idle'));
+      this.sprite.play(getAnimationKey(charId, 'idle'));
 
       this.visualContainer.add(this.sprite);
     } else {
@@ -243,7 +263,8 @@ export class TokenSprite extends Phaser.GameObjects.Container {
   private playAnimation(state: TokenAnimationState) {
     if (!this.sprite) return;
 
-    const key = getAnimationKey(state);
+    const charId = this.charId();
+    const key = getAnimationKey(charId, state);
 
     if (this.scene.anims.exists(key)) {
       this.sprite.play(key, true);
@@ -328,6 +349,31 @@ export class TokenSprite extends Phaser.GameObjects.Container {
     if (!this.isBankrupt && !this.isJailed) {
       this.playAnimation('win');
     }
+  }
+
+  setWinTemporarily(duration: number = 2000) {
+    if (this.isBankrupt || this.isJailed) return;
+    this.playAnimation('win');
+    this.scene.time.delayedCall(duration, () => {
+      // Chỉ quay lại idle nếu vẫn đang trong trạng thái bình thường
+      if (!this.isBankrupt && !this.isJailed && this.scene) {
+        this.playAnimation('idle');
+      }
+    });
+  }
+
+  setSadTemporarily(duration: number = 2000) {
+    if (this.isBankrupt || this.isJailed) return;
+    this.playAnimation('sad');
+    this.scene.time.delayedCall(duration, () => {
+      if (!this.isBankrupt && !this.isJailed && this.scene) {
+        this.playAnimation('idle');
+      }
+    });
+  }
+
+  private charId(): string {
+    return this.sprite?.texture.key.replace('_character', '') || 'ghost';
   }
 
   setIdle() {

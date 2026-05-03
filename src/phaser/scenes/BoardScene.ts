@@ -22,6 +22,8 @@ export class BoardScene extends Phaser.Scene {
   private diceContainer!: Phaser.GameObjects.Container;
   private boardContainer!: Phaser.GameObjects.Container;
   private boardSurface!: Phaser.GameObjects.Rectangle;
+  private lastPlayersState: Map<string, { cash: number }> = new Map();
+  private lastGlobalPurchaseId: string | undefined = undefined;
 
   // --- Dynamic Geometry Configuration ---
   public static readonly GEOMETRY = { cols: 14, rows: 12 };
@@ -202,7 +204,7 @@ export class BoardScene extends Phaser.Scene {
       const layout = BoardScene.getTileLayout(player.position);
       const tilePos = this.getTilePosition(layout);
 
-      // Calculate stacking offset (Phase 4: Mini-grid / Fan-out)
+      // Calculate stacking offset
       const playersOnThisTile = playersByPosition[player.position] || [];
       const playerIndex = playersOnThisTile.findIndex(p => p.id === player.id);
       let stackOffsetX = 0;
@@ -241,44 +243,61 @@ export class BoardScene extends Phaser.Scene {
 
       if (token) {
         token.setVisible(showStatus);
-      }
+        
+        // Phase 4: Token States & Highlights
+        const isCurrentPlayer = player.id === state.currentPlayerId;
+        token.setSelected(isCurrentPlayer);
+        token.setJailed(player.jailTurns > 0);
+        token.setBankrupt(player.isBankrupt || false);
 
-      // Phase 4: Token States & Highlights
-      const isCurrentPlayer = player.id === state.currentPlayerId;
-      token.setSelected(isCurrentPlayer);
-      token.setJailed(player.jailTurns > 0);
-      token.setBankrupt(player.isBankrupt || false);
-
-      // Ensure current player is always on top within the container
-      if (isCurrentPlayer) {
-        this.tokensContainer.bringToTop(token);
-      }
-
-      if (lastPos !== undefined && lastPos !== player.position) {
-        // Path movement...
-        const path: { x: number, y: number }[] = [];
-        let current = lastPos;
-        const totalTiles = getBoardTileCount(BoardScene.GEOMETRY);
-        const forwardDist = (player.position - lastPos + totalTiles) % totalTiles;
-        const backwardDist = (lastPos - player.position + totalTiles) % totalTiles;
-        const isBackward = backwardDist < forwardDist && backwardDist < 10;
-
-        while (current !== player.position) {
-          current = isBackward ? (current - 1 + totalTiles) % totalTiles : (current + 1) % totalTiles;
-          const layout = BoardScene.getTileLayout(current);
-          const p = this.getTilePosition(layout);
-          const ox = (current === player.position) ? stackOffsetX : 0;
-          const oy = (current === player.position) ? stackOffsetY : 0;
-          path.push({ x: p.x + ox, y: p.y + oy });
-          if (path.length > totalTiles) break;
+        // Ensure current player is always on top
+        if (isCurrentPlayer) {
+          this.tokensContainer.bringToTop(token);
         }
-        token.moveAlongPath(path);
-        this.playerPositions.set(player.id, player.position);
-      } else {
-        const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
-        if (dist > 1) token.moveToPosition(targetX, targetY, 300);
+
+        // Xử lý hoạt ảnh Win/Sad dựa trên thay đổi trạng thái
+        const lastState = this.lastPlayersState.get(player.id);
+        const hasNewPurchase = state.lastPurchaseId !== this.lastGlobalPurchaseId && state.lastPurchaseId !== undefined;
+        const isBuyer = hasNewPurchase && state.currentPlayerId === player.id;
+
+        if (lastState) {
+          if (isBuyer) {
+            token.setWinTemporarily(2000);
+          } else if (player.cash < lastState.cash && !isBuyer) {
+            token.setSadTemporarily(2000);
+          }
+        }
+        this.lastPlayersState.set(player.id, { cash: player.cash });
+
+        // Xử lý di chuyển
+        if (lastPos !== undefined && lastPos !== player.position) {
+          const path: { x: number, y: number }[] = [];
+          let current = lastPos;
+          const totalTiles = getBoardTileCount(BoardScene.GEOMETRY);
+          const forwardDist = (player.position - lastPos + totalTiles) % totalTiles;
+          const backwardDist = (lastPos - player.position + totalTiles) % totalTiles;
+          const isBackward = backwardDist < forwardDist && backwardDist < 10;
+
+          while (current !== player.position) {
+            current = isBackward ? (current - 1 + totalTiles) % totalTiles : (current + 1) % totalTiles;
+            const layout = BoardScene.getTileLayout(current);
+            const p = this.getTilePosition(layout);
+            const ox = (current === player.position) ? stackOffsetX : 0;
+            const oy = (current === player.position) ? stackOffsetY : 0;
+            path.push({ x: p.x + ox, y: p.y + oy });
+            if (path.length > totalTiles) break;
+          }
+          token.moveAlongPath(path);
+          this.playerPositions.set(player.id, player.position);
+        } else {
+          const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
+          if (dist > 1) token.moveToPosition(targetX, targetY, 300);
+        }
       }
     });
+
+    // Cập nhật lại ID mua cuối cùng toàn cục
+    this.lastGlobalPurchaseId = state.lastPurchaseId;
 
     // Update buildings (Phase 5: Now handled by TileSprite.updateStatus)
     this.buildingsContainer.removeAll(true);
