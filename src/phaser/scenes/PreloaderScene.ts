@@ -1,5 +1,10 @@
 import Phaser from 'phaser';
 
+import {
+  preloadTokenSpriteAssets,
+  createTokenSpriteAnimations,
+} from '../sprites/TokenSprite';
+
 export class PreloaderScene extends Phaser.Scene {
   private progressBar?: Phaser.GameObjects.Graphics;
   private progressBox?: Phaser.GameObjects.Graphics;
@@ -15,6 +20,7 @@ export class PreloaderScene extends Phaser.Scene {
 
   preload() {
     // Load assets
+    preloadTokenSpriteAssets(this);
     this.load.svg('home', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/home.svg');
     this.load.svg('landmark', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/landmark.svg');
     this.load.image('board-bg', '/assets/bg/bg-02.png');
@@ -99,7 +105,7 @@ export class PreloaderScene extends Phaser.Scene {
     this.tweens.add({
       targets: progress,
       value: 1,
-      duration: 500, 
+      duration: 500,
       ease: 'Cubic.easeInOut',
 
       onUpdate: () => {
