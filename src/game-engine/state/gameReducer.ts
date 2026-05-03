@@ -184,6 +184,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         ...state,
         phase: Phase.TRADE,
         tradeOffer: action.payload.offer,
+        currentPlayerId: action.payload.offer.targetId,
         log: [`${state.players.find(p => p.id === action.payload.offer.offererId)?.name} đề nghị giao dịch với ${state.players.find(p => p.id === action.payload.offer.targetId)?.name}`, ...state.log],
       };
       break;
@@ -200,6 +201,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       nextState = {
         ...state,
         phase: Phase.WAITING_TO_ROLL,
+        currentPlayerId: state.tradeOffer?.offererId ?? state.currentPlayerId,
         tradeOffer: undefined,
         log: [`Giao dịch bị từ chối.`, ...state.log],
       };
@@ -210,6 +212,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       nextState = {
         ...state,
         phase: Phase.WAITING_TO_ROLL,
+        currentPlayerId: state.tradeOffer?.offererId ?? state.currentPlayerId,
         tradeOffer: undefined,
       };
       break;

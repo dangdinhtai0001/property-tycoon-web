@@ -3,13 +3,17 @@ import { type GameState, type GameAction, Phase } from '../../game-engine/types/
 import { gameReducer } from '../../game-engine/state/gameReducer';
 import { saveGame } from '../../storage/gameStorage';
 
+export type TokenAnimState = 'idle' | 'run' | 'win' | 'sad';
+
 interface GameStore {
   state: GameState;
   activeSlotId: string;
   showTradeModal: boolean;
   inspectedPropertyId: string | null;
+  tokenAnimState: TokenAnimState;
   setShowTradeModal: (show: boolean) => void;
   setInspectedPropertyId: (id: string | null) => void;
+  setTokenAnimState: (animState: TokenAnimState) => void;
   dispatch: (action: GameAction | { type: 'LOAD_GAME'; payload: GameState; slotId: string }) => void;
   setActiveSlot: (slotId: string) => void;
 }
@@ -27,8 +31,10 @@ export const useGameStore = create<GameStore>((set) => ({
   activeSlotId: '1',
   showTradeModal: false,
   inspectedPropertyId: null,
+  tokenAnimState: 'idle',
   setShowTradeModal: (show) => set({ showTradeModal: show }),
   setInspectedPropertyId: (id) => set({ inspectedPropertyId: id }),
+  setTokenAnimState: (animState) => set({ tokenAnimState: animState }),
   setActiveSlot: (slotId) => set({ activeSlotId: slotId }),
   dispatch: (action) =>
     set((store) => {
@@ -47,8 +53,7 @@ export const useGameStore = create<GameStore>((set) => ({
         saveGame(newState, newSlotId);
       }
       
-      // Close trade modal if trade is proposed or cancelled
-      const shouldCloseTrade = action.type === 'PROPOSE_TRADE' || action.type === 'CANCEL_TRADE' || action.type === 'REJECT_TRADE' || action.type === 'ACCEPT_TRADE';
+      const shouldCloseTrade = action.type === 'CANCEL_TRADE' || action.type === 'REJECT_TRADE' || action.type === 'ACCEPT_TRADE';
 
       return { 
         state: newState, 
