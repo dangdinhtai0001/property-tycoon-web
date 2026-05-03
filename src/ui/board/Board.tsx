@@ -85,8 +85,8 @@ export const Board: React.FC = () => {
         style={{
           width: 'min(100%, 1860px)',
           height: 'min(100%, 1200px)',
-          backgroundColor: 'rgba(255, 255, 255, 0.4)',
-          backdropFilter: 'blur(12px)',
+          backgroundColor: '#ffffff',
+          backdropFilter: 'none',
           borderRadius: '3rem',
           border: '1px solid rgba(255, 255, 255, 0.6)',
           boxShadow: '0 32px 128px -16px rgba(15, 23, 42, 0.15)',
@@ -113,17 +113,17 @@ export const Board: React.FC = () => {
               boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.75)',
             }}
           >
-            {/* React Status Overlay BEHIND Phaser - allowing Phaser dice to be on top */}
-            <div className="absolute inset-0 z-[5]">
-              <BoardStatus />
-            </div>
-
-            {/* Phaser Game Container ON TOP of Status Overlay */}
+            {/* Phaser Game Container */}
             <div
               id="phaser-game-container"
               ref={containerRef}
               className="w-full h-full absolute inset-0 z-[10]"
             />
+
+            {/* React Status Overlay ON TOP of Phaser */}
+            <div className="absolute inset-0 z-[15] pointer-events-none">
+              <BoardStatus />
+            </div>
           </div>
         </div>
       </div>

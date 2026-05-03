@@ -20,8 +20,7 @@ export const BoardStatus: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Initial loading delay (1.2s)
-    const timer = setTimeout(() => setIsReady(true), 1200);
+    const timer = setTimeout(() => setIsReady(true), 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -102,21 +101,25 @@ export const BoardStatus: React.FC = () => {
 
   const info = getPhaseInfo();
   const themeColors = {
-    blue: { bg: 'bg-blue-50/90', border: 'border-blue-200', text: 'text-blue-600', badge: 'bg-blue-600' },
-    amber: { bg: 'bg-amber-50/90', border: 'border-amber-200', text: 'text-amber-600', badge: 'bg-amber-600' },
-    emerald: { bg: 'bg-emerald-50/90', border: 'border-emerald-200', text: 'text-emerald-600', badge: 'bg-emerald-600' },
-    rose: { bg: 'bg-rose-50/90', border: 'border-rose-200', text: 'text-rose-600', badge: 'bg-rose-600' },
-    slate: { bg: 'bg-slate-50/90', border: 'border-slate-200', text: 'text-slate-600', badge: 'bg-slate-600' },
+    blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', badge: 'bg-blue-600' },
+    amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', badge: 'bg-amber-600' },
+    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-600', badge: 'bg-emerald-600' },
+    rose: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-600', badge: 'bg-rose-600' },
+    slate: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-600', badge: 'bg-slate-600' },
   }[info.theme as keyof typeof themeColors];
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-8 md:p-12 lg:p-16">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={`w-full max-w-[340px] md:max-w-sm rounded-[2.5rem] border-2 shadow-2xl backdrop-blur-xl ${themeColors.bg} ${themeColors.border} overflow-hidden`}
+        className={`w-full max-w-[340px] md:max-w-sm rounded-[2.5rem] border-2 shadow-2xl ${themeColors.bg} ${themeColors.border} overflow-hidden`}
       >
-        <div className="p-5 md:p-7 space-y-4 md:space-y-6">
+        <div className="p-5 md:p-7 space-y-4 md:space-y-6 bg-white">
           {/* A. Turn Header */}
           <div className="flex flex-col items-center text-center space-y-3">
             <div className="flex items-center gap-3 bg-white/80 px-4 py-1.5 rounded-full shadow-sm border border-white/50">

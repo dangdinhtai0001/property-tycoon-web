@@ -46,22 +46,23 @@ export const THEME = {
     }
   },
   typography: {
+    fontFamily: '"Be Vietnam Pro", system-ui, sans-serif',
     name: {
-      size: '11px',
-      weight: '800',
+      size: '17px',
+      weight: '500',
     },
     price: {
-      size: '10px',
+      size: '20px',
       weight: '600',
     },
     label: {
-      size: '9px',
+      size: '18px',
       weight: '700',
     },
     corner: {
-      size: '14px',
-      weight: '900',
-      hintSize: '9px',
+      size: '25px',
+      weight: '800',
+      hintSize: '15px',
     },
     token: {
       size: 30,
