@@ -24,11 +24,19 @@ export const Board: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex-1 w-full h-full min-h-[600px] flex items-center justify-center bg-slate-50 p-2 overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center p-4 md:p-10 overflow-hidden bg-slate-50">
+      <style>{`
+        #phaser-game-container canvas {
+          display: block;
+          width: 100% !important;
+          height: 100% !important;
+          border-radius: 2rem;
+        }
+      `}</style>
       <div 
         id="phaser-game-container" 
         ref={containerRef}
-        className="w-full h-full max-w-[1000px] max-h-[1000px] aspect-square bg-slate-200 border-4 border-slate-300 shadow-2xl rounded-[2.5rem] overflow-hidden"
+        className="w-full h-full max-w-[1200px] max-h-[1200px] aspect-square bg-white shadow-[0_50px_100px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden border-8 border-white"
       />
     </div>
   );

@@ -29,6 +29,7 @@ function App() {
   const { state, dispatch, showTradeModal, setShowTradeModal } = useGameStore();
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
+  const [isActionExpanded, setIsActionExpanded] = React.useState(true);
 
   if (state.phase === Phase.SETUP) {
     return (
@@ -39,136 +40,140 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 p-2 md:p-4">
-      <div className="max-w-[2400px] mx-auto flex flex-col gap-4 px-2 md:px-4">
-        
-        {/* Header */}
-        <header className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-6">
-            <div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-800">
-                PROPERTY <span className="text-blue-600">TYCOON</span>
-              </h1>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Phase 3 — MVP Polish</p>
-            </div>
-            
-            <div className="hidden md:flex gap-4 items-center bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Trạng thái</span>
-                <span className="text-sm font-black text-blue-600 uppercase">{state.phase.replace(/_/g, ' ')}</span>
-              </div>
+    <div className="relative w-screen h-screen overflow-hidden bg-slate-100 flex flex-col font-sans selection:bg-blue-100">
+      
+      {/* Immersive Game Board - Background/Main Layer */}
+      <main className="absolute inset-0 z-0 flex items-center justify-center bg-slate-50">
+        <Board />
+      </main>
+
+      {/* Top HUD / Header Overlay */}
+      <header className="relative z-20 p-6 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-6 pointer-events-auto">
+          <div className="bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
+            <h1 className="text-2xl font-black tracking-tight text-slate-800 leading-none">
+              PROPERTY <span className="text-blue-600">TYCOON</span>
+            </h1>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Immersive Board Engine</p>
+          </div>
+          
+          <div className="hidden md:flex gap-4 items-center bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Trạng thái</span>
+              <span className="text-sm font-black text-blue-600 uppercase leading-none mt-1">{state.phase.replace(/_/g, ' ')}</span>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-              className={`p-3 rounded-2xl transition-all shadow-sm flex items-center gap-2 ${
-                isHistoryOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <ScrollText size={20} />
-              <span className="font-bold text-sm hidden sm:inline">LỊCH SỬ</span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsPauseOpen(true)}
-              className="p-3 bg-white border border-slate-200 text-slate-600 rounded-2xl hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
-            >
-              <Menu size={20} />
-              <span className="font-bold text-sm hidden sm:inline">MENU</span>
-            </motion.button>
-          </div>
-        </header>
-
-        <div className="flex flex-col lg:flex-row gap-6 items-start justify-center relative">
-          {/* Column 1: Board (Center) */}
-          <main className="flex-[5] w-full flex justify-center">
-            <Board />
-          </main>
-
-          {/* Overlay: Game Log */}
-          <AnimatePresence>
-            {isHistoryOpen && (
-              <motion.aside
-                initial={{ x: -400, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -400, opacity: 0 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="absolute left-0 top-0 z-50 w-full max-w-[360px] h-[800px] shadow-2xl"
-              >
-                <GameLogPanel onClose={() => setIsHistoryOpen(false)} />
-              </motion.aside>
-            )}
-          </AnimatePresence>
-
-          {/* Column 2: Panels (Actions) */}
-          <aside className="flex-[0.7] w-full lg:min-w-[300px] sticky top-4 self-start">
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 260,
-                damping: 20
-              }}
-              className="flex flex-col gap-6"
-            >
-              <PlayerListPanel />
-              <ActionPanel />
-              
-              <div className="p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-100 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <Info size={80} />
-                </div>
-                <h3 className="font-black mb-2 uppercase tracking-tight">Hướng dẫn nhanh</h3>
-                <ul className="text-sm space-y-2 text-blue-50">
-                  <li className="flex gap-2">
-                    <span className="font-black opacity-50">01</span>
-                    <span>Mua đất để bắt đầu xây dựng đế chế.</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-black opacity-50">02</span>
-                    <span>Thu thập đủ bộ màu để xây nhà/khách sạn.</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-black opacity-50">03</span>
-                    <span>Thế chấp hoặc bán bớt nhà nếu kẹt tiền.</span>
-                  </li>
-                </ul>
-              </div>
-            </motion.div>
-          </aside>
         </div>
 
-        <DebtResolutionModal />
-        <AuctionModal />
-        {(state.phase === Phase.TRADE || showTradeModal) && (
-          <TradeModal 
-            onClose={() => {
-              if (state.phase === Phase.TRADE) dispatch({ type: 'CANCEL_TRADE' });
-              setShowTradeModal(false);
-            }} 
-          />
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+            className={`p-4 rounded-[1.5rem] transition-all shadow-xl backdrop-blur-md flex items-center gap-2 ${
+              isHistoryOpen ? 'bg-blue-600 text-white' : 'bg-white/80 text-slate-600 border border-white hover:bg-white'
+            }`}
+          >
+            <ScrollText size={20} />
+            <span className="font-bold text-sm hidden sm:inline">LỊCH SỬ</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsPauseOpen(true)}
+            className="p-4 bg-white/80 border border-white text-slate-600 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
+          >
+            <Menu size={20} />
+            <span className="font-bold text-sm hidden sm:inline">MENU</span>
+          </motion.button>
+        </div>
+      </header>
+
+      {/* Left Overlay: Player List */}
+      <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col justify-start">
+        <motion.div 
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="pointer-events-auto"
+        >
+          <PlayerListPanel />
+        </motion.div>
+      </aside>
+
+      {/* Right Overlay: Action Panel */}
+      <aside className="absolute right-6 top-32 bottom-8 z-10 pointer-events-none flex flex-col items-end">
+        <motion.div 
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className={`pointer-events-auto transition-all duration-500 ease-in-out ${isActionExpanded ? 'w-96' : 'w-20'}`}
+        >
+          <div className="relative bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-white shadow-2xl h-full flex flex-col overflow-hidden">
+            <button 
+              onClick={() => setIsActionExpanded(!isActionExpanded)}
+              className="p-4 w-full flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
+            >
+              {isActionExpanded ? <Menu size={24} /> : <Menu size={24} className="rotate-90" />}
+            </button>
+            
+            <div className={`flex-1 overflow-y-auto px-6 pb-6 transition-opacity duration-300 ${isActionExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <ActionPanel />
+              
+              <div className="mt-6 p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-200/50 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <Info size={60} />
+                </div>
+                <h3 className="font-black mb-2 uppercase text-xs tracking-wider">Hướng dẫn nhanh</h3>
+                <ul className="text-[11px] space-y-1.5 text-blue-50">
+                  <li className="flex gap-2"><span>•</span><span>Mua đất để bắt đầu đế chế.</span></li>
+                  <li className="flex gap-2"><span>•</span><span>Thu thập đủ bộ màu để xây nhà.</span></li>
+                  <li className="flex gap-2"><span>•</span><span>Thế chấp nếu kẹt tiền mặt.</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </aside>
+
+      {/* Game Log Overlay */}
+      <AnimatePresence>
+        {isHistoryOpen && (
+          <motion.aside
+            initial={{ x: -400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -400, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="absolute left-0 top-0 bottom-0 z-50 w-full max-w-sm shadow-2xl"
+          >
+            <GameLogPanel onClose={() => setIsHistoryOpen(false)} />
+          </motion.aside>
         )}
-        <PauseMenu isOpen={isPauseOpen} onClose={() => setIsPauseOpen(false)} />
-        {state.phase === Phase.GAME_OVER && <EndGameScreen />}
-        <CardModal />
-        <BuildModal />
-        <PropertyInfoModal />
-        <MoneyLossEffect />
-        <MoneyGainEffect />
-        <BuildingCelebration />
-        <MoneyWatcher />
-        <BuildingWatcher />
-        <DiceRollAnimation />
-        <PurchaseCelebration />
-        <ParticleSystem />
-      </div>
+      </AnimatePresence>
+
+      {/* Modals & Overlays */}
+      <DebtResolutionModal />
+      <AuctionModal />
+      {(state.phase === Phase.TRADE || showTradeModal) && (
+        <TradeModal 
+          onClose={() => {
+            if (state.phase === Phase.TRADE) dispatch({ type: 'CANCEL_TRADE' });
+            setShowTradeModal(false);
+          }} 
+        />
+      )}
+      <PauseMenu isOpen={isPauseOpen} onClose={() => setIsPauseOpen(false)} />
+      {state.phase === Phase.GAME_OVER && <EndGameScreen />}
+      <CardModal />
+      <BuildModal />
+      <PropertyInfoModal />
+      <MoneyLossEffect />
+      <MoneyGainEffect />
+      <BuildingCelebration />
+      <MoneyWatcher />
+      <BuildingWatcher />
+      <DiceRollAnimation />
+      <PurchaseCelebration />
+      <ParticleSystem />
     </div>
   );
 }

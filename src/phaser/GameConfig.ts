@@ -7,7 +7,7 @@ export const getGameConfig = (containerId: string): Phaser.Types.Core.GameConfig
   parent: containerId,
   backgroundColor: '#f8fafc', // slate-50
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.FILL,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 1000,
     height: 1000,
