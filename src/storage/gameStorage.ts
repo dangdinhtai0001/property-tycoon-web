@@ -9,6 +9,7 @@ export interface SaveMetadata {
   date: string;
   playerCount: number;
   currentPlayerName: string;
+  currentPlayerCash: number;
 }
 
 export const listSaves = (): SaveMetadata[] => {
@@ -44,7 +45,8 @@ export const saveGame = (state: GameState, slotId: string = '1'): void => {
       name: `Game ${slotId}`,
       date: new Date().toISOString(),
       playerCount: state.players.length,
-      currentPlayerName: currentPlayer?.name || 'Unknown'
+      currentPlayerName: currentPlayer?.name || 'Unknown',
+      currentPlayerCash: currentPlayer?.cash || 0
     });
   } catch (err) {
     console.error('Could not save game', err);
