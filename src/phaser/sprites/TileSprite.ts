@@ -54,14 +54,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
     // 3. Render Content Based on Type
     if (isCorner) {
       this.renderCornerLayout(scene, width, height, tile);
+    } else if (sideIndex === 0 || sideIndex === 2) {
+      this.renderVerticalLayout(scene, width, height, tile, property, sideIndex === 2);
     } else {
-      const sideInfo = { 
-        isBottom: sideIndex === 0, 
-        isLeft: sideIndex === 1, 
-        isTop: sideIndex === 2, 
-        isRight: sideIndex === 3 
-      };
-      this.renderStandardLayout(scene, width, height, tile, property, sideInfo);
+      this.renderHorizontalLayout(scene, width, height, tile, property, sideIndex === 1);
     }
 
     this.updateStatus(tile);
@@ -124,81 +120,107 @@ export class TileSprite extends Phaser.GameObjects.Container {
     this.add(hintText);
   }
 
-  private renderStandardLayout(
+  private renderVerticalLayout(
     scene: Phaser.Scene,
     width: number,
     height: number,
     tile: BoardTile,
     property: Property | null,
-    side: { isTop: boolean, isBottom: boolean, isLeft: boolean, isRight: boolean }
+    isTop: boolean
   ) {
-    const isHorizontal = side.isTop || side.isBottom;
-    const isVertical = side.isLeft || side.isRight;
-
-    // A. Group / Type Strip
-    let stripColor: number | null = null;
-    if (property) {
-      if (property.groupId === PropertyGroup.STATION) stripColor = THEME.colors.types.STATION;
-      else if (property.groupId === PropertyGroup.UTILITY) stripColor = THEME.colors.types.UTILITY;
-      else stripColor = THEME.colors.groups[property.groupId as keyof typeof THEME.colors.groups];
-    } else {
-      if (tile.type === TileType.CHANCE) stripColor = THEME.colors.types.CHANCE;
-      else if (tile.type === TileType.FORTUNE) stripColor = THEME.colors.types.FORTUNE;
-      else if (tile.type === TileType.TAX) stripColor = THEME.colors.types.TAX;
-    }
+    const stripH = THEME.spacing.stripHeight;
+    const stripColor = this.getStripColor(tile, property);
 
     if (stripColor !== null) {
-      let sw = width, sh = height;
-      let sx = 0, sy = 0;
-
-      if (isHorizontal) {
-        sh = THEME.spacing.stripHeight;
-        sy = side.isTop ? height / 2 - sh / 2 : -height / 2 + sh / 2;
-      } else {
-        sw = THEME.spacing.stripHeight;
-        sx = side.isLeft ? width / 2 - sw / 2 : -width / 2 + sw / 2;
-      }
-
-      this.colorStrip = scene.add.rectangle(sx, sy, sw, sh, stripColor);
+      const sy = isTop ? height / 2 - stripH / 2 : -height / 2 + stripH / 2;
+      this.colorStrip = scene.add.rectangle(0, sy, width, stripH, stripColor);
       this.add(this.colorStrip);
     }
 
-    // B. Content Positioning
-
-    const innerY = isHorizontal ? (side.isTop ? -5 : 5) : 0;
-    const innerX = isVertical ? (side.isLeft ? -5 : 5) : 0;
-
-    // Icon
+    const innerY = isTop ? -5 : 5;
     const icon = getTileIcon(tile.type, property?.groupId);
-    this.iconText = scene.add.text(innerX, innerY - (isHorizontal ? 22 : 25), icon, { fontSize: '24px' }).setOrigin(0.5);
+    this.iconText = scene.add.text(0, innerY - 25, icon, { fontSize: '28px' }).setOrigin(0.5);
     this.add(this.iconText);
 
-    // Name
     const displayName = tile.shortName || tile.name;
-    this.nameText = scene.add.text(innerX, innerY, displayName, {
+    this.nameText = scene.add.text(0, innerY, displayName, {
       fontSize: THEME.typography.name.size,
       color: THEME.colors.text.PRIMARY,
       fontStyle: THEME.typography.name.weight,
       align: 'center',
-      wordWrap: { width: isHorizontal ? width - 10 : height - 20 }
+      wordWrap: { width: width - 15 }
     }).setOrigin(0.5);
     this.add(this.nameText);
 
-    // Price / Amount
-    let priceStr = '';
-    if (property) priceStr = `$${property.price}`;
-    else if (tile.type === TileType.TAX) priceStr = tile.name.includes('xa xỉ') ? '$150' : '$200';
-
-    this.priceText = scene.add.text(innerX, innerY + (isHorizontal ? 22 : 25), priceStr, {
+    let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
+    this.priceText = scene.add.text(0, innerY + 25, priceStr, {
       fontSize: THEME.typography.price.size,
       color: THEME.colors.text.SECONDARY,
       fontStyle: THEME.typography.price.weight
     }).setOrigin(0.5);
     this.add(this.priceText);
 
-    // Background Tints for Cards
-    if (tile.type === TileType.FORTUNE) this.background.setFillStyle(0xFFF1F2); // Cơ Hội -> Red
-    if (tile.type === TileType.CHANCE) this.background.setFillStyle(0xECFDF5);  // Khí Vận -> Green
+    this.applyTypeBackground(tile);
+  }
+
+  private renderHorizontalLayout(
+    scene: Phaser.Scene,
+    width: number,
+    height: number,
+    tile: BoardTile,
+    property: Property | null,
+    isLeft: boolean
+  ) {
+    const stripW = THEME.spacing.stripHeight;
+    const stripColor = this.getStripColor(tile, property);
+
+    if (stripColor !== null) {
+      const sx = isLeft ? width / 2 - stripW / 2 : -width / 2 + stripW / 2;
+      this.colorStrip = scene.add.rectangle(sx, 0, stripW, height, stripColor);
+      this.add(this.colorStrip);
+    }
+
+    const contentX = isLeft ? -15 : 15;
+    const icon = getTileIcon(tile.type, property?.groupId);
+    this.iconText = scene.add.text(contentX - 45, 0, icon, { fontSize: '24px' }).setOrigin(0.5);
+    this.add(this.iconText);
+
+    const displayName = tile.shortName || tile.name;
+    this.nameText = scene.add.text(contentX, -10, displayName, {
+      fontSize: THEME.typography.name.size,
+      color: THEME.colors.text.PRIMARY,
+      fontStyle: THEME.typography.name.weight,
+      align: 'left',
+      wordWrap: { width: width - 80 }
+    }).setOrigin(0, 0.5);
+    this.add(this.nameText);
+
+    let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
+    this.priceText = scene.add.text(contentX, 15, priceStr, {
+      fontSize: THEME.typography.price.size,
+      color: THEME.colors.text.SECONDARY,
+      fontStyle: THEME.typography.price.weight
+    }).setOrigin(0, 0.5);
+    this.add(this.priceText);
+
+    this.applyTypeBackground(tile);
+  }
+
+  private getStripColor(tile: BoardTile, property: Property | null): number | null {
+    if (property) {
+      if (property.groupId === PropertyGroup.STATION) return THEME.colors.types.STATION;
+      if (property.groupId === PropertyGroup.UTILITY) return THEME.colors.types.UTILITY;
+      return THEME.colors.groups[property.groupId as keyof typeof THEME.colors.groups];
+    }
+    if (tile.type === TileType.CHANCE) return THEME.colors.types.CHANCE;
+    if (tile.type === TileType.FORTUNE) return THEME.colors.types.FORTUNE;
+    if (tile.type === TileType.TAX) return THEME.colors.types.TAX;
+    return null;
+  }
+
+  private applyTypeBackground(tile: BoardTile) {
+    if (tile.type === TileType.FORTUNE) this.background.setFillStyle(0xFFF1F2);
+    if (tile.type === TileType.CHANCE) this.background.setFillStyle(0xECFDF5);
     if (tile.type === TileType.TAX) this.background.setFillStyle(0xFFFBEB);
   }
 
@@ -206,8 +228,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private buildingPips: Phaser.GameObjects.Arc[] = [];
   private mortgageStamp?: Phaser.GameObjects.Container;
 
-  public updateStatus(tile: BoardTile, players: Player[] = []) {
-    const pos = tile.position;
+  public updateStatus(tile: BoardTile, players: Player[] = [], showStatus: boolean = true) {
+    this.statusContainer.setVisible(showStatus);
+    if (!showStatus) return;
+
     const isProperty = tile.type === TileType.PROPERTY;
 
     // 1. Property-Specific Status
@@ -314,7 +338,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
     // 2. Corner-Specific Status (Jailed State)
     if (tile.type === TileType.JAIL) {
-      const playersOnTile = players.filter(p => p.position === pos);
+      const playersOnTile = players.filter(p => p.position === tile.position);
       const isAnyoneJailed = playersOnTile.some(p => p.jailTurns > 0);
 
       if (isAnyoneJailed) {

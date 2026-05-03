@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
 import { BuildingSprite } from '../sprites/BuildingSprite';
-import { TileType } from '../../game-engine/types/game';
+import { TileType, Phase } from '../../game-engine/types/game';
 import type { GameState, Property, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
 import {
@@ -167,10 +167,11 @@ export class BoardScene extends Phaser.Scene {
     }
 
     // Update tile statuses (Ownership, Buildings, Mortgage, Highlights)
+    const showStatus = state.phase !== Phase.SETUP;
     state.board.forEach((tile, index) => {
       const sprite = this.tiles[index];
       if (sprite) {
-        sprite.updateStatus(tile, state.players);
+        sprite.updateStatus(tile, state.players, showStatus);
 
         // Highlight current tile (where the current player is)
         const isCurrentTile = state.players.find(p => p.id === state.currentPlayerId)?.position === index;
@@ -230,6 +231,10 @@ export class BoardScene extends Phaser.Scene {
         this.tokens.set(player.id, token);
         this.tokensContainer.add(token);
         this.playerPositions.set(player.id, player.position);
+      }
+
+      if (token) {
+        token.setVisible(showStatus);
       }
 
       // Phase 4: Token States & Highlights
