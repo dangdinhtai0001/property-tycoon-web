@@ -24,7 +24,7 @@ import { BuildModal } from './ui/modals/BuildModal';
 import { PropertyInfoModal } from './ui/modals/PropertyInfoModal';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
 import { QuickGuidePanel } from './ui/panels/QuickGuidePanel';
-import { Menu, ScrollText } from 'lucide-react';
+import { Menu, ScrollText, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
@@ -32,6 +32,7 @@ function App() {
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isActionExpanded, setIsActionExpanded] = React.useState(true);
+  const [isGuideOpen, setIsGuideOpen] = React.useState(false);
 
   React.useEffect(() => {
     (window as any).game = {
@@ -75,30 +76,58 @@ function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pointer-events-auto">
+      </header>
+
+      {/* Bottom-left: Quick Guide expanded panel + button row */}
+      <div className="absolute left-6 bottom-8 z-20 flex flex-col gap-3 pointer-events-auto">
+        <AnimatePresence>
+          {isGuideOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 280 }}
+            >
+              <QuickGuidePanel isExpanded={isGuideOpen} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex items-center gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-            className={`p-4 rounded-[1.5rem] transition-all shadow-xl backdrop-blur-md flex items-center gap-2 border ${
+            className={`px-3 py-2 rounded-xl transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
               isHistoryOpen ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
             }`}
           >
-            <ScrollText size={20} />
-            <span className="font-bold text-sm">LỊCH SỬ</span>
+            <ScrollText size={14} />
+            <span className="font-bold text-xs">LỊCH SỬ</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsPauseOpen(true)}
-            className="p-4 bg-white/80 border border-white text-slate-700 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
+            className="px-3 py-2 bg-white/80 border border-white text-slate-700 rounded-xl hover:bg-white transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5"
           >
-            <Menu size={20} />
-            <span className="font-bold text-sm">MENU</span>
+            <Menu size={14} />
+            <span className="font-bold text-xs">MENU</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsGuideOpen(!isGuideOpen)}
+            className={`px-3 py-2 rounded-xl transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
+              isGuideOpen ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
+            }`}
+          >
+            <HelpCircle size={14} />
           </motion.button>
         </div>
-      </header>
+      </div>
 
 
       {/* Left Overlay: Player List */}
@@ -111,14 +140,6 @@ function App() {
           <PlayerListPanel />
         </motion.div>
 
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="pointer-events-auto"
-        >
-          <QuickGuidePanel />
-        </motion.div>
       </aside>
 
       {/* Right Overlay: Action Panel & Current Tile */}
