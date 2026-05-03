@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { type Property, TileType, Phase } from '../../game-engine/types/game';
-import { Handshake, ArrowRightLeft, X, Check, Trash2, Plus } from 'lucide-react';
+import { Handshake, ArrowRightLeft, X, Check } from 'lucide-react';
+
+const GROUP_COLORS: Record<string, string> = {
+  BROWN: '#78350f', LIGHT_BLUE: '#93c5fd', PINK: '#f472b6',
+  ORANGE: '#f97316', RED: '#dc2626', YELLOW: '#facc15',
+  GREEN: '#16a34a', DARK_BLUE: '#1e40af', STATION: '#64748b', UTILITY: '#a3a3a3',
+};
 
 interface TradeModalProps {
   onClose: () => void;
@@ -59,7 +65,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({ onClose }) => {
                     const prop = state.board.find(t => (t as any).id === id) as Property;
                     return (
                       <div key={id} className="p-3 bg-white rounded-xl shadow-sm border border-blue-100 flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: prop.color || '#ccc' }} />
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: GROUP_COLORS[prop.groupId] || '#ccc' }} />
                         <span className="text-sm font-bold text-slate-700">{prop.name}</span>
                       </div>
                     );
@@ -79,7 +85,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({ onClose }) => {
                     return (
                       <div key={id} className="p-3 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 justify-end">
                         <span className="text-sm font-bold text-slate-700">{prop.name}</span>
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: prop.color || '#ccc' }} />
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: GROUP_COLORS[prop.groupId] || '#ccc' }} />
                       </div>
                     );
                   })}
@@ -185,7 +191,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({ onClose }) => {
                           : 'border-slate-100 bg-white text-slate-600 hover:border-blue-200'
                       }`}
                     >
-                      <div className="w-2 h-2 rounded-full bg-white opacity-50" style={{ backgroundColor: p.color }} />
+                      <div className="w-2 h-2 rounded-full bg-white opacity-50" style={{ backgroundColor: GROUP_COLORS[p.groupId] || '#ccc' }} />
                       {p.name}
                     </button>
                   ))}
@@ -237,7 +243,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({ onClose }) => {
                           : 'border-slate-100 bg-white text-slate-600 hover:border-slate-300'
                       }`}
                     >
-                      <div className="w-2 h-2 rounded-full bg-white opacity-50" style={{ backgroundColor: p.color }} />
+                      <div className="w-2 h-2 rounded-full bg-white opacity-50" style={{ backgroundColor: GROUP_COLORS[p.groupId] || '#ccc' }} />
                       {p.name}
                     </button>
                   ))}

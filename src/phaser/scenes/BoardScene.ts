@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
 import { BuildingSprite } from '../sprites/BuildingSprite';
-import { TileType, Phase } from '../../game-engine/types/game';
+import { TileType } from '../../game-engine/types/game';
 import type { GameState, Property, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
 
@@ -10,11 +10,11 @@ export class BoardScene extends Phaser.Scene {
   private tiles: TileSprite[] = [];
   private tokens: Map<string, TokenSprite> = new Map();
   private playerPositions: Map<string, number> = new Map();
-  private tilesContainer: Phaser.GameObjects.Container;
-  private buildingsContainer: Phaser.GameObjects.Container;
-  private tokensContainer: Phaser.GameObjects.Container;
-  private diceContainer: Phaser.GameObjects.Container;
-  private boardContainer: Phaser.GameObjects.Container;
+  private tilesContainer!: Phaser.GameObjects.Container;
+  private buildingsContainer!: Phaser.GameObjects.Container;
+  private tokensContainer!: Phaser.GameObjects.Container;
+  private diceContainer!: Phaser.GameObjects.Container;
+  private boardContainer!: Phaser.GameObjects.Container;
 
   constructor() {
     super('BoardScene');
@@ -35,10 +35,6 @@ export class BoardScene extends Phaser.Scene {
     // Dice should be above everything
     this.add.existing(this.diceContainer);
     this.diceContainer.setDepth(1000);
-    
-    // Background for center
-    const centerX = this.cameras.main.width / 2;
-    const centerY = this.cameras.main.height / 2;
     
     // Center logo is now handled by React overlay (BoardStatus component)
 
@@ -87,7 +83,7 @@ export class BoardScene extends Phaser.Scene {
     const sumText = this.add.text(centerX, centerY + 100, (result[0] + result[1]).toString(), {
       fontSize: '80px',
       color: '#2563eb',
-      fontWeight: '900',
+      fontStyle: 'bold',
       stroke: '#ffffff',
       strokeThickness: 8
     }).setOrigin(0.5).setAlpha(0).setScale(0);
@@ -216,7 +212,7 @@ export class BoardScene extends Phaser.Scene {
         // Just adjust stacking if needed without full path
         const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
         if (dist > 2) {
-          token.moveTo(targetX, targetY, 300);
+          token.moveToPosition(targetX, targetY, 300);
         }
       }
     });

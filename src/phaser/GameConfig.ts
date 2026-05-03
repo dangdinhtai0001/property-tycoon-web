@@ -8,7 +8,7 @@ export const getGameConfig = (containerId: string): Phaser.Types.Core.GameConfig
   backgroundColor: 'rgba(0,0,0,0)',
   transparent: true,
   scale: {
-    mode: Phaser.Scale.FILL,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 1000,
     height: 1000,

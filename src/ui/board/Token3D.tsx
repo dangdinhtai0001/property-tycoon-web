@@ -21,7 +21,7 @@ export const Token3D: React.FC<Token3DProps> = ({ player, targetPosition3D, inde
   const targetY = targetPosition3D[1] + 0.5; // Hover slightly above tile
   const targetZ = targetPosition3D[2] + offsetZ;
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (groupRef.current) {
       // Smooth interpolation towards target position
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 5 * delta);

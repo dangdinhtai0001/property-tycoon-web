@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { TileType, PropertyGroup } from '../../game-engine/types/game';
-import type { BoardTile, Property } from '../../game-engine/types/game';
+import type { BoardTile, Property, Player } from '../../game-engine/types/game';
 
 const getGroupColor = (groupId?: PropertyGroup): number => {
   switch (groupId) {
@@ -20,8 +20,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
   private colorBar?: Phaser.GameObjects.Rectangle;
   private iconText?: Phaser.GameObjects.Text;
-  private nameText: Phaser.GameObjects.Text;
-  private infoText: Phaser.GameObjects.Text;
+  private nameText!: Phaser.GameObjects.Text;
+  private infoText!: Phaser.GameObjects.Text;
   private statusText?: Phaser.GameObjects.Text;
   private image?: Phaser.GameObjects.Image;
 
@@ -35,7 +35,6 @@ export class TileSprite extends Phaser.GameObjects.Container {
     // Determine Layout Type
     const isCorner = pos === 0 || pos === 10 || pos === 20 || pos === 30;
     const isVerticalSide = (pos > 10 && pos < 20) || (pos > 30 && pos < 40);
-    const isHorizontalSide = (pos > 0 && pos < 10) || (pos > 20 && pos < 30);
 
     // 1. Background
     this.background = scene.add.rectangle(0, 0, width, height, 0xffffff)
@@ -90,7 +89,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     this.nameText = scene.add.text(0, height / 2 - 15, tile.name, {
       fontSize: '12px',
       color: '#1e293b',
-      fontWeight: '900',
+      fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: width - 10 }
     }).setOrigin(0.5);
@@ -121,7 +120,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     this.nameText = scene.add.text(0, contentYOffset, displayName, {
       fontSize: '12px',
       color: '#0f172a',
-      fontWeight: '900',
+      fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: width - 10 }
     }).setOrigin(0.5);
@@ -133,10 +132,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
     else if (tile.type === TileType.TAX) info = tile.name.includes('xa xỉ') ? '$150' : '$200';
 
     const infoY = isTop ? -height / 2 + 35 : height / 2 - 35;
-    this.infoText = scene.add.text(0, infoY + contentYOffset, info, { fontSize: '11px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
+    this.infoText = scene.add.text(0, infoY + contentYOffset, info, { fontSize: '11px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
     this.add(this.infoText);
 
-    this.statusText = scene.add.text(0, isTop ? height / 2 - 25 : -height / 2 + 25, '', { fontSize: '10px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
+    this.statusText = scene.add.text(0, isTop ? height / 2 - 25 : -height / 2 + 25, '', { fontSize: '10px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
     this.add(this.statusText);
   }
 
@@ -164,7 +163,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     this.nameText = scene.add.text(contentXOffset, -10, displayName, {
       fontSize: '12px',
       color: '#0f172a',
-      fontWeight: '900',
+      fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: width - 25 }
     }).setOrigin(0.5);
@@ -173,10 +172,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
     // Layer 3: Price / Info
     let info = '';
     if (property) info = `$${property.price}`;
-    this.infoText = scene.add.text(contentXOffset, 10, info, { fontSize: '11px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
+    this.infoText = scene.add.text(contentXOffset, 10, info, { fontSize: '11px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
     this.add(this.infoText);
 
-    this.statusText = scene.add.text(isLeft ? width / 2 - 25 : -width / 2 + 25, 0, '', { fontSize: '10px', color: '#334155', fontWeight: '900' }).setOrigin(0.5);
+    this.statusText = scene.add.text(isLeft ? width / 2 - 25 : -width / 2 + 25, 0, '', { fontSize: '10px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
     this.add(this.statusText);
   }
 

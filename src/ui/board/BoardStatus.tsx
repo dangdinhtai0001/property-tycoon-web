@@ -23,25 +23,6 @@ export const BoardStatus: React.FC = () => {
   const currentPlayer = players.find(p => p.id === currentPlayerId);
   const currentTile = board.find(t => t.position === currentPlayer?.position);
   
-  const formatPhase = (phase: Phase) => {
-    switch (phase) {
-      case Phase.WAITING_TO_ROLL: return 'Chờ tung xúc xắc';
-      case Phase.ROLLING: return 'Đang tung...';
-      case Phase.MOVING: return 'Đang di chuyển';
-      case Phase.RESOLVING_TILE: return 'Đang xử lý ô';
-      case Phase.BUY_DECISION: return 'Quyết định mua';
-      case Phase.BUILD_DECISION: return 'Quyết định xây';
-      case Phase.DEBT_RESOLUTION: return 'Giải quyết nợ';
-      case Phase.END_TURN: return 'Kết thúc lượt';
-      case Phase.AUCTION: return 'Đang đấu giá';
-      case Phase.TRADE: return 'Đang giao dịch';
-      case Phase.SETUP: return 'Cài đặt';
-      case Phase.GAME_OVER: return 'Kết thúc trò chơi';
-      case Phase.SHOWING_CARD: return 'Xem thẻ';
-      default: return phase.replace(/_/g, ' ');
-    }
-  };
-
   const isProperty = currentTile?.type === TileType.PROPERTY;
   const property = isProperty ? (currentTile as Property) : null;
   const owner = property?.ownerId ? players.find(p => p.id === property.ownerId) : null;

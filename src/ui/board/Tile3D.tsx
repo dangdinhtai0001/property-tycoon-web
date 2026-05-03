@@ -80,7 +80,7 @@ export const Tile3D: React.FC<Tile3DProps> = ({ tile, position3D, rotationY }) =
           anchorX="center"
           anchorY="middle"
         >
-          {isMortgaged ? 'MORTGAGED' : `$${property.price}`}
+          {isMortgaged ? 'MORTGAGED' : `$${property?.price}`}
         </Text>
       )}
     </group>

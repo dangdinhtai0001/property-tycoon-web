@@ -1,5 +1,5 @@
 import React from 'react';
-import { type SaveMetadata, listSaves } from '../../storage/gameStorage';
+import { listSaves } from '../../storage/gameStorage';
 import { X, Save, Trash2, Calendar, Users } from 'lucide-react';
 
 interface SaveSlotModalProps {

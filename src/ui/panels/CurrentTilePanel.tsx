@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { TileType, type Property } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Landmark, Coins, User, Info, Building } from 'lucide-react';
+import { MapPin, Coins, User, Info, Building } from 'lucide-react';
 
 export const CurrentTilePanel: React.FC = () => {
   const { state } = useGameStore();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../app/store/useGameStore';
 import { TileType, Phase } from '../../game-engine/types/game';
-import { Info, AlertCircle, Sparkles, TrendingUp } from 'lucide-react';
+import { AlertCircle, Sparkles, TrendingUp } from 'lucide-react';
 
 type InteractionState = 'SHUFFLING' | 'PICKING' | 'REVEALING' | 'REVEALED';
 

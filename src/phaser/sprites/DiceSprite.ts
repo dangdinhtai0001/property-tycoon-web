@@ -3,7 +3,6 @@ import Phaser from 'phaser';
 export class DiceSprite extends Phaser.GameObjects.Container {
   private bodyGraphics: Phaser.GameObjects.Graphics;
   private dotsGraphics: Phaser.GameObjects.Graphics;
-  private value: number = 1;
   private isRolling: boolean = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number, size: number = 80) {
@@ -87,7 +86,6 @@ export class DiceSprite extends Phaser.GameObjects.Container {
     }
 
     // Final result
-    this.value = targetValue;
     this.drawDots(targetValue, size);
 
     // Landing animation

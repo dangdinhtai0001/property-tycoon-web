@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 
 export const ParticleSystem: React.FC = () => {

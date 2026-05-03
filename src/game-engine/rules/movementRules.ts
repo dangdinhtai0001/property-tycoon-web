@@ -1,4 +1,4 @@
-import { type GameState, type Player } from '../types/game';
+import { type GameState } from '../types/game';
 
 export const calculateNewPosition = (currentPosition: number, steps: number, boardSize: number): { position: number; passedStart: boolean } => {
   const newPosition = (currentPosition + steps) % boardSize;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
-import { PartyPopper, Sparkles } from 'lucide-react';
+import { PartyPopper } from 'lucide-react';
 
 interface CelebrationData {
   propertyName: string;

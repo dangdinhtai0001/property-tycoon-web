@@ -12,29 +12,38 @@ describe('Rent Rules', () => {
     rent: 20,
     ownerId: 'player-2',
     groupId: PropertyGroup.BROWN,
+    buildingLevel: 0,
+    buildingCost: 50,
+    isMortgaged: false,
+    mortgageValue: 50,
   };
 
   const initialState: GameState = {
     players: [
-      { id: 'player-1', name: 'P1', cash: 1000, position: 1, isBankrupt: false, color: 'red' },
-      { id: 'player-2', name: 'P2', cash: 1000, position: 0, isBankrupt: false, color: 'blue' },
+      { id: 'player-1', name: 'P1', cash: 1000, position: 1, isBankrupt: false, color: 'red', jailTurns: 0 },
+      { id: 'player-2', name: 'P2', cash: 1000, position: 0, isBankrupt: false, color: 'blue', jailTurns: 0 },
     ],
     currentPlayerId: 'player-1',
     phase: Phase.RESOLVING_TILE,
     board: [
       { id: 'tile-0', type: TileType.START, name: 'Start', position: 0 },
       mockProperty,
-      { 
-        id: 'prop-2', 
-        type: TileType.PROPERTY, 
-        name: 'Group Mate', 
-        position: 2, 
-        price: 100, 
-        rent: 20, 
+      {
+        id: 'prop-2',
+        type: TileType.PROPERTY,
+        name: 'Group Mate',
+        position: 2,
+        price: 100,
+        rent: 20,
         groupId: PropertyGroup.BROWN,
-        ownerId: undefined 
-      },
+        ownerId: undefined,
+        buildingLevel: 0,
+        buildingCost: 50,
+        isMortgaged: false,
+        mortgageValue: 50,
+      } as Property,
     ],
+    doublesCount: 0,
     log: [],
     config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, quickModeMultiplier: 1 },
   };

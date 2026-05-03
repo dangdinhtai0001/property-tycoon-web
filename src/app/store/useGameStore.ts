@@ -14,7 +14,7 @@ interface GameStore {
   setActiveSlot: (slotId: string) => void;
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
+export const useGameStore = create<GameStore>((set) => ({
   state: {
     players: [],
     currentPlayerId: '',

@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { TileType, type Property } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, Home, Lock, User } from 'lucide-react';
+import { Building2, Home, Lock } from 'lucide-react';
 
 const CashDelta: React.FC<{ value: number }> = ({ value }) => {
   const [prevValue, setPrevValue] = React.useState(value);

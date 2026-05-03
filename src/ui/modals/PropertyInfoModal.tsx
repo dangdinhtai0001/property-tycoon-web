@@ -1,8 +1,8 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { type Property, TileType, PropertyGroup } from '../../game-engine/types/game';
+import { type Property } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Landmark, DollarSign, Info } from 'lucide-react';
+import { X, Home, Landmark } from 'lucide-react';
 
 export const PropertyInfoModal: React.FC = () => {
   const { state, inspectedPropertyId, setInspectedPropertyId } = useGameStore();

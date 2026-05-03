@@ -7,8 +7,6 @@ import { HelpCircle, Info, AlertTriangle, Lightbulb } from 'lucide-react';
 export const QuickGuidePanel: React.FC = () => {
   const { state } = useGameStore();
   const [isExpanded, setIsExpanded] = React.useState(true);
-  const [turnCount, setTurnCount] = React.useState(0);
-
   // track turns to auto-collapse
   React.useEffect(() => {
     // This is a simplification, we could track actual turns in state

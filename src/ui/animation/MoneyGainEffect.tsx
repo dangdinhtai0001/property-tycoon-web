@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
-import { Sparkles, TrendingUp, DollarSign, PartyPopper } from 'lucide-react';
+import { Sparkles, DollarSign, PartyPopper } from 'lucide-react';
 
 export const MoneyGainEffect: React.FC = () => {
   const { queue, dequeue, isAnimating, setAnimating } = useAnimationQueue();

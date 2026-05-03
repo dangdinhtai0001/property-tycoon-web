@@ -38,7 +38,7 @@ export class TokenSprite extends Phaser.GameObjects.Container {
     this.text = scene.add.text(0, 0, player.name.charAt(0).toUpperCase(), {
       fontSize: '24px',
       color: '#ffffff',
-      fontWeight: '950',
+      fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 2
     }).setOrigin(0.5);
@@ -87,8 +87,6 @@ export class TokenSprite extends Phaser.GameObjects.Container {
 
   private glow: Phaser.GameObjects.Arc;
   private glowTween: Phaser.Tweens.Tween;
-  private isMoving: boolean = false;
-
   setSelected(selected: boolean) {
     if (selected) {
       this.glow.setVisible(true);
@@ -101,7 +99,7 @@ export class TokenSprite extends Phaser.GameObjects.Container {
     }
   }
 
-  moveTo(x: number, y: number, duration: number = 500) {
+  moveToPosition(x: number, y: number, duration: number = 500) {
     if (!this.scene) return;
     this.scene.tweens.killTweensOf(this);
 
@@ -120,12 +118,10 @@ export class TokenSprite extends Phaser.GameObjects.Container {
   async moveAlongPath(path: { x: number, y: number }[], durationPerTile: number = 250) {
     if (path.length === 0) return;
 
-    this.isMoving = true;
     if (this.scene) this.scene.tweens.killTweensOf(this);
 
     for (const point of path) {
       if (!this.scene) {
-        this.isMoving = false;
         return;
       }
       await new Promise<void>(resolve => {
@@ -144,6 +140,5 @@ export class TokenSprite extends Phaser.GameObjects.Container {
       });
     }
 
-    this.isMoving = false;
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { Phase, TileType, type Property } from '../../game-engine/types/game';
-import { canMortgage, canUnmortgage, canSellBuilding } from '../../game-engine/rules/financeRules';
+import { canMortgage, canUnmortgage } from '../../game-engine/rules/financeRules';
 import { canBuild } from '../../game-engine/rules/buildingRules';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { motion, AnimatePresence } from 'framer-motion';

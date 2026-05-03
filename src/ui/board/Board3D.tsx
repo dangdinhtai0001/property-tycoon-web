@@ -9,7 +9,6 @@ import { type Property, TileType } from '../../game-engine/types/game';
 
 const getTilePositionAndRotation = (position: number): { pos: [number, number, number]; rot: number } => {
   const SIZE = 5;
-  const INNER = SIZE - 1; // 4
   
   if (position === 0) return { pos: [SIZE, 0, SIZE], rot: 0 };
   if (position < 10) return { pos: [SIZE - position, 0, SIZE], rot: 0 };
