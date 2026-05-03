@@ -14,57 +14,69 @@ export class TokenSprite extends Phaser.GameObjects.Container {
 
     const color = Phaser.Display.Color.HexStringToColor(player.color).color;
 
+    // 0. Drop Shadow (Stays on the board, doesn't float)
+    const shadow = scene.add.ellipse(0, 5, 40, 15, 0x000000, 0.2);
+    this.add(shadow);
+
     // Create a nested container for the visual parts to allow independent animation
     this.visualContainer = scene.add.container(0, 0);
     this.add(this.visualContainer);
 
-    // Outer circle (border)
-    const border = scene.add.arc(0, 0, 22, 0, 360, false, 0xffffff);
+    // 1. Outer border (thicker white border)
+    const border = scene.add.arc(0, 0, 28, 0, 360, false, 0xffffff);
     this.visualContainer.add(border);
 
-    // Inner circle (player color)
-    this.circle = scene.add.arc(0, 0, 19, 0, 360, false, color);
+    // 2. Main Circle (player color)
+    this.circle = scene.add.arc(0, 0, 24, 0, 360, false, color);
     this.visualContainer.add(this.circle);
 
-    // Player initial or number
-    this.text = scene.add.text(0, 0, player.name.charAt(0), {
-      fontSize: '20px',
+    // 3. 3D Glossy Highlight
+    const highlight = scene.add.arc(-8, -8, 12, 0, 360, false, 0xffffff, 0.3);
+    this.visualContainer.add(highlight);
+
+    // 4. Player initial or number
+    this.text = scene.add.text(0, 0, player.name.charAt(0).toUpperCase(), {
+      fontSize: '24px',
       color: '#ffffff',
-      fontWeight: '900'
+      fontWeight: '950',
+      stroke: '#000000',
+      strokeThickness: 2
     }).setOrigin(0.5);
     this.visualContainer.add(this.text);
 
     scene.add.existing(this);
 
-    // Add float animation to the VISUAL container, not the parent
+    // Add float animation to the VISUAL container
     scene.tweens.add({
       targets: this.visualContainer,
-      y: -8,
+      y: -12,
       duration: 1500,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
 
-    // Subtle scale pulse on the circles
+    // Shadow pulse (scales inversely with height)
     scene.tweens.add({
-      targets: [this.circle, border],
-      scale: 1.05,
-      duration: 1000,
+      targets: shadow,
+      scaleX: 0.8,
+      scaleY: 0.8,
+      alpha: 0.1,
+      duration: 1500,
       yoyo: true,
       repeat: -1,
-      ease: 'Quad.easeInOut'
+      ease: 'Sine.easeInOut'
     });
 
     // Glow effect for selected/current player
-    this.glow = scene.add.arc(0, 0, 35, 0, 360, false, color, 0.3);
-    this.glow.setDepth(-1); // Behind everything else in this container
+    this.glow = scene.add.arc(0, 0, 45, 0, 360, false, color, 0.3);
+    this.glow.setDepth(-1);
     this.visualContainer.add(this.glow);
     this.glow.setVisible(false);
 
     this.glowTween = scene.tweens.add({
       targets: this.glow,
-      scale: 1.5,
+      scale: 1.6,
       alpha: 0,
       duration: 1500,
       repeat: -1,
@@ -90,8 +102,7 @@ export class TokenSprite extends Phaser.GameObjects.Container {
   }
 
   moveTo(x: number, y: number, duration: number = 500) {
-    // If already moving, we might want to chain or cancel
-    // For simplicity, we just stop current tweens on this object's position
+    if (!this.scene) return;
     this.scene.tweens.killTweensOf(this);
 
     this.scene.tweens.add({
@@ -110,10 +121,18 @@ export class TokenSprite extends Phaser.GameObjects.Container {
     if (path.length === 0) return;
 
     this.isMoving = true;
-    this.scene.tweens.killTweensOf(this);
+    if (this.scene) this.scene.tweens.killTweensOf(this);
 
     for (const point of path) {
+      if (!this.scene) {
+        this.isMoving = false;
+        return;
+      }
       await new Promise<void>(resolve => {
+        if (!this.scene) {
+          resolve();
+          return;
+        }
         this.scene.tweens.add({
           targets: this,
           x: point.x,

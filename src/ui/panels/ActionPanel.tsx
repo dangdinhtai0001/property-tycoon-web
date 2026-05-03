@@ -40,10 +40,10 @@ export const ActionPanel: React.FC = () => {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleRollDice}
-            className="w-full py-6 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-200 flex flex-col items-center justify-center gap-2"
+            className="w-full py-4 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-200 flex flex-col items-center justify-center gap-1.5"
           >
-            <Dices size={32} />
-            <span className="text-lg tracking-wider uppercase">Đổ xúc xắc</span>
+            <Dices size={28} />
+            <span className="text-base tracking-wider uppercase">Đổ xúc xắc</span>
           </motion.button>
         );
 
@@ -62,10 +62,10 @@ export const ActionPanel: React.FC = () => {
                 onComplete: () => dispatch({ type: 'BUY_PROPERTY', payload: { propertyId: property.id } })
               });
             }}
-            className="w-full py-6 bg-green-600 text-white font-black rounded-3xl shadow-xl shadow-green-200 flex flex-col items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-4 bg-green-600 text-white font-black rounded-3xl shadow-xl shadow-green-200 flex flex-col items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <CheckCircle size={32} />
-            <span className="text-lg tracking-wider uppercase">Mua {property.name} (${property.price})</span>
+            <CheckCircle size={28} />
+            <span className="text-base tracking-wider uppercase">Mua {property.name} (${property.price})</span>
           </motion.button>
         );
       }
@@ -79,10 +79,10 @@ export const ActionPanel: React.FC = () => {
             whileTap={canPay ? { scale: 0.98 } : {}}
             disabled={!canPay}
             onClick={() => dispatch({ type: 'RESOLVE_DEBT' })}
-            className="w-full py-6 bg-rose-600 text-white font-black rounded-3xl shadow-xl shadow-rose-200 flex flex-col items-center justify-center gap-2 disabled:opacity-40"
+            className="w-full py-4 bg-rose-600 text-white font-black rounded-3xl shadow-xl shadow-rose-200 flex flex-col items-center justify-center gap-1.5 disabled:opacity-40"
           >
-            <Coins size={32} />
-            <span className="text-lg tracking-wider uppercase">Trả nợ (${debtAmount})</span>
+            <Coins size={28} />
+            <span className="text-base tracking-wider uppercase">Trả nợ (${debtAmount})</span>
           </motion.button>
         );
       }
@@ -93,10 +93,10 @@ export const ActionPanel: React.FC = () => {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => dispatch({ type: 'END_TURN' })}
-            className="w-full py-6 bg-slate-900 text-white font-black rounded-3xl shadow-xl shadow-slate-200 flex flex-col items-center justify-center gap-2"
+            className="w-full py-4 bg-slate-900 text-white font-black rounded-3xl shadow-xl shadow-slate-200 flex flex-col items-center justify-center gap-1.5"
           >
-            <CheckCircle size={32} />
-            <span className="text-lg tracking-wider uppercase">Kết thúc lượt</span>
+            <CheckCircle size={28} />
+            <span className="text-base tracking-wider uppercase">Kết thúc lượt</span>
           </motion.button>
         );
 
@@ -278,7 +278,7 @@ export const ActionPanel: React.FC = () => {
         )}
       </div>
 
-      <div className="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-6 border border-white shadow-2xl flex flex-col gap-6">
+      <div className="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-4 border border-white shadow-2xl flex flex-col gap-4">
         {/* Primary Action Area */}
         <div className="relative">
           <AnimatePresence mode="wait">

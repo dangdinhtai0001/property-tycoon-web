@@ -74,6 +74,7 @@ export class DiceSprite extends Phaser.GameObjects.Container {
       this.drawDots(randomVal, size);
 
       // Random jitter/rotation during roll
+      if (!this.scene) return;
       this.scene.tweens.add({
         targets: this,
         angle: Phaser.Math.Between(-20, 20),
@@ -91,6 +92,10 @@ export class DiceSprite extends Phaser.GameObjects.Container {
 
     // Landing animation
     return new Promise(resolve => {
+      if (!this.scene) {
+        resolve();
+        return;
+      }
       this.scene.tweens.add({
         targets: this,
         angle: 0,
