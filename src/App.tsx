@@ -53,125 +53,131 @@ function App() {
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-50 flex flex-col font-sans selection:bg-blue-100">
       {/* Ambient Background Image */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-50 pointer-events-none"
-        style={{ backgroundImage: 'url(/assets/bg/main-menu.png)' }}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-40 pointer-events-none scale-105"
+        style={{ 
+          backgroundImage: 'url(/assets/bg/main-menu.png)',
+          filter: 'blur(8px) saturate(0.8)'
+        }}
       />
-      
-      {/* Soft Gradient Overlay */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-tr from-white/40 via-transparent to-white/60 pointer-events-none" />
-      <main className="absolute inset-0 z-0 flex items-center justify-center bg-transparent">
-        <Board />
-      </main>
 
-      {/* Top HUD / Header Overlay */}
-      <header className="relative z-20 p-6 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-6 pointer-events-auto">
-          <div className="bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
-            <h1 className="text-xl font-black tracking-tighter text-slate-800 leading-[0.8]">
-              ÔNG TRÙM <br />
-              <span className="text-blue-600 text-2xl">BẤT ĐỘNG SẢN</span>
-            </h1>
-            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest mt-2">Mô phỏng Bàn cờ Chân thực</p>
-          </div>
-        </div>
+      {/* Soft Gradient Overlay - Darker for more contrast */}
+      <div className="absolute inset-0 z-[1] bg-slate-900/10 pointer-events-none" />
+      <div className="absolute inset-0 z-[2] bg-gradient-to-tr from-white/60 via-transparent to-white/80 pointer-events-none" />
 
-      </header>
-
-      {/* Bottom-left: Quick Guide expanded panel + button row */}
-      <div className="absolute left-6 bottom-8 z-20 flex flex-col gap-3 pointer-events-auto">
-        <AnimatePresence>
-          {isGuideOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 280 }}
-            >
-              <QuickGuidePanel isExpanded={isGuideOpen} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-            className={`px-3 py-2 rounded-xl transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
-              isHistoryOpen ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
-            }`}
+      {/* Main UI Layout - 3 Columns */}
+      <div className="relative z-10 flex-1 flex flex-row gap-[clamp(16px,2vw,32px)] px-4 lg:px-6 py-0 md:py-2 lg:py-4 overflow-hidden">
+        
+        {/* Left Column: Player List */}
+        <aside className="w-64 lg:w-72 flex flex-col pointer-events-auto overflow-hidden">
+          <motion.header 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 shrink-0"
           >
-            <ScrollText size={14} />
-            <span className="font-bold text-xs">LỊCH SỬ</span>
-          </motion.button>
+            <div className="bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
+              <h1 className="text-xl font-black tracking-tighter text-slate-800 leading-[0.8]">
+                ÔNG TRÙM <br />
+                <span className="text-blue-600 text-2xl">BẤT ĐỘNG SẢN</span>
+              </h1>
+              <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest mt-2">Mô phỏng Bàn cờ Chân thực</p>
+            </div>
+          </motion.header>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsPauseOpen(true)}
-            className="px-3 py-2 bg-white/80 border border-white text-slate-700 rounded-xl hover:bg-white transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5"
+          <motion.div
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="flex-1 overflow-hidden"
           >
-            <Menu size={14} />
-            <span className="font-bold text-xs">MENU</span>
-          </motion.button>
+            <PlayerListPanel />
+          </motion.div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsGuideOpen(!isGuideOpen)}
-            className={`px-3 py-2 rounded-xl transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
-              isGuideOpen ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
-            }`}
-          >
-            <HelpCircle size={14} />
-          </motion.button>
-        </div>
-      </div>
+          {/* Bottom-left: Buttons */}
+          <div className="mt-auto pt-6 flex flex-col gap-3">
+            <AnimatePresence>
+              {isGuideOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 12 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 280 }}
+                >
+                  <QuickGuidePanel isExpanded={isGuideOpen} />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                className={`px-3 py-2 rounded-xl transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${isHistoryOpen ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
+                  }`}
+              >
+                <ScrollText size={14} />
+                <span className="font-bold text-xs">LỊCH SỬ</span>
+              </motion.button>
 
-      {/* Left Overlay: Player List */}
-      <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col gap-6 justify-between">
-        <motion.div 
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="pointer-events-auto flex flex-col"
-        >
-          <PlayerListPanel />
-        </motion.div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsPauseOpen(true)}
+                className="px-3 py-2 bg-white/80 border border-white text-slate-700 rounded-xl hover:bg-white transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5"
+              >
+                <Menu size={14} />
+                <span className="font-bold text-xs">MENU</span>
+              </motion.button>
 
-      </aside>
-
-      {/* Right Overlay: Action Panel & Current Tile */}
-      <aside className="absolute right-6 top-32 bottom-8 z-10 pointer-events-none flex flex-col gap-6 items-end">
-        <motion.div 
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className={`pointer-events-auto transition-all duration-500 ease-in-out ${isActionExpanded ? 'w-96' : 'w-20'}`}
-        >
-          <div className={`relative bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-white shadow-2xl flex flex-col overflow-hidden transition-all duration-500 ${isActionExpanded ? 'h-full' : 'h-16'}`}>
-            <button 
-              onClick={() => setIsActionExpanded(!isActionExpanded)}
-              className="p-5 w-full flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
-            >
-              {isActionExpanded ? <Menu size={24} /> : <Menu size={24} className="rotate-90" />}
-            </button>
-            
-            <div className={`flex-1 overflow-y-auto px-6 pb-6 transition-all duration-300 ${isActionExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <ActionPanel />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsGuideOpen(!isGuideOpen)}
+                className={`px-3 py-2 rounded-xl transition-all shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${isGuideOpen ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-white/80 text-slate-700 border-white hover:bg-white'
+                  }`}
+              >
+                <HelpCircle size={14} />
+              </motion.button>
             </div>
           </div>
-        </motion.div>
+        </aside>
 
-        <motion.div
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="pointer-events-auto w-96"
-        >
-          <CurrentTilePanel />
-        </motion.div>
-      </aside>
+        {/* Center Column: Board */}
+        <main className="flex-1 flex items-center justify-center overflow-hidden">
+          <Board />
+        </main>
+
+        {/* Right Column: Action Panel & Current Tile */}
+        <aside className="w-72 lg:w-80 flex flex-col gap-6 pointer-events-auto overflow-hidden">
+          <motion.div
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className={`flex-1 transition-all duration-500 ease-in-out ${isActionExpanded ? 'h-full' : 'h-16 shrink-0'}`}
+          >
+            <div className={`h-full relative bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-white shadow-2xl flex flex-col overflow-hidden transition-all duration-500`}>
+              <button
+                onClick={() => setIsActionExpanded(!isActionExpanded)}
+                className="p-5 w-full flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
+              >
+                {isActionExpanded ? <Menu size={24} /> : <Menu size={24} className="rotate-90" />}
+              </button>
+
+              <div className={`flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar transition-all duration-300 ${isActionExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <ActionPanel />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="shrink-0"
+          >
+            <CurrentTilePanel />
+          </motion.div>
+        </aside>
+      </div>
 
 
       {/* Game Log Overlay */}
@@ -193,11 +199,11 @@ function App() {
       <DebtResolutionModal />
       <AuctionModal />
       {(state.phase === Phase.TRADE || showTradeModal) && (
-        <TradeModal 
+        <TradeModal
           onClose={() => {
             if (state.phase === Phase.TRADE) dispatch({ type: 'CANCEL_TRADE' });
             setShowTradeModal(false);
-          }} 
+          }}
         />
       )}
       <PauseMenu isOpen={isPauseOpen} onClose={() => setIsPauseOpen(false)} />
