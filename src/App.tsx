@@ -60,7 +60,13 @@ function App() {
           <div className="hidden md:flex gap-4 items-center bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Trạng thái</span>
-              <span className="text-sm font-black text-blue-600 uppercase leading-none mt-1">{state.phase.replace(/_/g, ' ')}</span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm font-black text-slate-800 uppercase leading-none">
+                  Lượt của <span style={{ color: state.players.find(p => p.id === state.currentPlayerId)?.color }}>{state.players.find(p => p.id === state.currentPlayerId)?.name}</span>
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                <span className="text-sm font-black text-blue-600 uppercase leading-none">{state.phase.replace(/_/g, ' ')}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -95,7 +101,7 @@ function App() {
         <motion.div 
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="pointer-events-auto"
+          className="pointer-events-auto h-full flex flex-col"
         >
           <PlayerListPanel />
         </motion.div>

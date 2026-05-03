@@ -168,7 +168,11 @@ export class BoardScene extends Phaser.Scene {
         this.tokens.set(player.id, token);
         this.tokensContainer.add(token);
         this.playerPositions.set(player.id, player.position);
-      } else if (lastPos !== undefined && lastPos !== player.position) {
+      }
+      
+      token.setSelected(player.id === state.currentPlayerId);
+
+      if (lastPos !== undefined && lastPos !== player.position) {
         // Calculate path
         const path: {x: number, y: number}[] = [];
         let current = lastPos;

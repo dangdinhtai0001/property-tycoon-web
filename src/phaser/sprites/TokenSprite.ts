@@ -55,9 +55,39 @@ export class TokenSprite extends Phaser.GameObjects.Container {
       repeat: -1,
       ease: 'Quad.easeInOut'
     });
+
+    // Glow effect for selected/current player
+    this.glow = scene.add.arc(0, 0, 35, 0, 360, false, color, 0.3);
+    this.glow.setDepth(-1); // Behind everything else in this container
+    this.visualContainer.add(this.glow);
+    this.glow.setVisible(false);
+
+    this.glowTween = scene.tweens.add({
+      targets: this.glow,
+      scale: 1.5,
+      alpha: 0,
+      duration: 1500,
+      repeat: -1,
+      ease: 'Quad.easeOut'
+    });
+    this.glowTween.pause();
   }
 
+  private glow: Phaser.GameObjects.Arc;
+  private glowTween: Phaser.Tweens.Tween;
   private isMoving: boolean = false;
+
+  setSelected(selected: boolean) {
+    if (selected) {
+      this.glow.setVisible(true);
+      this.glowTween.resume();
+    } else {
+      this.glow.setVisible(false);
+      this.glowTween.pause();
+      this.glow.setScale(1);
+      this.glow.setAlpha(0.3);
+    }
+  }
 
   moveTo(x: number, y: number, duration: number = 500) {
     // If already moving, we might want to chain or cancel
