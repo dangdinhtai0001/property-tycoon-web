@@ -130,10 +130,18 @@ export class BoardScene extends Phaser.Scene {
       });
     }
 
-    // Update tile statuses (Ownership, Buildings, Mortgage)
+    // Update tile statuses (Ownership, Buildings, Mortgage, Highlights)
     state.board.forEach((tile, index) => {
-      if (this.tiles[index]) {
-        this.tiles[index].updateStatus(tile, state.players);
+      const sprite = this.tiles[index];
+      if (sprite) {
+        sprite.updateStatus(tile, state.players);
+        
+        // Highlight current tile (where the current player is)
+        const isCurrentTile = state.players.find(p => p.id === state.currentPlayerId)?.position === index;
+        const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
+        const highlightColor = currentPlayer ? Phaser.Display.Color.HexStringToColor(currentPlayer.color).color : 0xffffff;
+        
+        sprite.setHighlighted(isCurrentTile, highlightColor);
       }
     });
 
@@ -147,17 +155,28 @@ export class BoardScene extends Phaser.Scene {
     state.players.forEach((player) => {
       const tilePos = this.getTilePosition(player.position, offset, tileSize, cornerSize);
       
-      // Calculate stacking offset
+      // Calculate stacking offset (Phase 4: Mini-grid / Fan-out)
       const playersOnThisTile = playersByPosition[player.position] || [];
       const playerIndex = playersOnThisTile.findIndex(p => p.id === player.id);
       let stackOffsetX = 0;
       let stackOffsetY = 0;
       
       if (playersOnThisTile.length > 1) {
-        const angle = (playerIndex / playersOnThisTile.length) * Math.PI * 2;
-        const radius = 15;
-        stackOffsetX = Math.cos(angle) * radius;
-        stackOffsetY = Math.sin(angle) * radius;
+        const count = playersOnThisTile.length;
+        const spacing = 18;
+        
+        if (count === 2) {
+          stackOffsetX = playerIndex === 0 ? -spacing/2 : spacing/2;
+        } else if (count === 3) {
+          const angle = (playerIndex / 3) * Math.PI * 2 - Math.PI / 2;
+          stackOffsetX = Math.cos(angle) * spacing;
+          stackOffsetY = Math.sin(angle) * spacing;
+        } else if (count >= 4) {
+          const row = Math.floor(playerIndex / 2);
+          const col = playerIndex % 2;
+          stackOffsetX = (col - 0.5) * spacing;
+          stackOffsetY = (row - 0.5) * spacing;
+        }
       }
 
       const targetX = tilePos.x + stackOffsetX;
@@ -173,72 +192,43 @@ export class BoardScene extends Phaser.Scene {
         this.playerPositions.set(player.id, player.position);
       }
       
-      token.setSelected(player.id === state.currentPlayerId);
+      // Phase 4: Token States & Highlights
+      const isCurrentPlayer = player.id === state.currentPlayerId;
+      token.setSelected(isCurrentPlayer);
+      token.setJailed(player.jailTurns > 0);
+      token.setBankrupt(player.isBankrupt || false);
+      
+      // Ensure current player is always on top within the container
+      if (isCurrentPlayer) {
+        this.tokensContainer.bringToTop(token);
+      }
 
       if (lastPos !== undefined && lastPos !== player.position) {
-        // Calculate path
+        // Path movement...
         const path: {x: number, y: number}[] = [];
         let current = lastPos;
-        
-        // Determine direction: forward or backward
         const forwardDist = (player.position - lastPos + 44) % 44;
         const backwardDist = (lastPos - player.position + 44) % 44;
-        
-        // If backward distance is shorter and small, move backward (e.g. "Go back 3 spaces")
         const isBackward = backwardDist < forwardDist && backwardDist < 10;
         
         while (current !== player.position) {
-          if (isBackward) {
-            current = (current - 1 + 44) % 44;
-          } else {
-            current = (current + 1) % 44;
-          }
-          
+          current = isBackward ? (current - 1 + 44) % 44 : (current + 1) % 44;
           const p = this.getTilePosition(current, offset, tileSize, cornerSize);
-          
-          // Apply stacking offset only to the final destination
           const ox = (current === player.position) ? stackOffsetX : 0;
           const oy = (current === player.position) ? stackOffsetY : 0;
-          
           path.push({ x: p.x + ox, y: p.y + oy });
-          
-          // Safety break
           if (path.length > 44) break;
         }
-
         token.moveAlongPath(path);
         this.playerPositions.set(player.id, player.position);
       } else {
-        // Just adjust stacking if needed without full path
         const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
-        if (dist > 2) {
-          token.moveToPosition(targetX, targetY, 300);
-        }
+        if (dist > 1) token.moveToPosition(targetX, targetY, 300);
       }
     });
 
-    // Update buildings
+    // Update buildings (Phase 5: Now handled by TileSprite.updateStatus)
     this.buildingsContainer.removeAll(true);
-    state.board.forEach((tile) => {
-      if (tile.type === TileType.PROPERTY) {
-        const property = tile as Property;
-        if (property.buildingLevel && property.buildingLevel > 0) {
-          const tilePos = this.getTilePosition(tile.position, offset, tileSize, cornerSize);
-          if (property.buildingLevel === 5) {
-            const b = new BuildingSprite(this, tilePos.x + tilePos.w/2 - 25, tilePos.y - tilePos.h/2 + 25, 'hotel');
-            this.buildingsContainer.add(b);
-          } else {
-            for (let i = 0; i < property.buildingLevel; i++) {
-              // Layout houses in a row or grid
-              const offsetX = (i % 2 === 0) ? -15 : 15;
-              const offsetY = (i < 2) ? -15 : 15;
-              const b = new BuildingSprite(this, tilePos.x + offsetX, tilePos.y + offsetY - tilePos.h/4, 'house');
-              this.buildingsContainer.add(b);
-            }
-          }
-        }
-      }
-    });
   }
 
   private getTilePosition(position: number, offset: number, tileSize: number, cornerSize: number) {
