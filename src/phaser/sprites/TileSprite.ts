@@ -96,7 +96,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
     // 3. Icon
     const icon = getTileIcon(tile.type);
-    this.iconText = scene.add.text(0, -15, icon, { fontSize: '48px' }).setOrigin(0.5);
+    this.iconText = scene.add.text(0, -25, icon, { fontSize: '72px' }).setOrigin(0.5);
     this.add(this.iconText);
 
     // 4. Title
@@ -105,6 +105,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
       fontSize: THEME.typography.corner.size,
       color: style.text,
       fontStyle: '900',
+      fontFamily: THEME.typography.fontFamily,
       align: 'center',
       wordWrap: { width: width - 20 }
     }).setOrigin(0.5);
@@ -112,10 +113,11 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
     // 5. Hint
     const hint = getCornerHint(tile.type);
-    const hintText = scene.add.text(0, 45, hint, {
+    const hintText = scene.add.text(0, 65, hint, {
       fontSize: THEME.typography.corner.hintSize,
       color: style.text,
-      fontStyle: '600'
+      fontStyle: '600',
+      fontFamily: THEME.typography.fontFamily
     }).setOrigin(0.5).setAlpha(0.7);
     this.add(hintText);
   }
@@ -137,26 +139,28 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.add(this.colorStrip);
     }
 
-    const innerY = isTop ? -5 : 5;
+    const innerY = isTop ? -10 : 10;
     const icon = getTileIcon(tile.type, property?.groupId);
-    this.iconText = scene.add.text(0, innerY - 25, icon, { fontSize: '28px' }).setOrigin(0.5);
+    this.iconText = scene.add.text(0, innerY - 45, icon, { fontSize: '44px' }).setOrigin(0.5);
     this.add(this.iconText);
 
     const displayName = tile.shortName || tile.name;
     this.nameText = scene.add.text(0, innerY, displayName, {
       fontSize: THEME.typography.name.size,
       color: THEME.colors.text.PRIMARY,
-      fontStyle: THEME.typography.name.weight,
+      fontStyle: 'bold',
+      fontFamily: THEME.typography.fontFamily,
       align: 'center',
-      wordWrap: { width: width - 15 }
+      wordWrap: { width: width - 10 }
     }).setOrigin(0.5);
     this.add(this.nameText);
 
     let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
-    this.priceText = scene.add.text(0, innerY + 25, priceStr, {
+    this.priceText = scene.add.text(0, innerY + 45, priceStr, {
       fontSize: THEME.typography.price.size,
       color: THEME.colors.text.SECONDARY,
-      fontStyle: THEME.typography.price.weight
+      fontStyle: 'bold',
+      fontFamily: THEME.typography.fontFamily
     }).setOrigin(0.5);
     this.add(this.priceText);
 
@@ -180,26 +184,28 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.add(this.colorStrip);
     }
 
-    const contentX = isLeft ? -15 : 15;
+    const contentX = isLeft ? -10 : 10;
     const icon = getTileIcon(tile.type, property?.groupId);
-    this.iconText = scene.add.text(contentX - 45, 0, icon, { fontSize: '24px' }).setOrigin(0.5);
+    this.iconText = scene.add.text(contentX - 45, 0, icon, { fontSize: '44px' }).setOrigin(0.5);
     this.add(this.iconText);
 
     const displayName = tile.shortName || tile.name;
-    this.nameText = scene.add.text(contentX, -10, displayName, {
+    this.nameText = scene.add.text(contentX - 15, -15, displayName, {
       fontSize: THEME.typography.name.size,
       color: THEME.colors.text.PRIMARY,
-      fontStyle: THEME.typography.name.weight,
+      fontStyle: 'bold',
+      fontFamily: THEME.typography.fontFamily,
       align: 'left',
-      wordWrap: { width: width - 80 }
+      wordWrap: { width: width - 75 }
     }).setOrigin(0, 0.5);
     this.add(this.nameText);
 
     let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
-    this.priceText = scene.add.text(contentX, 15, priceStr, {
+    this.priceText = scene.add.text(contentX - 15, 25, priceStr, {
       fontSize: THEME.typography.price.size,
       color: THEME.colors.text.SECONDARY,
-      fontStyle: THEME.typography.price.weight
+      fontStyle: 'bold',
+      fontFamily: THEME.typography.fontFamily
     }).setOrigin(0, 0.5);
     this.add(this.priceText);
 
@@ -208,20 +214,18 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
   private getStripColor(tile: BoardTile, property: Property | null): number | null {
     if (property) {
-      if (property.groupId === PropertyGroup.STATION) return THEME.colors.types.STATION;
-      if (property.groupId === PropertyGroup.UTILITY) return THEME.colors.types.UTILITY;
-      return THEME.colors.groups[property.groupId as keyof typeof THEME.colors.groups];
+      // Only normal property groups (BROWN, RED, etc.) have color strips
+      if (property.groupId === PropertyGroup.STATION) return null;
+      if (property.groupId === PropertyGroup.UTILITY) return null;
+      return THEME.colors.groups[property.groupId as keyof typeof THEME.colors.groups] || null;
     }
-    if (tile.type === TileType.CHANCE) return THEME.colors.types.CHANCE;
-    if (tile.type === TileType.FORTUNE) return THEME.colors.types.FORTUNE;
-    if (tile.type === TileType.TAX) return THEME.colors.types.TAX;
     return null;
   }
 
   private applyTypeBackground(tile: BoardTile) {
-    if (tile.type === TileType.FORTUNE) this.background.setFillStyle(0xFFF1F2);
-    if (tile.type === TileType.CHANCE) this.background.setFillStyle(0xECFDF5);
-    if (tile.type === TileType.TAX) this.background.setFillStyle(0xFFFBEB);
+    if (tile.backgroundColor !== undefined) {
+      this.background.setFillStyle(tile.backgroundColor);
+    }
   }
 
   private ownerBadge?: Phaser.GameObjects.Arc;

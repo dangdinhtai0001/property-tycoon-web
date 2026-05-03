@@ -53,13 +53,19 @@ export class BoardScene extends Phaser.Scene {
     this.tokensContainer = this.add.container(0, 0);
     this.diceContainer = this.add.container(0, 0);
 
-    // Setup Board Surface
+    // Setup Board Background Image
+    const bg = this.add.image(BoardScene.BOARD_W / 2, BoardScene.BOARD_H / 2, 'board-bg');
+    bg.setDisplaySize(BoardScene.BOARD_W, BoardScene.BOARD_H);
+    bg.setAlpha(0.3); 
+    this.boardContainer.add(bg);
+
+    // Subtle overlay to make it look "integrated"
     this.boardSurface = this.add.rectangle(
       BoardScene.BOARD_W / 2,
       BoardScene.BOARD_H / 2,
       BoardScene.BOARD_W,
       BoardScene.BOARD_H,
-      0xffffff, 0
+      0xffffff, 0.1
     );
     this.boardContainer.add(this.boardSurface);
 

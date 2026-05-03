@@ -17,6 +17,7 @@ export class PreloaderScene extends Phaser.Scene {
     // Load assets
     this.load.svg('home', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/home.svg');
     this.load.svg('landmark', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/landmark.svg');
+    this.load.image('board-bg', '/assets/bg/bg-02.png');
   }
 
   create(): void {
@@ -98,7 +99,7 @@ export class PreloaderScene extends Phaser.Scene {
     this.tweens.add({
       targets: progress,
       value: 1,
-      duration: 1500, // 1.5s total "loading" feel
+      duration: 500, 
       ease: 'Cubic.easeInOut',
 
       onUpdate: () => {
