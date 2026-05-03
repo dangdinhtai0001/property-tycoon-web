@@ -33,8 +33,8 @@ export const Board: React.FC = () => {
           border-radius: 2rem;
         }
       `}</style>
-      <div 
-        id="phaser-game-container" 
+      <div
+        id="phaser-game-container"
         ref={containerRef}
         className="w-full h-full max-w-[1200px] max-h-[1200px] aspect-square bg-white shadow-[0_50px_100px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden border-8 border-white"
       />
