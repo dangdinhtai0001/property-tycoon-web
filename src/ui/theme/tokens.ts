@@ -70,7 +70,7 @@ export const THEME = {
     }
   },
   spacing: {
-    stripHeight: 8,
+    stripHeight: 25,
     padding: 6,
     radius: 12,
   },
