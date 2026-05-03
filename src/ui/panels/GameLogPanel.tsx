@@ -16,7 +16,7 @@ export const GameLogPanel: React.FC<GameLogPanelProps> = ({ onClose }) => {
         <div className="flex items-center gap-2">
           <ScrollText size={16} className="text-blue-600" />
           <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">
-            Nhật ký ván đấu
+            Lịch sử
           </h2>
         </div>
         <div className="flex items-center gap-2">

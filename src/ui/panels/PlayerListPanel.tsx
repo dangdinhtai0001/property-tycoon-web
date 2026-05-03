@@ -38,7 +38,7 @@ export const PlayerListPanel: React.FC = () => {
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between px-3 flex-none">
         <h2 className="text-sm font-black text-slate-400 tracking-widest uppercase italic">Danh sách người chơi</h2>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{state.players.length} PLAYERS</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{state.players.length} NGƯỜI CHƠI</span>
       </div>
 
       <div className="flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-10">

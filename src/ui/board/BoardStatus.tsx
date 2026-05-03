@@ -35,6 +35,9 @@ export const BoardStatus: React.FC = () => {
       case Phase.END_TURN: return 'Kết thúc lượt';
       case Phase.AUCTION: return 'Đang đấu giá';
       case Phase.TRADE: return 'Đang giao dịch';
+      case Phase.SETUP: return 'Cài đặt';
+      case Phase.GAME_OVER: return 'Kết thúc trò chơi';
+      case Phase.SHOWING_CARD: return 'Xem thẻ';
       default: return phase.replace(/_/g, ' ');
     }
   };
@@ -76,7 +79,7 @@ export const BoardStatus: React.FC = () => {
       default:
         return {
           title: 'Đang diễn ra',
-          text: 'Vui lòng chờ xử lý hệ thống...',
+          text: 'Vui lòng chờ lượt chơi hoặc xử lý từ hệ thống...',
           color: 'text-slate-600',
           bg: 'bg-white/90'
         };

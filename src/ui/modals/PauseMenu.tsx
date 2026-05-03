@@ -77,7 +77,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({ isOpen, onClose }) => {
               className="w-full py-4 bg-white text-red-600 font-bold rounded-2xl border-2 border-red-50 hover:bg-red-50 transition-all flex items-center justify-center gap-3"
             >
               <LogOut size={20} />
-              THOÁT RA MENU
+              THOÁT RA TRANG CHỦ
             </button>
           </div>
 

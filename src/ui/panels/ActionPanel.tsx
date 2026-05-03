@@ -207,19 +207,13 @@ export const ActionPanel: React.FC = () => {
     }
 
     // End Turn (Always available as a fallback after moving)
-    const canEndTurn = state.phase === Phase.END_TURN || state.phase === Phase.BUY_DECISION || state.phase === Phase.BUILD_DECISION;
+    const canEndTurn = state.phase === Phase.END_TURN || state.phase === Phase.BUILD_DECISION;
     if (canEndTurn) {
       actions.push(
         <button
           key="end-turn-secondary"
           onClick={() => {
-            if (state.phase === Phase.BUY_DECISION) {
-              dispatch({ type: 'DECLINE_BUY_PROPERTY' });
-              // Small delay to ensure state updates before ending turn if needed, 
-              // but gameReducer should handle Phase.END_TURN automatically after decline.
-            } else {
-              dispatch({ type: 'END_TURN' });
-            }
+            dispatch({ type: 'END_TURN' });
           }}
           className="flex-1 min-w-[120px] p-4 bg-slate-900 text-white font-black rounded-2xl flex items-center justify-center gap-2 text-xs shadow-lg"
         >
@@ -266,7 +260,7 @@ export const ActionPanel: React.FC = () => {
     <div className="flex flex-col gap-4">
       {/* Dynamic Header */}
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-sm font-black text-slate-400 tracking-widest uppercase italic">Phòng điều khiển</h2>
+        <h2 className="text-sm font-black text-slate-400 tracking-widest uppercase italic">Bảng điều khiển</h2>
         {state.lastDiceRoll && state.phase !== Phase.WAITING_TO_ROLL && (
           <div className="flex gap-1.5">
             {state.lastDiceRoll.map((d, i) => (

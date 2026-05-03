@@ -78,7 +78,7 @@ export const EndGameScreen: React.FC = () => {
           className="px-10 py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 shadow-2xl shadow-slate-200 transform hover:-translate-y-1"
         >
           <RotateCcw size={24} />
-          QUAY LẠI MENU CHÍNH
+          QUAY LẠI TRANG CHỦ
         </button>
 
       </div>

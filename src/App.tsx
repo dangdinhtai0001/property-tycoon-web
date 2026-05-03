@@ -53,9 +53,9 @@ function App() {
         <div className="flex items-center gap-6 pointer-events-auto">
           <div className="bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
             <h1 className="text-2xl font-black tracking-tight text-slate-800 leading-none">
-              PROPERTY <span className="text-blue-600">TYCOON</span>
+              TỶ <span className="text-blue-600">PHÚ</span>
             </h1>
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Immersive Board Engine</p>
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Mô phỏng Bàn cờ Chân thực</p>
           </div>
         </div>
 
@@ -128,7 +128,7 @@ function App() {
           className="pointer-events-auto p-4 bg-white/80 border border-white text-slate-700 rounded-[1.5rem] hover:bg-white transition-all shadow-xl backdrop-blur-md flex items-center gap-2"
         >
           <Menu size={20} />
-          <span className="font-bold text-sm">MENU</span>
+          <span className="font-bold text-sm">DANH MỤC</span>
         </motion.button>
       </div>
 

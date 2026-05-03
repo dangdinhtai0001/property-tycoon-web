@@ -31,9 +31,9 @@ export const MainMenu: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-[70vh] gap-12 bg-slate-50">
       <div className="text-center space-y-2">
         <h1 className="text-7xl font-black text-slate-900 tracking-tighter drop-shadow-sm">
-          PROPERTY <span className="text-blue-600">TYCOON</span>
+          TỶ <span className="text-blue-600">PHÚ</span>
         </h1>
-        <p className="text-xl text-slate-400 font-semibold uppercase tracking-[0.2em]">Ambitious MVP</p>
+        <p className="text-xl text-slate-400 font-semibold uppercase tracking-[0.2em]">Trải nghiệm Đỉnh cao</p>
       </div>
 
       <div className="flex flex-col gap-5 w-80">
@@ -69,7 +69,7 @@ export const MainMenu: React.FC = () => {
       )}
 
       <div className="mt-12 text-slate-400 text-sm font-medium">
-        v1.1 — Finance & Polish Update
+        v1.1 — Cập nhật Tài chính & Hoàn thiện
       </div>
     </div>
   );
