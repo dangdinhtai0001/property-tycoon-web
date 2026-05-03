@@ -10,11 +10,19 @@ import { rollDice } from '../../game-engine/rules/diceRules';
 
 export const ActionPanel: React.FC = () => {
   const { state, dispatch, setShowTradeModal } = useGameStore();
-  const { enqueue } = useAnimationQueue();
+  const { enqueue, isAnimating, queue } = useAnimationQueue();
   const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId)!;
   const currentTile = state.board[currentPlayer.position];
+  
+  const [isRolling, setIsRolling] = React.useState(false);
+
+  // Block actions if any animation is playing or in queue
+  const isBlocked = isRolling || isAnimating || queue.length > 0;
 
   const handleRollDice = () => {
+    if (isBlocked) return;
+    setIsRolling(true);
+    
     const result = rollDice();
     enqueue({
       type: 'DICE_ROLL',
@@ -28,6 +36,7 @@ export const ActionPanel: React.FC = () => {
         }
         await new Promise(resolve => setTimeout(resolve, 300));
         dispatch({ type: 'RESOLVE_TILE' });
+        setIsRolling(false);
       }
     });
   };
@@ -37,13 +46,14 @@ export const ActionPanel: React.FC = () => {
       case Phase.WAITING_TO_ROLL:
         return (
           <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isBlocked ? { scale: 1.02, y: -2 } : {}}
+            whileTap={!isBlocked ? { scale: 0.98 } : {}}
+            disabled={isBlocked}
             onClick={handleRollDice}
-            className="w-full py-4 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-200 flex flex-col items-center justify-center gap-1.5"
+            className="w-full py-3 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-200 flex flex-col items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Dices size={28} />
-            <span className="text-base tracking-wider uppercase">Đổ xúc xắc</span>
+            <Dices size={24} />
+            <span className="text-sm tracking-wider uppercase">{isBlocked ? 'Đang xử lý...' : 'Đổ xúc xắc'}</span>
           </motion.button>
         );
 
@@ -52,9 +62,9 @@ export const ActionPanel: React.FC = () => {
         const canAfford = currentPlayer.cash >= property.price;
         return (
           <motion.button
-            whileHover={canAfford ? { scale: 1.02, y: -2 } : {}}
-            whileTap={canAfford ? { scale: 0.98 } : {}}
-            disabled={!canAfford}
+            whileHover={canAfford && !isBlocked ? { scale: 1.02, y: -2 } : {}}
+            whileTap={canAfford && !isBlocked ? { scale: 0.98 } : {}}
+            disabled={!canAfford || isBlocked}
             onClick={() => {
               const remainingCash = currentPlayer.cash - property.price;
               enqueue({
@@ -69,10 +79,10 @@ export const ActionPanel: React.FC = () => {
                 onComplete: () => dispatch({ type: 'BUY_PROPERTY', payload: { propertyId: property.id } })
               });
             }}
-            className="w-full py-4 bg-green-600 text-white font-black rounded-3xl shadow-xl shadow-green-200 flex flex-col items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-green-600 text-white font-black rounded-3xl shadow-xl shadow-green-200 flex flex-col items-center justify-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <CheckCircle size={28} />
-            <span className="text-base tracking-wider uppercase">Mua {property.name} (${property.price})</span>
+            <CheckCircle size={24} />
+            <span className="text-sm tracking-wider uppercase">Mua {property.name} (${property.price})</span>
           </motion.button>
         );
       }
@@ -82,14 +92,14 @@ export const ActionPanel: React.FC = () => {
         const canPay = currentPlayer.cash >= debtAmount;
         return (
           <motion.button
-            whileHover={canPay ? { scale: 1.02, y: -2 } : {}}
-            whileTap={canPay ? { scale: 0.98 } : {}}
-            disabled={!canPay}
+            whileHover={canPay && !isBlocked ? { scale: 1.02, y: -2 } : {}}
+            whileTap={canPay && !isBlocked ? { scale: 0.98 } : {}}
+            disabled={!canPay || isBlocked}
             onClick={() => dispatch({ type: 'RESOLVE_DEBT' })}
-            className="w-full py-4 bg-rose-600 text-white font-black rounded-3xl shadow-xl shadow-rose-200 flex flex-col items-center justify-center gap-1.5 disabled:opacity-40"
+            className="w-full py-3 bg-rose-600 text-white font-black rounded-3xl shadow-xl shadow-rose-200 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
           >
-            <Coins size={28} />
-            <span className="text-base tracking-wider uppercase">Trả nợ (${debtAmount})</span>
+            <Coins size={24} />
+            <span className="text-sm tracking-wider uppercase">Trả nợ (${debtAmount})</span>
           </motion.button>
         );
       }
@@ -97,13 +107,14 @@ export const ActionPanel: React.FC = () => {
       case Phase.END_TURN:
         return (
           <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isBlocked ? { scale: 1.02, y: -2 } : {}}
+            whileTap={!isBlocked ? { scale: 0.98 } : {}}
+            disabled={isBlocked}
             onClick={() => dispatch({ type: 'END_TURN' })}
-            className="w-full py-4 bg-slate-900 text-white font-black rounded-3xl shadow-xl shadow-slate-200 flex flex-col items-center justify-center gap-1.5"
+            className="w-full py-3 bg-slate-900 text-white font-black rounded-3xl shadow-xl shadow-slate-200 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
           >
-            <CheckCircle size={28} />
-            <span className="text-base tracking-wider uppercase">Kết thúc lượt</span>
+            <CheckCircle size={24} />
+            <span className="text-sm tracking-wider uppercase">Kết thúc lượt</span>
           </motion.button>
         );
 
@@ -135,10 +146,10 @@ export const ActionPanel: React.FC = () => {
         <button
           key="jail-fine"
           onClick={() => dispatch({ type: 'PAY_FINE' })}
-          disabled={currentPlayer.cash < 50}
-          className="flex-1 min-w-[120px] p-4 bg-amber-100 text-amber-700 font-black rounded-2xl border border-amber-200 flex items-center justify-center gap-2 text-xs"
+          disabled={currentPlayer.cash < 50 || isBlocked}
+          className="flex-1 min-w-[120px] p-3 bg-amber-100 text-amber-700 font-black rounded-2xl border border-amber-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
         >
-          <Coins size={16} /> RA TÙ (50$)
+          <Coins size={14} /> RA TÙ (50$)
         </button>
       );
     }
@@ -149,9 +160,10 @@ export const ActionPanel: React.FC = () => {
         <button
           key="skip-buy"
           onClick={() => dispatch({ type: 'DECLINE_BUY_PROPERTY' })}
-          className="flex-1 min-w-[120px] p-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 flex items-center justify-center gap-2 text-xs"
+          disabled={isBlocked}
+          className="flex-1 min-w-[120px] p-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
         >
-          <Ban size={16} /> BỎ QUA
+          <Ban size={14} /> BỎ QUA
         </button>
       );
     }
@@ -162,9 +174,10 @@ export const ActionPanel: React.FC = () => {
         <button
           key="trade"
           onClick={() => setShowTradeModal(true)}
-          className="flex-1 min-w-[120px] p-4 bg-white text-blue-600 font-bold rounded-2xl border border-blue-100 hover:bg-blue-50 flex items-center justify-center gap-2 text-xs shadow-sm"
+          disabled={isBlocked}
+          className="flex-1 min-w-[120px] p-3 bg-white text-blue-600 font-bold rounded-2xl border border-blue-100 hover:bg-blue-50 flex items-center justify-center gap-2 text-[10px] shadow-sm disabled:opacity-50"
         >
-          <Handshake size={16} /> GIAO DỊCH
+          <Handshake size={14} /> GIAO DỊCH
         </button>
       );
     }
@@ -180,9 +193,10 @@ export const ActionPanel: React.FC = () => {
           <button
             key="build"
             onClick={() => dispatch({ type: 'BUILD', payload: { propertyId: prop.id } })}
-            className="flex-1 min-w-[120px] p-4 bg-orange-100 text-orange-700 font-bold rounded-2xl border border-orange-200 flex items-center justify-center gap-2 text-xs"
+            disabled={isBlocked}
+            className="flex-1 min-w-[120px] p-3 bg-orange-100 text-orange-700 font-bold rounded-2xl border border-orange-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
           >
-            <Home size={16} /> XÂY NHÀ
+            <Home size={14} /> XÂY NHÀ
           </button>
         );
       }
@@ -193,10 +207,10 @@ export const ActionPanel: React.FC = () => {
           <button
             key="mortgage"
             onClick={() => dispatch({ type: 'MORTGAGE_PROPERTY', payload: { propertyId: prop.id } })}
-            disabled={!canMortgage(state, prop.id)}
-            className="flex-1 min-w-[120px] p-4 bg-slate-100 text-slate-700 font-bold rounded-2xl border border-slate-200 flex items-center justify-center gap-2 text-xs"
+            disabled={!canMortgage(state, prop.id) || isBlocked}
+            className="flex-1 min-w-[120px] p-3 bg-slate-100 text-slate-700 font-bold rounded-2xl border border-slate-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
           >
-            <Landmark size={16} /> THẾ CHẤP
+            <Landmark size={14} /> THẾ CHẤP
           </button>
         );
       } else {
@@ -204,10 +218,10 @@ export const ActionPanel: React.FC = () => {
           <button
             key="unmortgage"
             onClick={() => dispatch({ type: 'UNMORTGAGE_PROPERTY', payload: { propertyId: prop.id } })}
-            disabled={!canUnmortgage(state, prop.id)}
-            className="flex-1 min-w-[120px] p-4 bg-emerald-100 text-emerald-700 font-bold rounded-2xl border border-emerald-200 flex items-center justify-center gap-2 text-xs"
+            disabled={!canUnmortgage(state, prop.id) || isBlocked}
+            className="flex-1 min-w-[120px] p-3 bg-emerald-100 text-emerald-700 font-bold rounded-2xl border border-emerald-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
           >
-            <RotateCcw size={16} /> GIẢI CHẤP
+            <RotateCcw size={14} /> GIẢI CHẤP
           </button>
         );
       }
@@ -222,9 +236,10 @@ export const ActionPanel: React.FC = () => {
           onClick={() => {
             dispatch({ type: 'END_TURN' });
           }}
-          className="flex-1 min-w-[120px] p-4 bg-slate-900 text-white font-black rounded-2xl flex items-center justify-center gap-2 text-xs shadow-lg"
+          disabled={isBlocked}
+          className="flex-1 min-w-[120px] p-3 bg-slate-900 text-white font-black rounded-2xl flex items-center justify-center gap-2 text-[10px] shadow-lg disabled:opacity-50"
         >
-          <CheckCircle size={16} /> KẾT THÚC LƯỢT
+          <CheckCircle size={14} /> KẾT THÚC LƯỢT
         </button>
       );
     }
@@ -264,7 +279,7 @@ export const ActionPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* Dynamic Header */}
       <div className="flex items-center justify-between px-2">
         <h2 className="text-sm font-black text-slate-400 tracking-widest uppercase italic">Bảng điều khiển</h2>
@@ -280,7 +295,7 @@ export const ActionPanel: React.FC = () => {
       </div>
 
       <div 
-        className="backdrop-blur-sm p-4 flex flex-col gap-4 transition-all duration-300"
+        className="backdrop-blur-sm p-3 flex flex-col gap-3 transition-all duration-300"
         style={{
           backgroundColor: 'var(--panel-bg)',
           borderRadius: 'var(--panel-radius)',
@@ -303,7 +318,7 @@ export const ActionPanel: React.FC = () => {
         </div>
 
         {/* Secondary Actions Area */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <div className="h-[1px] flex-1 bg-slate-100" />
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">Hành động bổ sung</span>
@@ -317,13 +332,13 @@ export const ActionPanel: React.FC = () => {
         </div>
 
         {/* Dynamic Hint Area */}
-        <div className="bg-slate-50 rounded-3xl p-4 border border-slate-100 flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-            <Info size={16} className="text-blue-600" />
+        <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 flex items-start gap-2.5">
+          <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+            <Info size={14} className="text-blue-600" />
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Gợi ý lượt chơi</span>
-            <p className="text-xs font-bold text-slate-600 leading-relaxed">{getPhaseHint()}</p>
+          <div className="flex flex-col gap-0">
+            <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Gợi ý lượt chơi</span>
+            <p className="text-[11px] font-bold text-slate-600 leading-tight mt-1">{getPhaseHint()}</p>
           </div>
         </div>
       </div>

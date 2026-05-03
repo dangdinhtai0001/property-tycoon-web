@@ -28,25 +28,25 @@ export const Board: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Calculate board size based on available space and aspect ratio (1420:1120)
+  // Calculate board size based on available space and aspect ratio (1940:1380)
   const boardDims = useMemo(() => {
-    if (dimensions.width === 0) return { w: 760, h: 600 };
+    if (dimensions.width === 0) return { w: 981, h: 700 };
 
     const padding = dimensions.height < 700 ? 0 : (dimensions.height < 800 ? 8 : 32);
     const availW = dimensions.width - padding;
     const availH = dimensions.height - padding;
-    const ratio = 1420 / 1120;
+    const ratio = 1940 / 1380;
 
     let w, h;
     if (availW / availH > ratio) {
       h = Math.min(availH, 950); 
       w = h * ratio;
     } else {
-      w = Math.min(availW, 1200); 
+      w = Math.min(availW, 1400); 
       h = w / ratio;
     }
 
-    return { w: Math.max(w, 507), h: Math.max(h, 400) };
+    return { w: Math.max(w, 562), h: Math.max(h, 400) };
   }, [dimensions]);
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export const Board: React.FC = () => {
       <div 
         className="relative flex items-center justify-center shadow-2xl transition-all duration-500 ease-out"
         style={{
-          width: 'min(100%, 1500px)',
+          width: 'min(100%, 1860px)',
           height: 'min(100%, 1200px)',
           backgroundColor: 'rgba(255, 255, 255, 0.4)',
           backdropFilter: 'blur(12px)',
