@@ -1,10 +1,14 @@
 import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
-import { BuildingSprite } from '../sprites/BuildingSprite';
-import { TileType } from '../../game-engine/types/game';
-import type { GameState, Property, Player } from '../../game-engine/types/game';
+import { Phase } from '../../game-engine/types/game';
+import type { GameState, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
+import { useGameStore } from '../../app/store/useGameStore';
+import {
+  getBoardTileCount,
+  getBoardTileLayout,
+} from '../../game-engine/utils/boardGeometry';
 
 export class BoardScene extends Phaser.Scene {
   private tiles: TileSprite[] = [];
@@ -15,6 +19,26 @@ export class BoardScene extends Phaser.Scene {
   private tokensContainer!: Phaser.GameObjects.Container;
   private diceContainer!: Phaser.GameObjects.Container;
   private boardContainer!: Phaser.GameObjects.Container;
+  private boardSurface!: Phaser.GameObjects.Rectangle;
+  private lastPlayersState: Map<string, { cash: number }> = new Map();
+  private lastGlobalPurchaseId: string | undefined = undefined;
+
+  // --- Dynamic Geometry Configuration ---
+  public static readonly GEOMETRY = { cols: 14, rows: 12 };
+
+  private static readonly CORNER_TILE_SIZE = 180;
+
+  private static readonly VERTICAL_TILE_W = 130;   // Width of Top/Bot inner tiles
+
+  private static readonly HORIZONTAL_TILE_H = 100;  // Height of Left/Right inner tiles
+
+
+  private static readonly BOARD_W = BoardScene.CORNER_TILE_SIZE * 2 + BoardScene.VERTICAL_TILE_W * (BoardScene.GEOMETRY.cols - 2);
+  private static readonly BOARD_H = BoardScene.CORNER_TILE_SIZE * 2 + BoardScene.HORIZONTAL_TILE_H * (BoardScene.GEOMETRY.rows - 2);
+
+  public static getTileLayout(index: number) {
+    return getBoardTileLayout(index, BoardScene.GEOMETRY);
+  }
 
   constructor() {
     super('BoardScene');
@@ -26,16 +50,32 @@ export class BoardScene extends Phaser.Scene {
     this.buildingsContainer = this.add.container(0, 0);
     this.tokensContainer = this.add.container(0, 0);
     this.diceContainer = this.add.container(0, 0);
-    
-    // Add in order: Tiles (bottom) -> Buildings -> Tokens -> Dice (top)
+
+    // Setup Board Background Image
+    const bg = this.add.image(BoardScene.BOARD_W / 2, BoardScene.BOARD_H / 2, 'board-bg');
+    bg.setDisplaySize(BoardScene.BOARD_W, BoardScene.BOARD_H);
+    bg.setAlpha(0.3); 
+    this.boardContainer.add(bg);
+
+    // Subtle overlay to make it look "integrated"
+    this.boardSurface = this.add.rectangle(
+      BoardScene.BOARD_W / 2,
+      BoardScene.BOARD_H / 2,
+      BoardScene.BOARD_W,
+      BoardScene.BOARD_H,
+      0xffffff, 0.1
+    );
+    this.boardContainer.add(this.boardSurface);
+
+    // Add in order: Tiles (bottom) -> Buildings -> Borders -> Tokens -> Dice (top)
     this.boardContainer.add(this.tilesContainer);
     this.boardContainer.add(this.buildingsContainer);
     this.boardContainer.add(this.tokensContainer);
-    
+
     // Dice should be above everything
     this.add.existing(this.diceContainer);
     this.diceContainer.setDepth(1000);
-    
+
     // Center logo is now handled by React overlay (BoardStatus component)
 
 
@@ -58,7 +98,7 @@ export class BoardScene extends Phaser.Scene {
     const centerY = this.cameras.main.height / 2;
 
     this.diceContainer.removeAll(true);
-    
+
     const dice1 = new DiceSprite(this, centerX - 60, centerY, 100);
     const dice2 = new DiceSprite(this, centerX + 60, centerY, 100);
     this.diceContainer.add([dice1, dice2]);
@@ -87,7 +127,7 @@ export class BoardScene extends Phaser.Scene {
       stroke: '#ffffff',
       strokeThickness: 8
     }).setOrigin(0.5).setAlpha(0).setScale(0);
-    
+
     this.diceContainer.add(sumText);
 
     this.tweens.add({
@@ -114,26 +154,38 @@ export class BoardScene extends Phaser.Scene {
   }
 
   private updateBoard(state: GameState) {
-    // Adjusted sizes to better fit the 1000x1000 coordinate space
-    const tileSize = 82;
-    const cornerSize = 130;
-    const boardWidth = cornerSize * 2 + tileSize * 9;
-    const offset = (this.cameras.main.width - boardWidth) / 2;
+    const offsetW = (this.cameras.main.width - BoardScene.BOARD_W) / 2;
+    const offsetH = (this.cameras.main.height - BoardScene.BOARD_H) / 2;
+
+    this.boardContainer.setPosition(offsetW, offsetH);
 
     // Clear and redraw tiles if board configuration changed or first load
     if (this.tiles.length === 0) {
-      state.board.forEach((tile) => {
-        const pos = this.getTilePosition(tile.position, offset, tileSize, cornerSize);
-        const sprite = new TileSprite(this, pos.x, pos.y, pos.w, pos.h, tile);
+      state.board.forEach((tile, index) => {
+        const layout = BoardScene.getTileLayout(index);
+        const pos = this.getTilePosition(layout);
+        const sprite = new TileSprite(this, pos.x, pos.y, pos.w, pos.h, tile, layout);
         this.tiles.push(sprite);
         this.tilesContainer.add(sprite);
       });
     }
 
-    // Update tile statuses (Ownership, Buildings, Mortgage)
+    // Update tile statuses (Ownership, Buildings, Mortgage, Highlights)
+    const showStatus = state.phase !== Phase.SETUP;
     state.board.forEach((tile, index) => {
-      if (this.tiles[index]) {
-        this.tiles[index].updateStatus(tile, state.players);
+      const sprite = this.tiles[index];
+      if (sprite) {
+        sprite.updateStatus(tile, state.players, showStatus);
+
+        // Highlight current tile (where the current player is)
+        const isCurrentTile = state.players.find(p => p.id === state.currentPlayerId)?.position === index;
+        const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
+        const highlightColor = currentPlayer ? Phaser.Display.Color.HexStringToColor(currentPlayer.color).color : 0xffffff;
+
+        sprite.setHighlighted(isCurrentTile, highlightColor);
+        if (isCurrentTile) {
+          this.tilesContainer.bringToTop(sprite);
+        }
       }
     });
 
@@ -145,19 +197,31 @@ export class BoardScene extends Phaser.Scene {
     });
 
     state.players.forEach((player) => {
-      const tilePos = this.getTilePosition(player.position, offset, tileSize, cornerSize);
-      
+      const layout = BoardScene.getTileLayout(player.position);
+      const tilePos = this.getTilePosition(layout);
+
       // Calculate stacking offset
       const playersOnThisTile = playersByPosition[player.position] || [];
       const playerIndex = playersOnThisTile.findIndex(p => p.id === player.id);
       let stackOffsetX = 0;
       let stackOffsetY = 0;
-      
+
       if (playersOnThisTile.length > 1) {
-        const angle = (playerIndex / playersOnThisTile.length) * Math.PI * 2;
-        const radius = 15;
-        stackOffsetX = Math.cos(angle) * radius;
-        stackOffsetY = Math.sin(angle) * radius;
+        const count = playersOnThisTile.length;
+        const spacing = 18;
+
+        if (count === 2) {
+          stackOffsetX = playerIndex === 0 ? -spacing / 2 : spacing / 2;
+        } else if (count === 3) {
+          const angle = (playerIndex / 3) * Math.PI * 2 - Math.PI / 2;
+          stackOffsetX = Math.cos(angle) * spacing;
+          stackOffsetY = Math.sin(angle) * spacing;
+        } else if (count >= 4) {
+          const row = Math.floor(playerIndex / 2);
+          const col = playerIndex % 2;
+          stackOffsetX = (col - 0.5) * spacing;
+          stackOffsetY = (row - 0.5) * spacing;
+        }
       }
 
       const targetX = tilePos.x + stackOffsetX;
@@ -165,121 +229,134 @@ export class BoardScene extends Phaser.Scene {
 
       let token = this.tokens.get(player.id);
       const lastPos = this.playerPositions.get(player.id);
-      
+
       if (!token) {
         token = new TokenSprite(this, targetX, targetY, player);
         this.tokens.set(player.id, token);
         this.tokensContainer.add(token);
         this.playerPositions.set(player.id, player.position);
       }
-      
-      token.setSelected(player.id === state.currentPlayerId);
 
-      if (lastPos !== undefined && lastPos !== player.position) {
-        // Calculate path
-        const path: {x: number, y: number}[] = [];
-        let current = lastPos;
+      if (token) {
+        token.setVisible(showStatus);
         
-        // Determine direction: forward or backward
-        const forwardDist = (player.position - lastPos + 40) % 40;
-        const backwardDist = (lastPos - player.position + 40) % 40;
-        
-        // If backward distance is shorter and small, move backward (e.g. "Go back 3 spaces")
-        const isBackward = backwardDist < forwardDist && backwardDist < 10;
-        
-        while (current !== player.position) {
-          if (isBackward) {
-            current = (current - 1 + 40) % 40;
-          } else {
-            current = (current + 1) % 40;
+        // Phase 4: Token States & Highlights
+        const isCurrentPlayer = player.id === state.currentPlayerId;
+        token.setSelected(isCurrentPlayer);
+        token.setJailed(player.jailTurns > 0);
+        token.setBankrupt(player.isBankrupt || false);
+        if (isCurrentPlayer && (player.jailTurns > 0 || player.isBankrupt)) {
+          useGameStore.getState().setTokenAnimState('sad');
+        }
+
+        // Ensure current player is always on top
+        if (isCurrentPlayer) {
+          this.tokensContainer.bringToTop(token);
+        }
+
+        // Xử lý hoạt ảnh Win/Sad dựa trên thay đổi trạng thái
+        const lastState = this.lastPlayersState.get(player.id);
+        const hasNewPurchase = state.lastPurchaseId !== this.lastGlobalPurchaseId && state.lastPurchaseId !== undefined;
+        const isBuyer = hasNewPurchase && state.currentPlayerId === player.id;
+
+        const { setTokenAnimState } = useGameStore.getState();
+        const isCurrentPlayerToken = player.id === state.currentPlayerId;
+
+        if (lastState) {
+          if (isBuyer) {
+            token.setWinTemporarily(2000);
+            if (isCurrentPlayerToken) {
+              setTokenAnimState('win');
+              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+            }
+          } else if (player.cash < lastState.cash && !isBuyer) {
+            token.setSadTemporarily(2000);
+            if (isCurrentPlayerToken) {
+              setTokenAnimState('sad');
+              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+            }
           }
-          
-          const p = this.getTilePosition(current, offset, tileSize, cornerSize);
-          
-          // Apply stacking offset only to the final destination
-          const ox = (current === player.position) ? stackOffsetX : 0;
-          const oy = (current === player.position) ? stackOffsetY : 0;
-          
-          path.push({ x: p.x + ox, y: p.y + oy });
-          
-          // Safety break
-          if (path.length > 40) break;
         }
+        this.lastPlayersState.set(player.id, { cash: player.cash });
 
-        token.moveAlongPath(path);
-        this.playerPositions.set(player.id, player.position);
-      } else {
-        // Just adjust stacking if needed without full path
-        const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
-        if (dist > 2) {
-          token.moveToPosition(targetX, targetY, 300);
-        }
-      }
-    });
+        // Xử lý di chuyển
+        if (lastPos !== undefined && lastPos !== player.position) {
+          const path: { x: number, y: number }[] = [];
+          let current = lastPos;
+          const totalTiles = getBoardTileCount(BoardScene.GEOMETRY);
+          const forwardDist = (player.position - lastPos + totalTiles) % totalTiles;
+          const backwardDist = (lastPos - player.position + totalTiles) % totalTiles;
+          const isBackward = backwardDist < forwardDist && backwardDist < 10;
 
-    // Update buildings
-    this.buildingsContainer.removeAll(true);
-    state.board.forEach((tile) => {
-      if (tile.type === TileType.PROPERTY) {
-        const property = tile as Property;
-        if (property.buildingLevel && property.buildingLevel > 0) {
-          const tilePos = this.getTilePosition(tile.position, offset, tileSize, cornerSize);
-          if (property.buildingLevel === 5) {
-            const b = new BuildingSprite(this, tilePos.x + tilePos.w/2 - 25, tilePos.y - tilePos.h/2 + 25, 'hotel');
-            this.buildingsContainer.add(b);
-          } else {
-            for (let i = 0; i < property.buildingLevel; i++) {
-              // Layout houses in a row or grid
-              const offsetX = (i % 2 === 0) ? -15 : 15;
-              const offsetY = (i < 2) ? -15 : 15;
-              const b = new BuildingSprite(this, tilePos.x + offsetX, tilePos.y + offsetY - tilePos.h/4, 'house');
-              this.buildingsContainer.add(b);
+          while (current !== player.position) {
+            current = isBackward ? (current - 1 + totalTiles) % totalTiles : (current + 1) % totalTiles;
+            const layout = BoardScene.getTileLayout(current);
+            const p = this.getTilePosition(layout);
+            const ox = (current === player.position) ? stackOffsetX : 0;
+            const oy = (current === player.position) ? stackOffsetY : 0;
+            path.push({ x: p.x + ox, y: p.y + oy });
+            if (path.length > totalTiles) break;
+          }
+          token.moveAlongPath(path);
+          if (isCurrentPlayerToken) {
+            const moveDuration = path.length * 300;
+            setTokenAnimState('run');
+            setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), moveDuration);
+          }
+          this.playerPositions.set(player.id, player.position);
+        } else {
+          const dist = Phaser.Math.Distance.Between(token.x, token.y, targetX, targetY);
+          if (dist > 1) {
+            token.moveToPosition(targetX, targetY, 300);
+            if (isCurrentPlayerToken) {
+              setTokenAnimState('run');
+              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 300);
             }
           }
         }
       }
     });
+
+    // Cập nhật lại ID mua cuối cùng toàn cục
+    this.lastGlobalPurchaseId = state.lastPurchaseId;
+
+    // Update buildings (Phase 5: Now handled by TileSprite.updateStatus)
+    this.buildingsContainer.removeAll(true);
   }
 
-  private getTilePosition(position: number, offset: number, tileSize: number, cornerSize: number) {
-    const boardSize = cornerSize * 2 + tileSize * 9;
-    let x: number, y: number;
-    let w = tileSize, h = tileSize;
+  private getTilePosition(layout: { col: number, row: number }) {
+    const { col, row } = layout;
+    const { cols, rows } = BoardScene.GEOMETRY;
+    const { VERTICAL_TILE_W, HORIZONTAL_TILE_H, CORNER_TILE_SIZE, BOARD_W, BOARD_H } = BoardScene;
 
-    if (position === 0) { // Start
-      x = boardSize - cornerSize / 2;
-      y = boardSize - cornerSize / 2;
-      w = h = cornerSize;
-    } else if (position < 10) { // Bottom
-      x = boardSize - cornerSize - (position - 0.5) * tileSize;
-      y = boardSize - cornerSize / 2;
-      h = cornerSize;
-    } else if (position === 10) { // Jail
-      x = cornerSize / 2;
-      y = boardSize - cornerSize / 2;
-      w = h = cornerSize;
-    } else if (position < 20) { // Left
-      x = cornerSize / 2;
-      y = boardSize - cornerSize - (position - 10 - 0.5) * tileSize;
-      w = cornerSize;
-    } else if (position === 20) { // Free Parking
-      x = cornerSize / 2;
-      y = cornerSize / 2;
-      w = h = cornerSize;
-    } else if (position < 30) { // Top
-      x = cornerSize + (position - 20 - 0.5) * tileSize;
-      y = cornerSize / 2;
-      h = cornerSize;
-    } else if (position === 30) { // Go to Jail
-      x = boardSize - cornerSize / 2;
-      y = cornerSize / 2;
-      w = h = cornerSize;
-    } else { // Right
-      x = boardSize - cornerSize / 2;
-      y = cornerSize + (position - 30 - 0.5) * tileSize;
-      w = cornerSize;
+    let x: number, y: number;
+    let w: number, h: number;
+
+    // Horizontal Position (X)
+    if (col === 0) {
+      x = CORNER_TILE_SIZE / 2;
+      w = CORNER_TILE_SIZE;
+    } else if (col === cols - 1) {
+      x = BOARD_W - CORNER_TILE_SIZE / 2;
+      w = CORNER_TILE_SIZE;
+    } else {
+      x = CORNER_TILE_SIZE + (col - 0.5) * VERTICAL_TILE_W;
+      w = VERTICAL_TILE_W;
     }
 
-    return { x: x + offset, y: y + offset, w, h };
+    // Vertical Position (Y)
+    if (row === 0) {
+      y = CORNER_TILE_SIZE / 2;
+      h = CORNER_TILE_SIZE;
+    } else if (row === rows - 1) {
+      y = BOARD_H - CORNER_TILE_SIZE / 2;
+      h = CORNER_TILE_SIZE;
+    } else {
+      y = CORNER_TILE_SIZE + (row - 0.5) * HORIZONTAL_TILE_H;
+      h = HORIZONTAL_TILE_H;
+    }
+
+    return { x, y, w, h };
   }
+
 }

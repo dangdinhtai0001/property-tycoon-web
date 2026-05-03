@@ -22,8 +22,8 @@ export const CHANCE_CARDS: Card[] = [
   {
     id: 'chance-4',
     type: TileType.CHANCE,
-    description: 'Tiến đến Đường H2.',
-    action: { type: 'MOVE_TO_TILE', position: 39 },
+    description: 'Tiến đến Phố Hàng Đào.',
+    action: { type: 'MOVE_TO_TILE', position: 43 },
   },
   {
     id: 'chance-5',

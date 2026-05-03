@@ -1,170 +1,249 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
+import type { TokenAnimState } from '../../app/store/useGameStore';
 import { Phase, TileType } from '../../game-engine/types/game';
-import type { Property, GameState } from '../../game-engine/types/game';
+import type { Property, GameState, Player } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Info, AlertTriangle, Lightbulb } from 'lucide-react';
+import {
+  Dices,
+  MapPin,
+  Wallet,
+  ShieldAlert,
+  HelpCircle,
+  ArrowRightCircle,
+  Construction
+} from 'lucide-react';
+import { CharacterSprite } from '../shared/CharacterSprite';
 
 export const BoardStatus: React.FC = () => {
-  const { state } = useGameStore();
-  
-  // Local state to delay UI updates until movement is finished
+  const { state, tokenAnimState } = useGameStore();
   const [displayedState, setDisplayedState] = useState<GameState>(state);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Only update the displayed information when not in ROLLING or MOVING phases
-    // This ensures the status card doesn't jump to the destination before the token gets there
+    const timer = setTimeout(() => setIsReady(true), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Sync display state when not actively animating movement
     if (state.phase !== Phase.ROLLING && state.phase !== Phase.MOVING) {
       setDisplayedState(state);
     }
   }, [state]);
 
-  const { players, currentPlayerId, phase, board, lastDiceRoll, log } = displayedState;
+  if (!isReady) return null;
 
+  const { players, currentPlayerId, phase, board, lastDiceRoll, log } = displayedState;
   const currentPlayer = players.find(p => p.id === currentPlayerId);
   const currentTile = board.find(t => t.position === currentPlayer?.position);
-  
-  const isProperty = currentTile?.type === TileType.PROPERTY;
-  const property = isProperty ? (currentTile as Property) : null;
-  const owner = property?.ownerId ? players.find(p => p.id === property.ownerId) : null;
 
-  const getPhaseHint = () => {
-    switch (state.phase) {
+  // 1. Phase Guidance & Styling
+  const getPhaseInfo = () => {
+    switch (phase) {
       case Phase.WAITING_TO_ROLL:
         return {
-          title: 'Đến lượt bạn',
-          text: 'Tung xúc xắc để di chuyển.',
-          icon: <Lightbulb className="text-amber-500" size={20} />,
-          color: 'text-amber-600',
-          bg: 'bg-amber-50/95',
-          borderColor: 'border-amber-200'
+          label: 'Chờ tung xúc xắc',
+          hint: 'Tung xúc xắc để bắt đầu di chuyển',
+          theme: 'blue',
+          icon: <Dices size={18} />
+        };
+      case Phase.ROLLING:
+        return {
+          label: 'Đang tung',
+          hint: 'Đang xác định kết quả...',
+          theme: 'slate',
+          icon: <Dices size={18} className="animate-bounce" />
+        };
+      case Phase.MOVING:
+        return {
+          label: 'Đang di chuyển',
+          hint: 'Quân cờ đang tới vị trí mới',
+          theme: 'blue',
+          icon: <MapPin size={18} />
         };
       case Phase.BUY_DECISION:
         return {
-          title: 'Quyết định mua',
-          text: 'Bạn có muốn sở hữu ô đất này?',
-          icon: <Info className="text-blue-500" size={20} />,
-          color: 'text-blue-600',
-          bg: 'bg-blue-50/95',
-          borderColor: 'border-blue-200'
+          label: 'Quyết định mua',
+          hint: 'Bạn muốn sở hữu tài sản này không?',
+          theme: 'amber',
+          icon: <Wallet size={18} />
         };
       case Phase.BUILD_DECISION:
         return {
-          title: 'Nâng cấp nhà',
-          text: 'Xây thêm nhà để tăng lợi nhuận.',
-          icon: <HelpCircle className="text-emerald-500" size={20} />,
-          color: 'text-emerald-600',
-          bg: 'bg-emerald-50/95',
-          borderColor: 'border-emerald-200'
+          label: 'Quản lý tài sản',
+          hint: 'Bạn có thể xây thêm nhà hoặc kết thúc lượt',
+          theme: 'emerald',
+          icon: <Construction size={18} />
         };
       case Phase.DEBT_RESOLUTION:
         return {
-          title: 'CẢNH BÁO NỢ',
-          text: 'Hãy thế chấp hoặc bán nhà để trả nợ.',
-          icon: <AlertTriangle className="text-rose-500" size={20} />,
-          color: 'text-rose-600',
-          bg: 'bg-rose-50/95',
-          borderColor: 'border-rose-200'
+          label: 'Xử lý nợ',
+          hint: 'Cần huy động tiền mặt ngay lập tức',
+          theme: 'rose',
+          icon: <ShieldAlert size={18} />
         };
+
       default:
         return {
-          title: 'Đang diễn ra',
-          text: 'Vui lòng chờ lượt chơi...',
-          icon: <HelpCircle className="text-slate-400" size={20} />,
-          color: 'text-slate-600',
-          bg: 'bg-white/95',
-          borderColor: 'border-white'
+          label: 'Lượt chơi mới',
+          hint: 'Vui lòng chờ hành động tiếp theo',
+          theme: 'slate',
+          icon: <HelpCircle size={18} />
         };
     }
   };
 
-  const hint = getPhaseHint();
+  const info = getPhaseInfo();
+  const THEME_COLORS = {
+    blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', badge: 'bg-blue-600' },
+    amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', badge: 'bg-amber-600' },
+    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-600', badge: 'bg-emerald-600' },
+    rose: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-600', badge: 'bg-rose-600' },
+    slate: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-600', badge: 'bg-slate-600' },
+  } as const;
+  
+  const themeColors = THEME_COLORS[info.theme as keyof typeof THEME_COLORS];
+
+  if (!isReady) {
+    return null;
+  }
+
+  const charId = currentPlayer?.avatarUrl || 'ghost';
+  const spriteAnimState: TokenAnimState = tokenAnimState;
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-12">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center text-center space-y-4 max-w-sm w-full"
-      >
-        {/* Main Status Card */}
-        <div className={`backdrop-blur-md border-4 rounded-[3rem] p-8 shadow-2xl shadow-slate-300/30 w-full transition-all duration-500 ${hint.bg} ${hint.borderColor}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPlayerId + phase + (currentTile?.id || '')}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-5"
-            >
-              {/* Turn Guide / Hint */}
-              <div className="flex flex-col items-center gap-2">
-                <div className="p-2 rounded-xl bg-white shadow-sm">
-                  {hint.icon}
-                </div>
-                <div className="space-y-1">
-                  <p className={`text-[11px] font-black uppercase tracking-[0.2em] ${hint.color}`}>
-                    {hint.title}
-                  </p>
-                  <p className="text-sm font-bold text-slate-700 leading-tight">
-                    {hint.text}
-                  </p>
-                </div>
+    <>
+      {/* Character sprite — between status panel and right tiles */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentPlayerId}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1.3 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="absolute pointer-events-none flex flex-col items-center"
+          style={{ left: '70%', top: '40%', transform: 'translate(-50%, -50%)' }}
+        >
+          <div style={{ width: 180, height: 180, position: 'relative' }}>
+            <CharacterSprite charId={charId} animState={spriteAnimState} />
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-8 md:p-12 lg:p-16">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`w-full max-w-[300px] md:max-w-sm rounded-[2.5rem] border-2 shadow-2xl ${themeColors.bg} ${themeColors.border} overflow-hidden`}
+        >
+          <div className="p-5 md:p-7 space-y-4 md:space-y-6 bg-white">
+            {/* A. Turn Header */}
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="flex items-center gap-3 bg-white/80 px-4 py-1.5 rounded-full shadow-sm border border-white/50">
+                <div className="w-2.5 h-2.5 rounded-full ring-2 ring-offset-2 ring-slate-100" style={{ backgroundColor: currentPlayer?.color }} />
+                <span className="text-sm font-black tracking-tight text-slate-800">{currentPlayer?.name}</span>
               </div>
-
-              <div className="h-px bg-slate-200/60 w-3/4 mx-auto" />
-
-              {/* Player & Location */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: currentPlayer?.color }} />
-                  <span className="text-base font-black text-slate-900 tracking-tight">{currentPlayer?.name}</span>
-                </div>
-                <p className="text-xs font-bold text-slate-500">
-                  đang ở <span className="text-slate-800">{currentTile?.name}</span>
-                </p>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg ${themeColors.badge} text-white`}>
+                {info.icon}
+                <span className="text-[10px] font-black uppercase tracking-widest leading-none">{info.label}</span>
               </div>
+              <p className="text-[13px] font-bold text-slate-500 italic leading-snug">{info.hint}</p>
+            </div>
 
-              {/* Contextual Action Info */}
-              {isProperty && property && (
-                <div className="bg-white/60 rounded-3xl p-4 border border-white/80 shadow-sm">
-                  <div className="flex justify-between items-center text-left">
-                    <div className="space-y-0.5">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">Chủ sở hữu</p>
-                      <p className="text-xs font-black" style={{ color: owner?.color || '#94a3b8' }}>
-                        {owner ? owner.name : 'Chưa có'}
-                      </p>
+            <div className="h-px bg-slate-200/50 w-full" />
+
+            {/* B. Dice & Tile Summary */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPlayerId + phase + (currentTile?.id || '')}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-4"
+              >
+                {/* Dice Focus */}
+                {lastDiceRoll && (phase === Phase.WAITING_TO_ROLL || phase === Phase.MOVING || phase === Phase.RESOLVING_TILE) && (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="flex items-center justify-center gap-3">
+                      {[lastDiceRoll[0], lastDiceRoll[1]].map((val, i) => (
+                        <div key={i} className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-lg font-black text-slate-700">
+                          {val}
+                        </div>
+                      ))}
                     </div>
-                    <div className="space-y-0.5 text-right">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">Giá niêm yết</p>
-                      <p className="text-xs font-black text-slate-900">${property.price}</p>
+                    {lastDiceRoll[0] === lastDiceRoll[1] && (
+                      <span className="text-[9px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded uppercase tracking-tighter">Tung đôi!</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Current Tile Card */}
+                {currentTile && (
+                  <div className="bg-white/50 rounded-3xl p-4 border border-white/80 shadow-inner text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="p-2 bg-white rounded-xl shadow-sm text-slate-400">
+                        <MapPin size={16} />
+                      </div>
+                      <div className="flex-1 text-center">
+                        <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Vị trí hiện tại</p>
+                        <h3 className="text-sm font-black text-slate-800 leading-tight">{currentTile.name}</h3>
+
+                        {currentTile.type === TileType.PROPERTY && (
+                          <div className="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center text-left">
+                            <PropertyInfo tile={currentTile as Property} players={players} />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </motion.div>
+            </AnimatePresence>
 
-              {/* Mini Log */}
-              <div className="pt-1">
-                <p className="text-[10px] text-slate-400 font-bold italic line-clamp-1 opacity-70">
-                  "{log[0] || 'Game đang chạy...'}"
-                </p>
+            {/* C. Mini Log */}
+            <div className="pt-2 border-t border-slate-200/50">
+              <div className="flex items-center gap-2 mb-2">
+                <ArrowRightCircle size={12} className="text-slate-400" />
+                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">Gần nhất</span>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        
-        {/* Dice Result (Floating above center) */}
-        {lastDiceRoll && (phase === Phase.MOVING || phase === Phase.RESOLVING_TILE) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="px-4 py-2 bg-slate-900 text-white rounded-full text-xs font-black shadow-lg"
-          >
-            🎲 {lastDiceRoll[0]} + {lastDiceRoll[1]} = {lastDiceRoll[0] + lastDiceRoll[1]}
-          </motion.div>
-        )}
-      </motion.div>
-    </div>
+              <div className="space-y-1">
+                {log.slice(0, 2).map((entry, i) => (
+                  <p key={i} className={`text-[11px] font-bold leading-tight ${i === 0 ? 'text-slate-600' : 'text-slate-400 opacity-60'}`}>
+                    {entry}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </>
   );
 };
+
+const PropertyInfo: React.FC<{ tile: Property, players: Player[] }> = ({ tile, players }) => {
+  const owner = tile.ownerId ? players.find(p => p.id === tile.ownerId) : null;
+  return (
+    <>
+      <div className="flex-1">
+        <p className="text-[8px] font-bold text-slate-400 uppercase">Chủ sở hữu</p>
+        <div className="flex items-center gap-1.5">
+          {owner ? (
+            <>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: owner.color }} />
+              <span className="text-[11px] font-black" style={{ color: owner.color }}>{owner.name}</span>
+            </>
+          ) : (
+            <span className="text-[11px] font-black text-slate-400 italic">Chưa có chủ</span>
+          )}
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-[8px] font-bold text-slate-400 uppercase">Giá niêm yết</p>
+        <p className="text-xs font-black text-slate-800">${tile.price}</p>
+      </div>
+    </>
+  );
+};
+

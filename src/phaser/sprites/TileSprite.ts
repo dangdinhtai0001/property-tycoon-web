@@ -1,44 +1,35 @@
 import Phaser from 'phaser';
 import { TileType, PropertyGroup } from '../../game-engine/types/game';
 import type { BoardTile, Property, Player } from '../../game-engine/types/game';
-
-const getGroupColor = (groupId?: PropertyGroup): number => {
-  switch (groupId) {
-    case PropertyGroup.BROWN: return 0x78350f; // bg-yellow-900
-    case PropertyGroup.LIGHT_BLUE: return 0x93c5fd; // bg-blue-300
-    case PropertyGroup.PINK: return 0xf472b6; // bg-pink-400
-    case PropertyGroup.ORANGE: return 0xf97316; // bg-orange-500
-    case PropertyGroup.RED: return 0xdc2626; // bg-red-600
-    case PropertyGroup.YELLOW: return 0xfacc15; // bg-yellow-400
-    case PropertyGroup.GREEN: return 0x16a34a; // bg-green-600
-    case PropertyGroup.DARK_BLUE: return 0x1e40af; // bg-blue-800
-    default: return 0x94a3b8; // bg-gray-400
-  }
-};
+import { THEME, getTileIcon, getCornerHint } from '../../ui/theme/tokens';
+import { type BoardTileLayout } from '../../game-engine/utils/boardGeometry';
 
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
-  private colorBar?: Phaser.GameObjects.Rectangle;
+  private border?: Phaser.GameObjects.Graphics;
+  private layout: BoardTileLayout;
+
+  private colorStrip?: Phaser.GameObjects.Rectangle;
   private iconText?: Phaser.GameObjects.Text;
   private nameText!: Phaser.GameObjects.Text;
-  private infoText!: Phaser.GameObjects.Text;
-  private statusText?: Phaser.GameObjects.Text;
-  private image?: Phaser.GameObjects.Image;
+  private priceText!: Phaser.GameObjects.Text;
+  private statusContainer: Phaser.GameObjects.Container;
+  private ownerMarker?: Phaser.GameObjects.Rectangle;
+  private buildingMarkers: Phaser.GameObjects.Text[] = [];
+  private mortgageOverlay?: Phaser.GameObjects.Rectangle;
+  private jailedBadge?: Phaser.GameObjects.Container;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile) {
+  constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile, layout: BoardTileLayout) {
     super(scene, x, y);
+    this.layout = layout;
 
+    const { sideIndex, isCorner } = layout;
     const isProperty = tile.type === TileType.PROPERTY;
     const property = isProperty ? (tile as Property) : null;
-    const pos = tile.position;
 
-    // Determine Layout Type
-    const isCorner = pos === 0 || pos === 10 || pos === 20 || pos === 30;
-    const isVerticalSide = (pos > 10 && pos < 20) || (pos > 30 && pos < 40);
-
-    // 1. Background
-    this.background = scene.add.rectangle(0, 0, width, height, 0xffffff)
-      .setStrokeStyle(2, 0xe2e8f0);
+    // 1. Background (Agnostic of type)
+    const bgColor = tile.backgroundColor ?? THEME.colors.surface.DEFAULT;
+    this.background = scene.add.rectangle(0, 0, width, height, bgColor);
     this.add(this.background);
 
     this.background.setInteractive({ useHandCursor: true });
@@ -46,243 +37,395 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.scene.events.emit('tile-clicked', tile.id);
     });
 
+    // Hover effects
+    this.background.on('pointerover', () => {
+      this.drawBorder(THEME.colors.surface.HOVER, 2);
+      scene.tweens.add({ targets: this, scale: 1.02, duration: 100 });
+    });
+
+    this.background.on('pointerout', () => {
+      this.drawBorder(THEME.colors.surface.BORDER, 1.5);
+      scene.tweens.add({ targets: this, scale: 1, duration: 100 });
+    });
+
+    // 2. Status Container (for markers)
+    this.statusContainer = scene.add.container(0, 0);
+    this.add(this.statusContainer);
+
+    // 3. Render Content Based on Type
     if (isCorner) {
       this.renderCornerLayout(scene, width, height, tile);
-    } else if (isVerticalSide) {
-      this.renderVerticalLayout(scene, width, height, tile, property);
+    } else if (sideIndex === 0 || sideIndex === 2) {
+      this.renderVerticalLayout(scene, width, height, tile, property, sideIndex === 2);
     } else {
-      this.renderHorizontalLayout(scene, width, height, tile, property);
+      this.renderHorizontalLayout(scene, width, height, tile, property, sideIndex === 1);
     }
 
     this.updateStatus(tile);
+    this.applyTypeBackground(tile);
+    this.drawBorder();
     scene.add.existing(this);
   }
 
   private renderCornerLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile) {
-    // Try to load image if available
-    if (tile.imageUrl) {
-      // Assuming images are preloaded with keys like 'tile-image-{id}'
-      const imageKey = `tile-img-${tile.id}`;
-      if (scene.textures.exists(imageKey)) {
-        this.image = scene.add.image(0, 0, imageKey);
-        const scale = Math.min(width / this.image.width, height / this.image.height) * 0.8;
-        this.image.setScale(scale);
-        this.add(this.image);
-        return;
-      }
+    const type = tile.type as keyof typeof THEME.colors.corners;
+    const style = THEME.colors.corners[type] || THEME.colors.corners.JAIL;
+
+    // 1. Background Tint
+    this.background.setFillStyle(style.bg);
+
+    // 2. Accent Bar (Small strip at the outer corner)
+    let ax = 0, ay = 0, aw = 0, ah = 0;
+    const strip = 10;
+    const { col, row } = this.layout;
+    const isBot = row > 0;
+    const isTop = row === 0;
+    const isLeft = col === 0;
+    const isRight = col > 0;
+
+    if (isBot && isRight) { // Bottom Right
+      ax = width / 2 - strip / 2; ay = height / 2 - strip / 2; aw = strip; ah = strip;
+    } else if (isBot && isLeft) { // Bottom Left
+      ax = -width / 2 + strip / 2; ay = height / 2 - strip / 2; aw = strip; ah = strip;
+    } else if (isTop && isLeft) { // Top Left
+      ax = -width / 2 + strip / 2; ay = -height / 2 + strip / 2; aw = strip; ah = strip;
+    } else if (isTop && isRight) { // Top Right
+      ax = width / 2 - strip / 2; ay = -height / 2 + strip / 2; aw = strip; ah = strip;
     }
 
-    // Fallback: Large Icon and Name
-    const getIcon = () => {
-      switch (tile.type) {
-        case TileType.START: return '🚩';
-        case TileType.JAIL: return '🚔';
-        case TileType.REST: return '🏖️';
-        case TileType.GO_TO_JAIL: return '👮';
-        default: return '📍';
-      }
-    };
+    const accent = scene.add.rectangle(ax, ay, aw, ah, style.accent);
+    this.add(accent);
 
-    this.iconText = scene.add.text(0, -10, getIcon(), { fontSize: '42px' }).setOrigin(0.5);
+    // 3. Icon
+    const icon = getTileIcon(tile.type);
+    this.iconText = scene.add.text(0, -25, icon, { fontSize: '72px' }).setOrigin(0.5);
     this.add(this.iconText);
 
-    this.nameText = scene.add.text(0, height / 2 - 15, tile.name, {
-      fontSize: '12px',
-      color: '#1e293b',
+    // 4. Title
+    const displayName = tile.shortName || tile.name;
+    this.nameText = scene.add.text(0, 25, displayName.toUpperCase(), {
+      fontSize: THEME.typography.corner.size,
+      color: style.text,
+      fontStyle: '900',
+      fontFamily: THEME.typography.fontFamily,
+      align: 'center',
+      wordWrap: { width: width - 20 }
+    }).setOrigin(0.5);
+    this.add(this.nameText);
+
+    // 5. Hint
+    const hint = getCornerHint(tile.type);
+    const hintText = scene.add.text(0, 65, hint, {
+      fontSize: THEME.typography.corner.hintSize,
+      color: style.text,
+      fontStyle: '600',
+      fontFamily: THEME.typography.fontFamily
+    }).setOrigin(0.5).setAlpha(0.7);
+    this.add(hintText);
+  }
+
+  private renderVerticalLayout(
+    scene: Phaser.Scene,
+    width: number,
+    height: number,
+    tile: BoardTile,
+    property: Property | null,
+    isTop: boolean
+  ) {
+    const stripH = THEME.spacing.stripHeight;
+    const stripColor = this.getStripColor(property);
+
+    if (stripColor !== null) {
+      const sy = isTop ? height / 2 - stripH / 2 : -height / 2 + stripH / 2;
+      this.colorStrip = scene.add.rectangle(0, sy, width, stripH, stripColor);
+      this.add(this.colorStrip);
+    }
+
+    const innerY = isTop ? -10 : 10;
+    const icon = getTileIcon(tile.type, property?.groupId);
+    this.iconText = scene.add.text(0, innerY - 45, icon, { fontSize: '44px' }).setOrigin(0.5);
+    this.add(this.iconText);
+
+    const displayName = tile.shortName || tile.name;
+    this.nameText = scene.add.text(0, innerY, displayName, {
+      fontSize: THEME.typography.name.size,
+      color: THEME.colors.text.PRIMARY,
       fontStyle: 'bold',
+      fontFamily: THEME.typography.fontFamily,
       align: 'center',
       wordWrap: { width: width - 10 }
     }).setOrigin(0.5);
     this.add(this.nameText);
+
+    let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
+    this.priceText = scene.add.text(0, innerY + 45, priceStr, {
+      fontSize: THEME.typography.price.size,
+      color: THEME.colors.text.SECONDARY,
+      fontStyle: 'bold',
+      fontFamily: THEME.typography.fontFamily
+    }).setOrigin(0.5);
+    this.add(this.priceText);
+
+
   }
 
-  private renderHorizontalLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile, property: Property | null) {
-    const isTop = tile.position > 20 && tile.position < 30;
-    const hasColorBar = property && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY;
+  private renderHorizontalLayout(
+    scene: Phaser.Scene,
+    width: number,
+    height: number,
+    tile: BoardTile,
+    property: Property | null,
+    isLeft: boolean
+  ) {
+    const stripW = THEME.spacing.stripHeight;
+    const stripColor = this.getStripColor(property);
 
-    // Color Bar (Faces Board Center)
-    if (hasColorBar) {
-      const barY = isTop ? height / 2 - 10 : -height / 2 + 10;
-      this.colorBar = scene.add.rectangle(0, barY, width, 20, getGroupColor(property.groupId));
-      this.add(this.colorBar);
+    if (stripColor !== null) {
+      const sx = isLeft ? width / 2 - stripW / 2 : -width / 2 + stripW / 2;
+      this.colorStrip = scene.add.rectangle(sx, 0, stripW, height, stripColor);
+      this.add(this.colorStrip);
     }
 
-    // Offset content based on color bar position
-    const contentYOffset = hasColorBar ? (isTop ? -10 : 10) : 0;
-
-    // Layer 1: Icon (Always show for properties now)
-    const iconY = isTop ? -height / 2 + 18 : height / 2 - 18;
-    this.iconText = scene.add.text(0, iconY + contentYOffset, this.getTileIcon(tile, property), { fontSize: '18px' }).setOrigin(0.5);
+    const contentX = isLeft ? -10 : 10;
+    const icon = getTileIcon(tile.type, property?.groupId);
+    this.iconText = scene.add.text(contentX - 45, 0, icon, { fontSize: '44px' }).setOrigin(0.5);
     this.add(this.iconText);
 
-    // Layer 2: Short Name
     const displayName = tile.shortName || tile.name;
-    this.nameText = scene.add.text(0, contentYOffset, displayName, {
-      fontSize: '12px',
-      color: '#0f172a',
+    this.nameText = scene.add.text(contentX - 15, -15, displayName, {
+      fontSize: THEME.typography.name.size,
+      color: THEME.colors.text.PRIMARY,
       fontStyle: 'bold',
-      align: 'center',
-      wordWrap: { width: width - 10 }
-    }).setOrigin(0.5);
+      fontFamily: THEME.typography.fontFamily,
+      align: 'left',
+      wordWrap: { width: width - 75 }
+    }).setOrigin(0, 0.5);
     this.add(this.nameText);
 
-    // Layer 3: Price / Info
-    let info = '';
-    if (property) info = `$${property.price}`;
-    else if (tile.type === TileType.TAX) info = tile.name.includes('xa xỉ') ? '$150' : '$200';
-
-    const infoY = isTop ? -height / 2 + 35 : height / 2 - 35;
-    this.infoText = scene.add.text(0, infoY + contentYOffset, info, { fontSize: '11px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add(this.infoText);
-
-    this.statusText = scene.add.text(0, isTop ? height / 2 - 25 : -height / 2 + 25, '', { fontSize: '10px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add(this.statusText);
-  }
-
-  private renderVerticalLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile, property: Property | null) {
-    const isLeft = tile.position > 10 && tile.position < 20;
-    const hasColorBar = property && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY;
-
-    // Color Bar (Faces Board Center)
-    if (hasColorBar) {
-      const barX = isLeft ? width / 2 - 10 : -width / 2 + 10;
-      this.colorBar = scene.add.rectangle(barX, 0, 20, height, getGroupColor(property.groupId));
-      this.add(this.colorBar);
-    }
-
-    // Offset content based on color bar position
-    const contentXOffset = hasColorBar ? (isLeft ? -10 : 10) : 0;
-
-    // Layer 1: Icon
-    const iconX = isLeft ? -width / 2 + 18 : width / 2 - 18;
-    this.iconText = scene.add.text(iconX + contentXOffset, 0, this.getTileIcon(tile, property), { fontSize: '20px' }).setOrigin(0.5);
-    this.add(this.iconText);
-
-    // Layer 2: Short Name
-    const displayName = tile.shortName || tile.name;
-    this.nameText = scene.add.text(contentXOffset, -10, displayName, {
-      fontSize: '12px',
-      color: '#0f172a',
+    let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
+    this.priceText = scene.add.text(contentX - 15, 25, priceStr, {
+      fontSize: THEME.typography.price.size,
+      color: THEME.colors.text.SECONDARY,
       fontStyle: 'bold',
-      align: 'center',
-      wordWrap: { width: width - 25 }
-    }).setOrigin(0.5);
-    this.add(this.nameText);
+      fontFamily: THEME.typography.fontFamily
+    }).setOrigin(0, 0.5);
+    this.add(this.priceText);
 
-    // Layer 3: Price / Info
-    let info = '';
-    if (property) info = `$${property.price}`;
-    this.infoText = scene.add.text(contentXOffset, 10, info, { fontSize: '11px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add(this.infoText);
 
-    this.statusText = scene.add.text(isLeft ? width / 2 - 25 : -width / 2 + 25, 0, '', { fontSize: '10px', color: '#334155', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add(this.statusText);
   }
 
-  private getTileIcon(tile: BoardTile, property: Property | null): string {
-    switch (tile.type) {
-      case TileType.CHANCE: return '🎲';
-      case TileType.FORTUNE: return '🍀';
-      case TileType.TAX: return '💸';
-      case TileType.PROPERTY: 
-        if (property?.groupId === PropertyGroup.STATION) return '🚉';
-        if (property?.groupId === PropertyGroup.UTILITY) return '⚡';
-        return '🏠';
-      default: return '📍';
+  private getStripColor(property: Property | null): number | null {
+    if (property) {
+      // Only normal property groups (BROWN, RED, etc.) have color strips
+      if (property.groupId === PropertyGroup.STATION) return null;
+      if (property.groupId === PropertyGroup.UTILITY) return null;
+      return THEME.colors.groups[property.groupId as keyof typeof THEME.colors.groups] || null;
+    }
+    return null;
+  }
+
+  private applyTypeBackground(tile: BoardTile) {
+    if (tile.backgroundColor !== undefined) {
+      this.background.setFillStyle(tile.backgroundColor);
+    } else {
+      // Fallback if data property is missing
+      if (tile.type === TileType.CHANCE) {
+        this.background.setFillStyle(0xFEF08A);
+      } else if (tile.type === TileType.FORTUNE) {
+        this.background.setFillStyle(0xFECACA);
+      } else if (tile.type === TileType.TAX) {
+        this.background.setFillStyle(0xFFFBEB);
+      } else {
+        this.background.setFillStyle(THEME.colors.surface.DEFAULT);
+      }
     }
   }
 
-  private ownerLine?: Phaser.GameObjects.Rectangle;
-  private currentOwnerId: string | null = null;
+  private ownerBadge?: Phaser.GameObjects.Arc;
+  private buildingPips: Phaser.GameObjects.Arc[] = [];
+  private mortgageStamp?: Phaser.GameObjects.Container;
 
-  public updateStatus(tile: BoardTile, players: Player[] = []) {
-    if (tile.type !== TileType.PROPERTY) return;
-    const property = tile as Property;
-    const pos = tile.position;
-    
-    // 1. Ownership Indicator (Thick Line at Outer Edge)
-    const owner = property.ownerId ? players.find(p => p.id === property.ownerId) : null;
-    
-    if (owner) {
-      const ownerColor = Phaser.Display.Color.HexStringToColor(owner.color).color;
-      const thickness = 8;
-      
-      if (!this.ownerLine) {
-        // Determine position based on board side
-        let lx = 0, ly = 0, lw = this.background.width, lh = this.background.height;
-        
-        if (pos > 0 && pos < 10) { // Bottom
-          ly = this.background.height / 2 - thickness / 2;
-          lh = thickness;
-        } else if (pos > 10 && pos < 20) { // Left
-          lx = -this.background.width / 2 + thickness / 2;
-          lw = thickness;
-        } else if (pos > 20 && pos < 30) { // Top
-          ly = -this.background.height / 2 + thickness / 2;
-          lh = thickness;
-        } else if (pos > 30 && pos < 40) { // Right
-          lx = this.background.width / 2 - thickness / 2;
-          lw = thickness;
+  public updateStatus(tile: BoardTile, players: Player[] = [], showStatus: boolean = true) {
+    this.statusContainer.setVisible(showStatus);
+    if (!showStatus) return;
+
+    const isProperty = tile.type === TileType.PROPERTY;
+
+    // 1. Property-Specific Status
+    if (isProperty) {
+      const property = tile as Property;
+      const owner = property.ownerId ? players.find(p => p.id === property.ownerId) : null;
+
+      // Ownership Indicators
+      if (owner) {
+        const ownerColor = Phaser.Display.Color.HexStringToColor(owner.color).color;
+
+        // A. Strip highlight
+        const thickness = 6;
+        if (!this.ownerMarker) {
+          let mx = 0, my = 0, mw = this.background.width, mh = this.background.height;
+          if (this.layout.sideIndex === 0) { my = this.background.height / 2 - thickness / 2; mh = thickness; }
+          else if (this.layout.sideIndex === 1) { mx = -this.background.width / 2 + thickness / 2; mw = thickness; }
+          else if (this.layout.sideIndex === 2) { my = -this.background.height / 2 + thickness / 2; mh = thickness; }
+          else if (this.layout.sideIndex === 3) { mx = this.background.width / 2 - thickness / 2; mw = thickness; }
+          this.ownerMarker = this.scene.add.rectangle(mx, my, mw, mh, ownerColor);
+          this.statusContainer.add(this.ownerMarker);
+        } else {
+          this.ownerMarker.setFillStyle(ownerColor).setVisible(true);
         }
 
-        this.ownerLine = this.scene.add.rectangle(lx, ly, lw, lh, ownerColor);
-        this.add(this.ownerLine);
-        
-        // Initial animation
-        this.ownerLine.setScale(0);
-        this.scene.tweens.add({
-          targets: this.ownerLine,
-          scale: 1,
-          duration: 400,
-          ease: 'Back.easeOut'
-        });
+        // B. Badge Dot (Bottom-Left)
+        if (!this.ownerBadge) {
+          const bx = -this.background.width / 2 + 15;
+          const by = this.background.height / 2 - 15;
+          this.ownerBadge = this.scene.add.arc(bx, by, THEME.effects.markers.ownerBadgeSize / 2, 0, 360, false, ownerColor)
+            .setStrokeStyle(1.5, 0xffffff);
+          this.statusContainer.add(this.ownerBadge);
+        } else {
+          this.ownerBadge.setFillStyle(ownerColor).setVisible(true);
+        }
       } else {
-        this.ownerLine.setFillStyle(ownerColor);
-        this.ownerLine.setVisible(true);
-        
-        // Animation if owner changed
-        if (this.currentOwnerId !== owner.id) {
-          this.ownerLine.setScale(1.5);
-          this.scene.tweens.add({
-            targets: this.ownerLine,
-            scale: 1,
-            duration: 300,
-            ease: 'Bounce.easeOut'
-          });
+        this.ownerMarker?.setVisible(false);
+        this.ownerBadge?.setVisible(false);
+      }
+
+      // Building Indicators (Land only)
+      this.buildingMarkers.forEach(m => m.destroy());
+      this.buildingPips.forEach(p => p.destroy());
+      this.buildingMarkers = [];
+      this.buildingPips = [];
+
+      if (property.buildingLevel > 0) {
+        const bx = this.background.width / 2 - 15;
+        const by = this.background.height / 2 - 15;
+
+        if (property.buildingLevel === 5) {
+          // Level 5: Landmark Icon
+          const marker = this.scene.add.text(bx, by, '🏨', { fontSize: '14px' }).setOrigin(0.5);
+          this.statusContainer.add(marker);
+          this.buildingMarkers.push(marker);
+        } else {
+          // Level 1-4: Pips
+          const pipSize = THEME.effects.markers.buildingPipSize;
+          const gap = THEME.effects.markers.buildingPipGap;
+          const totalWidth = (property.buildingLevel * pipSize) + ((property.buildingLevel - 1) * gap);
+
+          for (let i = 0; i < property.buildingLevel; i++) {
+            const px = bx - totalWidth / 2 + (i * (pipSize + gap)) + pipSize / 2;
+            const pip = this.scene.add.arc(px, by, pipSize / 2, 0, 360, false, 0x334155).setStrokeStyle(1, 0xffffff);
+            this.statusContainer.add(pip);
+            this.buildingPips.push(pip);
+          }
         }
       }
-      
-      this.currentOwnerId = owner.id;
-      this.background.setStrokeStyle(2, 0xe2e8f0); // Revert to default border
-    } else {
-      if (this.ownerLine) this.ownerLine.setVisible(false);
-      this.background.setStrokeStyle(2, 0xe2e8f0);
-      this.currentOwnerId = null;
-    }
-    
-    // 2. Building Level & Mortgage Status
-    let statusParts = [];
-    if (property.buildingLevel > 0) {
-      if (property.buildingLevel === 5) {
-        statusParts.push('🏨');
+
+      // Mortgage Status
+      if (property.isMortgaged) {
+        if (!this.mortgageOverlay) {
+          this.mortgageOverlay = this.scene.add.rectangle(0, 0, this.background.width, this.background.height, 0x000000, 0.2);
+          this.statusContainer.add(this.mortgageOverlay);
+        }
+
+        if (!this.mortgageStamp) {
+          this.mortgageStamp = this.scene.add.container(0, 0);
+          const bg = this.scene.add.rectangle(0, 0, 70, 18, THEME.effects.markers.mortgageStampColor, 0.9)
+            .setStrokeStyle(1, 0xffffff).setAngle(-25);
+          const txt = this.scene.add.text(0, 0, 'THẾ CHẤP', { fontSize: '9px', color: '#ffffff', fontStyle: 'bold' })
+            .setOrigin(0.5).setAngle(-25);
+          this.mortgageStamp.add([bg, txt]);
+          this.statusContainer.add(this.mortgageStamp);
+        }
+
+        this.mortgageOverlay.setVisible(true);
+        this.mortgageStamp.setVisible(true);
+        this.background.setAlpha(0.6);
+        if (this.iconText) this.iconText.setAlpha(0.4);
+        if (this.nameText) this.nameText.setAlpha(0.4);
+        if (this.priceText) this.priceText.setAlpha(0.4);
       } else {
-        statusParts.push('🏠'.repeat(property.buildingLevel));
+        this.mortgageOverlay?.setVisible(false);
+        this.mortgageStamp?.setVisible(false);
+        this.background.setAlpha(1);
+        if (this.iconText) this.iconText.setAlpha(1);
+        if (this.nameText) this.nameText.setAlpha(1);
+        if (this.priceText) this.priceText.setAlpha(1);
       }
     }
-    
-    if (property.isMortgaged) {
-      statusParts.push('🔒 TC');
-      this.background.setFillStyle(0xf1f5f9);
-      this.background.setAlpha(0.8);
-    } else {
-      this.background.setFillStyle(0xffffff);
-      this.background.setAlpha(1);
+
+    // 2. Corner-Specific Status (Jailed State)
+    if (tile.type === TileType.JAIL) {
+      const playersOnTile = players.filter(p => p.position === tile.position);
+      const isAnyoneJailed = playersOnTile.some(p => p.jailTurns > 0);
+
+      if (isAnyoneJailed) {
+        if (!this.jailedBadge) {
+          this.jailedBadge = this.scene.add.container(0, -this.background.height / 2 + 15);
+          const bg = this.scene.add.rectangle(0, 0, 60, 16, 0xDC2626, 0.9).setStrokeStyle(1, 0xffffff);
+          const txt = this.scene.add.text(0, 0, 'BỊ GIAM', { fontSize: '9px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+          this.jailedBadge.add([bg, txt]);
+          this.statusContainer.add(this.jailedBadge);
+        }
+        this.jailedBadge.setVisible(true);
+      } else {
+        this.jailedBadge?.setVisible(false);
+      }
     }
 
-    if (this.statusText) {
-      this.statusText.setText(statusParts.join(' '));
-      this.statusText.setColor('#64748b');
-      this.statusText.setFontStyle('900');
+    // Cập nhật border dựa trên trạng thái hiện tại
+    this.drawBorder();
+  }
+
+  private highlight?: Phaser.GameObjects.Graphics;
+
+  private drawBorder(
+    color: number = THEME.colors.surface.BORDER,
+    width: number = 1.5
+  ) {
+    if (!this.border) {
+      this.border = this.scene.add.graphics();
+      this.add(this.border);
+    }
+
+    this.border.clear();
+    this.border.lineStyle(width, color, 1);
+
+    this.border.strokeRect(
+      -this.background.width / 2,
+      -this.background.height / 2,
+      this.background.width,
+      this.background.height
+    );
+
+    this.bringToTop(this.border);
+  }
+
+  public setHighlighted(active: boolean, color: number = 0xffffff) {
+    if (active) {
+      if (!this.highlight) {
+        this.highlight = this.scene.add.graphics();
+        this.add(this.highlight);
+      }
+      this.highlight.clear();
+      this.highlight.lineStyle(THEME.effects.tileHighlightWidth, color, 0.8);
+      this.highlight.strokeRect(
+        -this.background.width / 2,
+        -this.background.height / 2,
+        this.background.width,
+        this.background.height
+      );
+
+      // Outer glow effect using rectangle with alpha gradient if possible, 
+      // but for simplicity, we use a thicker stroke for now.
+      this.highlight.lineStyle(THEME.effects.tileHighlightWidth * 2, color, 0.3);
+      this.highlight.strokeRect(
+        -this.background.width / 2 - 2,
+        -this.background.height / 2 - 2,
+        this.background.width + 4,
+        this.background.height + 4
+      );
+      this.highlight.setVisible(true);
+    } else {
+      this.highlight?.setVisible(false);
     }
   }
 }

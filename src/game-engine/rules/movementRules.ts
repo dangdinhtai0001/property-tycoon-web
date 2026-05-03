@@ -45,9 +45,9 @@ export const moveToJail = (state: GameState): GameState => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
   if (!currentPlayer) return state;
 
-  // Assume jail is at position 10, we can also look it up by TileType.JAIL
+  // Assume jail is at position 11, we can also look it up by TileType.JAIL
   const jailTile = state.board.find(t => t.type === 'JAIL');
-  const jailPosition = jailTile ? jailTile.position : 10;
+  const jailPosition = jailTile ? jailTile.position : 11;
 
   const updatedPlayers = state.players.map(p => {
     if (p.id === currentPlayer.id) {

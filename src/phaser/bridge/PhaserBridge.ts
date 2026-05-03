@@ -21,10 +21,12 @@ export class PhaserBridge {
     const initialState = useGameStore.getState().state;
     this.updatePhaser(initialState);
 
-    // Subscribe to store changes
+    // Only call updatePhaser when game state changes, not UI state like tokenAnimState
     this.unsubscribe = useGameStore.subscribe(
-      (state) => {
-        this.updatePhaser(state.state);
+      (store, prevStore) => {
+        if (store.state !== prevStore.state) {
+          this.updatePhaser(store.state);
+        }
       }
     );
 

@@ -1,5 +1,51 @@
 @import "tailwindcss";
 
+:root {
+  /* Board Tokens */
+  --board-bg: #FFFDF7;
+  --board-border: rgba(148, 163, 184, 0.35);
+  --board-radius: 32px;
+  --board-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
+  --board-padding: 20px;
+  --board-inner-padding: 16px;
+
+  /* Panel Tokens */
+  --panel-bg: rgba(255, 255, 255, 0.86);
+  --panel-border: rgba(255, 255, 255, 0.8);
+  --panel-radius: 2.5rem;
+  --panel-shadow: 0 12px 36px rgba(15, 23, 42, 0.1);
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+
+  /* Text Readability */
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  /* Tile Group Colors */
+  --tile-brown: #92400E;
+  --tile-light-blue: #38BDF8;
+  --tile-pink: #F472B6;
+  --tile-orange: #FB923C;
+  --tile-red: #EF4444;
+  --tile-yellow: #FACC15;
+  --tile-green: #22C55E;
+  --tile-dark-blue: #1E40AF;
+
+  /* Tile Type Colors */
+  --tile-station: #334155;
+  --tile-utility: #0D9488;
+  --tile-chance: #F43F5E;
+  --tile-fortune: #10B981;
+  --tile-tax: #D97706;
+}
+
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;

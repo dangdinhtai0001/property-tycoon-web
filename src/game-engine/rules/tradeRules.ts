@@ -45,6 +45,7 @@ export const acceptTrade = (state: GameState): GameState => {
     players: updatedPlayers,
     board: updatedBoard,
     phase: Phase.WAITING_TO_ROLL,
+    currentPlayerId: tradeOffer.offererId,
     tradeOffer: undefined,
     log: [`Giao dịch thành công giữa ${offerer.name} và ${target.name}.`, ...state.log],
   };

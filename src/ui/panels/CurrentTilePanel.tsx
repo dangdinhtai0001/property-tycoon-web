@@ -46,7 +46,13 @@ export const CurrentTilePanel: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="bg-white/90 backdrop-blur-md rounded-[2rem] border border-white shadow-2xl overflow-hidden flex flex-col pointer-events-auto"
+        className="backdrop-blur-md overflow-hidden flex flex-col pointer-events-auto transition-all duration-300"
+        style={{
+          backgroundColor: 'var(--panel-bg)',
+          borderRadius: 'var(--panel-radius)',
+          border: '1px solid var(--panel-border)',
+          boxShadow: 'var(--panel-shadow)',
+        }}
       >
         {/* Header with Type Color */}
         <div 
