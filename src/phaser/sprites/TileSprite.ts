@@ -19,13 +19,25 @@ const getGroupColor = (groupId?: PropertyGroup): number => {
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
   private colorBar?: Phaser.GameObjects.Rectangle;
+  private iconText?: Phaser.GameObjects.Text;
   private nameText: Phaser.GameObjects.Text;
-  private priceText?: Phaser.GameObjects.Text;
+  private infoText: Phaser.GameObjects.Text;
+  private statusText?: Phaser.GameObjects.Text;
+  private image?: Phaser.GameObjects.Image;
 
   constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile) {
     super(scene, x, y);
 
-    // Background
+    const isProperty = tile.type === TileType.PROPERTY;
+    const property = isProperty ? (tile as Property) : null;
+    const pos = tile.position;
+
+    // Determine Layout Type
+    const isCorner = pos === 0 || pos === 10 || pos === 20 || pos === 30;
+    const isVerticalSide = (pos > 10 && pos < 20) || (pos > 30 && pos < 40);
+    const isHorizontalSide = (pos > 0 && pos < 10) || (pos > 20 && pos < 30);
+
+    // 1. Background
     this.background = scene.add.rectangle(0, 0, width, height, 0xffffff)
       .setStrokeStyle(2, 0xe2e8f0);
     this.add(this.background);
@@ -35,35 +47,163 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.scene.events.emit('tile-clicked', tile.id);
     });
 
-    const isProperty = tile.type === TileType.PROPERTY;
-    const property = isProperty ? (tile as Property) : null;
-
-    // Color bar for properties
-    if (isProperty && property?.groupId && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY) {
-      this.colorBar = scene.add.rectangle(0, -height / 2 + 10, width, 20, getGroupColor(property.groupId));
-      this.add(this.colorBar);
+    if (isCorner) {
+      this.renderCornerLayout(scene, width, height, tile);
+    } else if (isVerticalSide) {
+      this.renderVerticalLayout(scene, width, height, tile, property);
+    } else {
+      this.renderHorizontalLayout(scene, width, height, tile, property);
     }
 
-    // Name
-    this.nameText = scene.add.text(0, isProperty ? 12 : 0, tile.name, {
-      fontSize: '14px',
+    this.updateStatus(tile);
+    scene.add.existing(this);
+  }
+
+  private renderCornerLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile) {
+    // Try to load image if available
+    if (tile.imageUrl) {
+      // Assuming images are preloaded with keys like 'tile-image-{id}'
+      const imageKey = `tile-img-${tile.id}`;
+      if (scene.textures.exists(imageKey)) {
+        this.image = scene.add.image(0, 0, imageKey);
+        const scale = Math.min(width / this.image.width, height / this.image.height) * 0.8;
+        this.image.setScale(scale);
+        this.add(this.image);
+        return;
+      }
+    }
+
+    // Fallback: Large Icon and Name
+    const getIcon = () => {
+      switch (tile.type) {
+        case TileType.START: return '🚩';
+        case TileType.JAIL: return '🚔';
+        case TileType.REST: return '🏖️';
+        case TileType.GO_TO_JAIL: return '👮';
+        default: return '📍';
+      }
+    };
+
+    this.iconText = scene.add.text(0, -10, getIcon(), { fontSize: '42px' }).setOrigin(0.5);
+    this.add(this.iconText);
+
+    this.nameText = scene.add.text(0, height / 2 - 15, tile.name, {
+      fontSize: '12px',
       color: '#1e293b',
       fontWeight: '900',
       align: 'center',
-      wordWrap: { width: width - 15 }
+      wordWrap: { width: width - 10 }
+    }).setOrigin(0.5);
+    this.add(this.nameText);
+  }
+
+  private renderHorizontalLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile, property: Property | null) {
+    const isTop = tile.position > 20 && tile.position < 30;
+    const hasColorBar = property && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY;
+
+    // Color Bar (Faces Board Center)
+    if (hasColorBar) {
+      const barY = isTop ? height / 2 - 10 : -height / 2 + 10;
+      this.colorBar = scene.add.rectangle(0, barY, width, 20, getGroupColor(property.groupId));
+      this.add(this.colorBar);
+    }
+
+    // Offset content based on color bar position
+    const contentYOffset = hasColorBar ? (isTop ? -10 : 10) : 0;
+
+    // Layer 1: Icon (Always show for properties now)
+    const iconY = isTop ? -height / 2 + 18 : height / 2 - 18;
+    this.iconText = scene.add.text(0, iconY + contentYOffset, this.getTileIcon(tile, property), { fontSize: '18px' }).setOrigin(0.5);
+    this.add(this.iconText);
+
+    // Layer 2: Short Name
+    const displayName = tile.shortName || tile.name;
+    this.nameText = scene.add.text(0, contentYOffset, displayName, {
+      fontSize: '11px',
+      color: '#1e293b',
+      fontWeight: '900',
+      align: 'center',
+      wordWrap: { width: width - 10 }
     }).setOrigin(0.5);
     this.add(this.nameText);
 
-    // Price
-    if (isProperty && property) {
-      this.priceText = scene.add.text(0, height / 2 - 18, `$${property.price}`, {
-        fontSize: '13px',
-        color: '#475569',
-        fontWeight: '900'
-      }).setOrigin(0.5);
-      this.add(this.priceText);
+    // Layer 3: Price / Info
+    let info = '';
+    if (property) info = `$${property.price}`;
+    else if (tile.type === TileType.TAX) info = tile.name.includes('xa xỉ') ? '$150' : '$200';
+
+    const infoY = isTop ? -height / 2 + 35 : height / 2 - 35;
+    this.infoText = scene.add.text(0, infoY + contentYOffset, info, { fontSize: '10px', color: '#64748b', fontWeight: '900' }).setOrigin(0.5);
+    this.add(this.infoText);
+
+    this.statusText = scene.add.text(0, isTop ? height / 2 - 25 : -height / 2 + 25, '', { fontSize: '9px', fontWeight: 'bold' }).setOrigin(0.5);
+    this.add(this.statusText);
+  }
+
+  private renderVerticalLayout(scene: Phaser.Scene, width: number, height: number, tile: BoardTile, property: Property | null) {
+    const isLeft = tile.position > 10 && tile.position < 20;
+    const hasColorBar = property && property.groupId !== PropertyGroup.STATION && property.groupId !== PropertyGroup.UTILITY;
+
+    // Color Bar (Faces Board Center)
+    if (hasColorBar) {
+      const barX = isLeft ? width / 2 - 10 : -width / 2 + 10;
+      this.colorBar = scene.add.rectangle(barX, 0, 20, height, getGroupColor(property.groupId));
+      this.add(this.colorBar);
     }
 
-    scene.add.existing(this);
+    // Offset content based on color bar position
+    const contentXOffset = hasColorBar ? (isLeft ? -10 : 10) : 0;
+
+    // Layer 1: Icon
+    const iconX = isLeft ? -width / 2 + 18 : width / 2 - 18;
+    this.iconText = scene.add.text(iconX + contentXOffset, 0, this.getTileIcon(tile, property), { fontSize: '18px' }).setOrigin(0.5);
+    this.add(this.iconText);
+
+    // Layer 2: Short Name
+    const displayName = tile.shortName || tile.name;
+    this.nameText = scene.add.text(contentXOffset, -10, displayName, {
+      fontSize: '11px',
+      color: '#1e293b',
+      fontWeight: '900',
+      align: 'center',
+      wordWrap: { width: width - 25 }
+    }).setOrigin(0.5);
+    this.add(this.nameText);
+
+    // Layer 3: Price / Info
+    let info = '';
+    if (property) info = `$${property.price}`;
+    this.infoText = scene.add.text(contentXOffset, 10, info, { fontSize: '10px', color: '#64748b', fontWeight: '900' }).setOrigin(0.5);
+    this.add(this.infoText);
+
+    this.statusText = scene.add.text(isLeft ? width / 2 - 25 : -width / 2 + 25, 0, '', { fontSize: '9px', fontWeight: 'bold' }).setOrigin(0.5);
+    this.add(this.statusText);
+  }
+
+  private getTileIcon(tile: BoardTile, property: Property | null): string {
+    switch (tile.type) {
+      case TileType.CHANCE: return '🎲';
+      case TileType.FORTUNE: return '🍀';
+      case TileType.TAX: return '💸';
+      case TileType.PROPERTY: 
+        if (property?.groupId === PropertyGroup.STATION) return '🚉';
+        if (property?.groupId === PropertyGroup.UTILITY) return '⚡';
+        return '🏠';
+      default: return '📍';
+    }
+  }
+
+  public updateStatus(tile: BoardTile) {
+    if (tile.type !== TileType.PROPERTY) return;
+    const property = tile as Property;
+    
+    let statusParts = [];
+    if (property.ownerId) statusParts.push('👤'); 
+    if (property.buildingLevel > 0) statusParts.push(`🏠x${property.buildingLevel}`);
+    if (property.isMortgaged) statusParts.push('🚫');
+
+    if (this.statusText) {
+      this.statusText.setText(statusParts.join('\n'));
+    }
   }
 }

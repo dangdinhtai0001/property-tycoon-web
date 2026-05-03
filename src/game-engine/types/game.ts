@@ -47,6 +47,7 @@ export interface BoardTile {
   id: TileId;
   type: TileType;
   name: string;
+  shortName?: string;
   position: number;
   imageUrl?: string;
 }
