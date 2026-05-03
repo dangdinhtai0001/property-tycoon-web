@@ -96,28 +96,32 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
 
     case 'APPLY_CARD': {
       if (state.phase !== Phase.SHOWING_CARD || !state.activeCard) return state;
-      return applyCardEffect(state);
+      const result = applyCardEffect(state);
+      // Card moved the player — auto-resolve the new tile so the game doesn't get stuck
+      if (result.phase === Phase.RESOLVING_TILE) {
+        return gameReducer(result, { type: 'RESOLVE_TILE' });
+      }
+      return result;
     }
 
     case 'TELEPORT_PLAYER': {
       const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
       const targetPos = action.payload.position;
-      
+
       // Calculate steps to reach target position (forward)
       const steps = (targetPos - currentPlayer.position + state.board.length) % state.board.length;
-      
+
       // If same position, do nothing or just return state
       if (steps === 0) return state;
 
-      // Apply movement logic (handles pass start bonus, etc)
-      // Note: we set silent=false to get the "Passed Start" log if applicable
       const stateAfterMove = applyMovement(state, steps, false);
-      
-      return {
+      const stateWithLog = {
         ...stateAfterMove,
         phase: Phase.RESOLVING_TILE,
         log: [`[DEBUG] Nhảy đến ${state.board[targetPos].name} (Vượt qua ${steps} ô)`, ...stateAfterMove.log]
       };
+      // Auto-resolve tile so special tiles (CHANCE, FORTUNE, TAX, etc.) trigger correctly
+      return gameReducer(stateWithLog, { type: 'RESOLVE_TILE' });
     }
     
     case 'DEBUG_ADD_CASH': {
