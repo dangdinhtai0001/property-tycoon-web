@@ -98,7 +98,7 @@ function App() {
       </header>
 
 
-      {/* Left Overlay: Player List & Current Tile */}
+      {/* Left Overlay: Player List & Quick Guide */}
       <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col gap-6 justify-start">
         <motion.div 
           initial={{ x: -100, opacity: 0 }}
@@ -112,14 +112,22 @@ function App() {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="pointer-events-auto"
+          className="pointer-events-auto p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-200/50 relative overflow-hidden"
         >
-          <CurrentTilePanel />
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <Info size={60} />
+          </div>
+          <h3 className="font-black mb-2 uppercase text-xs tracking-wider">Hướng dẫn nhanh</h3>
+          <ul className="text-[11px] space-y-1.5 text-blue-50">
+            <li className="flex gap-2"><span>•</span><span>Mua đất để bắt đầu đế chế.</span></li>
+            <li className="flex gap-2"><span>•</span><span>Thu thập đủ bộ màu để xây nhà.</span></li>
+            <li className="flex gap-2"><span>•</span><span>Thế chấp nếu kẹt tiền mặt.</span></li>
+          </ul>
         </motion.div>
       </aside>
 
-      {/* Right Overlay: Action Panel */}
-      <aside className="absolute right-6 top-32 bottom-8 z-10 pointer-events-none flex flex-col items-end">
+      {/* Right Overlay: Action Panel & Current Tile */}
+      <aside className="absolute right-6 top-32 bottom-8 z-10 pointer-events-none flex flex-col gap-6 items-end">
         <motion.div 
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -135,20 +143,17 @@ function App() {
             
             <div className={`flex-1 overflow-y-auto px-6 pb-6 transition-opacity duration-300 ${isActionExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <ActionPanel />
-              
-              <div className="mt-6 p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-200/50 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <Info size={60} />
-                </div>
-                <h3 className="font-black mb-2 uppercase text-xs tracking-wider">Hướng dẫn nhanh</h3>
-                <ul className="text-[11px] space-y-1.5 text-blue-50">
-                  <li className="flex gap-2"><span>•</span><span>Mua đất để bắt đầu đế chế.</span></li>
-                  <li className="flex gap-2"><span>•</span><span>Thu thập đủ bộ màu để xây nhà.</span></li>
-                  <li className="flex gap-2"><span>•</span><span>Thế chấp nếu kẹt tiền mặt.</span></li>
-                </ul>
-              </div>
             </div>
           </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className={`pointer-events-auto transition-all duration-500 ${isActionExpanded ? 'w-96' : 'w-0 opacity-0'}`}
+        >
+          <CurrentTilePanel />
         </motion.div>
       </aside>
 
