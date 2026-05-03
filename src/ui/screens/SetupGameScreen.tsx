@@ -6,13 +6,36 @@ import { Users, Shield, Zap, Trash2, Plus, Info, CheckCircle2, AlertCircle, Land
 import { motion, AnimatePresence } from 'framer-motion';
 
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-const TOKENS = ['🚗', '🐕', '🎩', '🚢', '🦖', '🐧', '🚁', '🐈', '🚀', '🦄'];
+const CHARACTERS = [
+  { id: 'ghost', name: 'Ghosty', icon: '👻', image: '/assets/characters/ghost_character.png' },
+  { id: 'cat', name: 'Chibi Cat', icon: '🐱', image: '/assets/characters/charming-chibi-cat.png' },
+  { id: 'magician', name: 'Cat Magician', icon: '🧙‍♂️', image: '/assets/characters/chibi-cat-magican.png' },
+];
+
+const CharacterAvatar: React.FC<{ charId: string; className?: string }> = ({ charId, className = "" }) => {
+  const char = CHARACTERS.find(c => c.id === charId) || CHARACTERS[0];
+  
+  return (
+    <div className={`relative overflow-hidden bg-slate-100/50 rounded-2xl border-2 border-slate-200 shadow-inner ${className}`}>
+      <div 
+        className="absolute inset-0"
+        style={{ 
+          backgroundImage: `url(${char.image})`,
+          backgroundSize: '400% 400%',
+          backgroundPosition: '0% 0%',
+          imageRendering: 'pixelated',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+    </div>
+  );
+};
 
 export const SetupGameScreen: React.FC = () => {
   const { dispatch } = useGameStore();
   const [players, setPlayers] = useState<{ name: string; color: string; token: string }[]>([
-    { name: 'Người chơi 1', color: COLORS[0], token: TOKENS[0] },
-    { name: 'Người chơi 2', color: COLORS[1], token: TOKENS[1] },
+    { name: 'Người chơi 1', color: COLORS[0], token: CHARACTERS[0].id },
+    { name: 'Người chơi 2', color: COLORS[1], token: CHARACTERS[0].id },
   ]);
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
 
@@ -20,9 +43,8 @@ export const SetupGameScreen: React.FC = () => {
     if (players.length < 6) {
       // Find next available color and token
       const usedColors = new Set(players.map(p => p.color));
-      const usedTokens = new Set(players.map(p => p.token));
       const nextColor = COLORS.find(c => !usedColors.has(c)) || COLORS[players.length];
-      const nextToken = TOKENS.find(t => !usedTokens.has(t)) || TOKENS[players.length];
+      const nextToken = CHARACTERS[0].id;
 
       setPlayers([...players, { 
         name: `Người chơi ${players.length + 1}`, 
@@ -63,19 +85,25 @@ export const SetupGameScreen: React.FC = () => {
   };
 
   const handleStartGame = () => {
-    dispatch({ type: 'START_GAME', payload: { players: players.map(p => ({ ...p, avatarUrl: p.token })), config } });
+    dispatch({ 
+      type: 'START_GAME', 
+      payload: { 
+        players: players.map(p => ({ 
+          ...p, 
+          avatarUrl: p.token // This is the charId (e.g., 'ghost_blue')
+        })), 
+        config 
+      } 
+    });
   };
 
   const validation = useMemo(() => {
     const colors = players.map(p => p.color);
-    const tokens = players.map(p => p.token);
     const hasDuplicateColor = new Set(colors).size !== colors.length;
-    const hasDuplicateToken = new Set(tokens).size !== tokens.length;
     const hasEmptyName = players.some(p => !p.name.trim());
     return { 
-      isValid: !hasDuplicateColor && !hasDuplicateToken && !hasEmptyName,
+      isValid: !hasDuplicateColor && !hasEmptyName,
       hasDuplicateColor,
-      hasDuplicateToken,
       hasEmptyName
     };
   }, [players]);
@@ -169,17 +197,19 @@ export const SetupGameScreen: React.FC = () => {
                   <div className="flex items-center gap-4">
                     {/* Token Selection */}
                     <div className="relative group/token">
-                      <button className="w-16 h-16 bg-slate-50 rounded-2xl shadow-inner border-2 border-slate-100 flex items-center justify-center text-3xl cursor-pointer hover:border-blue-400 transition-colors">
-                        {p.token}
+                      <button className="relative w-16 h-16 group cursor-pointer outline-none">
+                        <CharacterAvatar charId={p.token} className="w-full h-full group-hover:border-blue-400 transition-colors" />
                       </button>
-                      <div className="absolute top-full left-0 mt-2 p-3 bg-white shadow-2xl rounded-2xl border border-slate-100 z-50 grid grid-cols-5 gap-2 opacity-0 pointer-events-none group-focus-within/token:opacity-100 group-focus-within/token:pointer-events-auto transition-all transform scale-95 group-focus-within/token:scale-100">
-                        {TOKENS.map(t => (
+                      
+                      <div className="absolute top-full left-0 mt-2 p-4 bg-white shadow-2xl rounded-[2rem] border border-slate-100 z-50 flex flex-wrap gap-4 opacity-0 pointer-events-none group-focus-within/token:opacity-100 group-focus-within/token:pointer-events-auto transition-all transform scale-95 group-focus-within/token:scale-100 min-w-[200px]">
+                        {CHARACTERS.map(c => (
                           <button 
-                            key={t}
-                            onClick={() => updatePlayer(idx, 'token', t)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 transition-colors ${p.token === t ? 'bg-blue-100 text-blue-600' : ''}`}
+                            key={c.id}
+                            onClick={() => updatePlayer(idx, 'token', c.id)}
+                            className={`relative w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all ${p.token === c.id ? 'border-blue-500 scale-110 shadow-lg' : 'border-slate-50 hover:border-blue-200'}`}
+                            title={c.name}
                           >
-                            {t}
+                            <CharacterAvatar charId={c.id} className="w-full h-full border-none shadow-none bg-transparent" />
                           </button>
                         ))}
                       </div>
@@ -418,7 +448,6 @@ export const SetupGameScreen: React.FC = () => {
             >
               {validation.hasEmptyName && <p>• Tên không được để trống</p>}
               {validation.hasDuplicateColor && <p>• Chọn màu khác nhau</p>}
-              {validation.hasDuplicateToken && <p>• Chọn linh vật khác nhau</p>}
             </motion.div>
           )}
 
