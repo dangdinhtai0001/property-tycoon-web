@@ -44,17 +44,23 @@ function App() {
 
   if (state.phase === Phase.SETUP) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 p-4 md:p-8">
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
         <MainMenu />
       </div>
     );
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-100 flex flex-col font-sans selection:bg-blue-100">
+    <div className="fixed inset-0 overflow-hidden bg-slate-50 flex flex-col font-sans selection:bg-blue-100">
+      {/* Ambient Background Image */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-50 pointer-events-none"
+        style={{ backgroundImage: 'url(/assets/bg/main-menu.png)' }}
+      />
       
-      {/* Immersive Game Board - Background/Main Layer */}
-      <main className="absolute inset-0 z-0 flex items-center justify-center bg-slate-50">
+      {/* Soft Gradient Overlay */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-tr from-white/40 via-transparent to-white/60 pointer-events-none" />
+      <main className="absolute inset-0 z-0 flex items-center justify-center bg-transparent">
         <Board />
       </main>
 
@@ -62,10 +68,11 @@ function App() {
       <header className="relative z-20 p-6 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-6 pointer-events-auto">
           <div className="bg-white/80 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-white shadow-xl shadow-slate-200/50">
-            <h1 className="text-2xl font-black tracking-tight text-slate-800 leading-none">
-              TỶ <span className="text-blue-600">PHÚ</span>
+            <h1 className="text-xl font-black tracking-tighter text-slate-800 leading-[0.8]">
+              ÔNG TRÙM <br />
+              <span className="text-blue-600 text-2xl">BẤT ĐỘNG SẢN</span>
             </h1>
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Mô phỏng Bàn cờ Chân thực</p>
+            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest mt-2">Mô phỏng Bàn cờ Chân thực</p>
           </div>
         </div>
 
@@ -96,13 +103,22 @@ function App() {
 
 
       {/* Left Overlay: Player List */}
-      <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col gap-6 justify-start">
+      <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col gap-6 justify-between">
         <motion.div 
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           className="pointer-events-auto flex flex-col"
         >
           <PlayerListPanel />
+        </motion.div>
+
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="pointer-events-auto"
+        >
+          <QuickGuidePanel />
         </motion.div>
       </aside>
 
