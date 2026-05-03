@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import type { TokenAnimState } from '../../app/store/useGameStore';
 import { Phase, TileType } from '../../game-engine/types/game';
-import type { Property, GameState, BoardTile, Player } from '../../game-engine/types/game';
+import type { Property, GameState, Player } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dices,
@@ -11,7 +11,6 @@ import {
   ShieldAlert,
   HelpCircle,
   ArrowRightCircle,
-  Lock,
   Construction
 } from 'lucide-react';
 import { CharacterSprite } from '../shared/CharacterSprite';
@@ -84,13 +83,7 @@ export const BoardStatus: React.FC = () => {
           theme: 'rose',
           icon: <ShieldAlert size={18} />
         };
-      case Phase.JAIL_DECISION:
-        return {
-          label: 'Đang ở tù',
-          hint: 'Chọn cách để rời khỏi Trại Giam',
-          theme: 'slate',
-          icon: <Lock size={18} />
-        };
+
       default:
         return {
           label: 'Lượt chơi mới',
@@ -102,13 +95,15 @@ export const BoardStatus: React.FC = () => {
   };
 
   const info = getPhaseInfo();
-  const themeColors = {
+  const THEME_COLORS = {
     blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', badge: 'bg-blue-600' },
     amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', badge: 'bg-amber-600' },
     emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-600', badge: 'bg-emerald-600' },
     rose: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-600', badge: 'bg-rose-600' },
     slate: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-600', badge: 'bg-slate-600' },
-  }[info.theme as keyof typeof themeColors];
+  } as const;
+  
+  const themeColors = THEME_COLORS[info.theme as keyof typeof THEME_COLORS];
 
   if (!isReady) {
     return null;

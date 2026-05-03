@@ -17,7 +17,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private ownerMarker?: Phaser.GameObjects.Rectangle;
   private buildingMarkers: Phaser.GameObjects.Text[] = [];
   private mortgageOverlay?: Phaser.GameObjects.Rectangle;
-  private mortgageIcon?: Phaser.GameObjects.Text;
+  private jailedBadge?: Phaser.GameObjects.Container;
 
   constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile, layout: BoardTileLayout) {
     super(scene, x, y);
@@ -133,7 +133,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     isTop: boolean
   ) {
     const stripH = THEME.spacing.stripHeight;
-    const stripColor = this.getStripColor(tile, property);
+    const stripColor = this.getStripColor(property);
 
     if (stripColor !== null) {
       const sy = isTop ? height / 2 - stripH / 2 : -height / 2 + stripH / 2;
@@ -178,7 +178,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
     isLeft: boolean
   ) {
     const stripW = THEME.spacing.stripHeight;
-    const stripColor = this.getStripColor(tile, property);
+    const stripColor = this.getStripColor(property);
 
     if (stripColor !== null) {
       const sx = isLeft ? width / 2 - stripW / 2 : -width / 2 + stripW / 2;
@@ -214,7 +214,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
   }
 
-  private getStripColor(tile: BoardTile, property: Property | null): number | null {
+  private getStripColor(property: Property | null): number | null {
     if (property) {
       // Only normal property groups (BROWN, RED, etc.) have color strips
       if (property.groupId === PropertyGroup.STATION) return null;
@@ -296,7 +296,6 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.buildingPips = [];
 
       if (property.buildingLevel > 0) {
-        const isHorizontal = this.layout.sideIndex === 0 || this.layout.sideIndex === 2;
         const bx = this.background.width / 2 - 15;
         const by = this.background.height / 2 - 15;
 
