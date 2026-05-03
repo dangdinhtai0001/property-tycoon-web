@@ -28,18 +28,25 @@ export const Board: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Calculate board size based on available space
-  const boardSize = useMemo(() => {
-    if (dimensions.width === 0) return 600; // fallback
+  // Calculate board size based on available space and aspect ratio (1420:1120)
+  const boardDims = useMemo(() => {
+    if (dimensions.width === 0) return { w: 760, h: 600 };
 
-    // Use absolute minimum padding for small screens to hit target size
     const padding = dimensions.height < 700 ? 0 : (dimensions.height < 800 ? 8 : 32);
-    const availableWidth = dimensions.width - padding;
-    const availableHeight = dimensions.height - padding;
-    
-    const size = Math.min(availableWidth, availableHeight, 900);
-    
-    return Math.max(size, 400);
+    const availW = dimensions.width - padding;
+    const availH = dimensions.height - padding;
+    const ratio = 1420 / 1120;
+
+    let w, h;
+    if (availW / availH > ratio) {
+      h = Math.min(availH, 950); 
+      w = h * ratio;
+    } else {
+      w = Math.min(availW, 1200); 
+      h = w / ratio;
+    }
+
+    return { w: Math.max(w, 507), h: Math.max(h, 400) };
   }, [dimensions]);
 
   useEffect(() => {
@@ -76,8 +83,8 @@ export const Board: React.FC = () => {
       <div 
         className="relative flex items-center justify-center shadow-2xl transition-all duration-500 ease-out"
         style={{
-          width: 'min(100%, 1200px)',
-          height: 'min(100%, 960px)',
+          width: 'min(100%, 1500px)',
+          height: 'min(100%, 1200px)',
           backgroundColor: 'rgba(255, 255, 255, 0.4)',
           backdropFilter: 'blur(12px)',
           borderRadius: '3rem',
@@ -89,8 +96,8 @@ export const Board: React.FC = () => {
         <div 
           className="relative overflow-hidden"
           style={{
-            width: `${boardSize}px`,
-            height: `${boardSize}px`,
+            width: `${boardDims.w}px`,
+            height: `${boardDims.h}px`,
             backgroundColor: 'var(--board-bg)',
             borderRadius: 'var(--board-radius)',
             boxShadow: 'var(--board-shadow)',
