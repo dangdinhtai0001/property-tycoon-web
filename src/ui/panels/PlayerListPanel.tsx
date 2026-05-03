@@ -65,17 +65,18 @@ export const PlayerListPanel: React.FC = () => {
               key={player.id}
               initial={false}
               animate={{ 
-                height: isCurrent ? '100px' : '70px',
+                height: isCurrent ? '100px' : '72px',
                 opacity: player.isBankrupt ? 0.6 : 1
               }}
-              className={`relative overflow-hidden rounded-[1.5rem] border-2 transition-all duration-300 ${
+              className={`relative overflow-hidden transition-all duration-300 ${
                 isCurrent 
-                  ? 'bg-white shadow-lg shadow-slate-200/50 z-10' 
-                  : 'bg-slate-100/60 border-transparent opacity-80'
+                   ? 'bg-white shadow-xl shadow-slate-200/50 z-10 border-2' 
+                   : 'bg-white/40 backdrop-blur-sm border border-white/50 opacity-90'
               }`}
               style={{ 
-                borderColor: isCurrent ? player.color : 'transparent',
-                borderLeftWidth: '10px',
+                borderRadius: 'calc(var(--panel-radius) / 2)',
+                borderColor: isCurrent ? player.color : undefined,
+                borderLeftWidth: '12px',
                 borderLeftColor: player.color
               }}
             >

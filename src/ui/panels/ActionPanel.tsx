@@ -279,7 +279,15 @@ export const ActionPanel: React.FC = () => {
         )}
       </div>
 
-      <div className="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-4 border border-white shadow-2xl flex flex-col gap-4">
+      <div 
+        className="backdrop-blur-sm p-4 flex flex-col gap-4 transition-all duration-300"
+        style={{
+          backgroundColor: 'var(--panel-bg)',
+          borderRadius: 'var(--panel-radius)',
+          border: '1px solid var(--panel-border)',
+          boxShadow: 'var(--panel-shadow)',
+        }}
+      >
         {/* Primary Action Area */}
         <div className="relative">
           <AnimatePresence mode="wait">
