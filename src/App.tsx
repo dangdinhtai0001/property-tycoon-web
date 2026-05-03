@@ -8,6 +8,7 @@ import { ActionPanel } from './ui/panels/ActionPanel';
 import { GameLogPanel } from './ui/panels/GameLogPanel';
 import { useGameStore } from './app/store/useGameStore';
 import { MainMenu } from './ui/screens/MainMenu';
+import { CurrentTilePanel } from './ui/panels/CurrentTilePanel';
 import { Phase } from './game-engine/types/game';
 import { DebtResolutionModal } from './ui/modals/DebtResolutionModal';
 import { AuctionModal } from './ui/modals/AuctionModal';
@@ -96,14 +97,24 @@ function App() {
         </div>
       </header>
 
-      {/* Left Overlay: Player List */}
-      <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col justify-start">
+
+      {/* Left Overlay: Player List & Current Tile */}
+      <aside className="absolute left-6 top-32 bottom-8 z-10 w-80 pointer-events-none flex flex-col gap-6 justify-start">
         <motion.div 
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="pointer-events-auto h-full flex flex-col"
+          className="pointer-events-auto h-[60%] flex flex-col"
         >
           <PlayerListPanel />
+        </motion.div>
+
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="pointer-events-auto"
+        >
+          <CurrentTilePanel />
         </motion.div>
       </aside>
 
