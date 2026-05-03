@@ -184,6 +184,27 @@ export const SetupGameScreen: React.FC = () => {
                   <div className="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                 </div>
               </label>
+
+              <label className="flex items-center justify-between group cursor-pointer p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-rose-100 text-rose-600 rounded-xl">
+                    <Settings size={16} />
+                  </div>
+                  <div>
+                    <span className="block font-black text-slate-700">Chế độ Debug</span>
+                    <span className="text-xs text-slate-400 font-medium italic">Cho phép nhảy ô và cộng tiền để test</span>
+                  </div>
+                </div>
+                <div className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={config.enableDebug}
+                    onChange={(e) => setConfig({...config, enableDebug: e.target.checked})}
+                  />
+                  <div className="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                </div>
+              </label>
             </div>
           </div>
 

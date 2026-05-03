@@ -32,6 +32,15 @@ function App() {
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isActionExpanded, setIsActionExpanded] = React.useState(true);
+  const [isDebugOpen, setIsDebugOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    (window as any).game = {
+      jumpTo: (pos: number) => dispatch({ type: 'TELEPORT_PLAYER', payload: { position: pos } }),
+      addCash: (amount: number) => dispatch({ type: 'DEBUG_ADD_CASH', payload: { amount } }),
+      state: state
+    };
+  }, [dispatch, state]);
 
   if (state.phase === Phase.SETUP) {
     return (
@@ -128,18 +137,6 @@ function App() {
         </motion.div>
       </aside>
 
-
-      {/* Bottom Left: Quick Guide Panel */}
-      <aside className="absolute left-8 bottom-8 z-10 w-80 pointer-events-none">
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="pointer-events-auto"
-        >
-          <QuickGuidePanel />
-        </motion.div>
-      </aside>
 
       {/* Game Log Overlay */}
       <AnimatePresence>
