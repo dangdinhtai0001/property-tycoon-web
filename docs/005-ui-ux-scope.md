@@ -320,24 +320,42 @@ Layout đề xuất:
 
 ```txt
 ┌──────────────────────────────────────────────────────────────┐
-│ Top Bar: Game title / turn / phase / pause                   │
+│ Top Bar: Game title / turn / phase / pause     [React DOM]   │
 ├───────────────┬───────────────────────────────┬──────────────┤
 │ Player Panel  │                               │ Action Panel │
-│               │          Board UI             │ Dice Area    │
-│ Asset Summary │                               │ Current Tile │
-│               │                               │              │
+│  [React DOM]  │   Board UI + Token + Dice     │  [React DOM] │
+│ Asset Summary │     [Phaser Canvas]           │ Current Tile │
+│  [React DOM]  │                               │  [React DOM] │
 ├───────────────┴───────────────────────────────┴──────────────┤
-│ Game Log                                                     │
+│ Game Log                                      [React DOM]    │
 └──────────────────────────────────────────────────────────────┘
+```
+
+Phân định rõ khu vực render:
+
+```txt
+Phaser Canvas (WebGL/Canvas):
+- Board UI: 40 tiles, ownership markers, building indicators
+- Token Display: vị trí và animation token
+- Dice Area: sprite animation xúc xắc
+- Particle/Glow effects toàn bộ game world
+
+React DOM:
+- Player Panel: danh sách người chơi, tiền, trạng thái
+- Action Buttons: Roll Dice, End Turn, Manage Assets
+- Current Tile info panel
+- Game Log
+- Top Bar
+- Tất cả Modal (Buy Property, Debt Resolution, Jail, Building, Mortgage...)
 ```
 
 Alternative:
 
 ```txt
-Left: Player list + asset summary
-Center: Board
-Right: Dice + actions + current tile info
-Bottom: Game log
+Left: Player list + asset summary [React DOM]
+Center: Board [Phaser Canvas]
+Right: Dice + actions + current tile info [React DOM]
+Bottom: Game log [React DOM]
 ```
 
 ## 6.3 Responsive Requirement
@@ -368,7 +386,7 @@ Nhưng UI không nên hard-code quá mức khiến future responsive bất khả
 
 ## 7.1 Purpose
 
-Board UI hiển thị 40 ô, vị trí token, ownership, building và trạng thái tài sản.
+Board UI hiển thị 40 ô, vị trí token, ownership, building và trạng thái tài sản. Toàn bộ Board UI được render bởi **Phaser** (WebGL/Canvas), không phải DOM. Phaser scene đọc `GameState` để cập nhật vị trí token, trạng thái tile, ownership markers và hiệu ứng.
 
 Board phải giúp người chơi hiểu nhanh:
 
@@ -1991,6 +2009,33 @@ Make board hard to read
 Require physics
 Change rule state by themselves
 ```
+
+## 23.2b Animation Implementation — Phaser
+
+Tất cả animations trong game world (board, token, dice) sử dụng hệ thống của **Phaser**, không dùng CSS Transition hay Framer Motion:
+
+```txt
+Token hop/bounce:
+- Dùng Phaser Tweens với easing curve (ease-out lên, ease-in xuống)
+- Phaser Timeline để chuỗi nhiều hop liên tiếp
+
+Token trail effect:
+- Dùng Phaser Particles hoặc afterimage technique trong Phaser scene
+
+Dice animation:
+- Dùng Phaser SpriteSheet animation với anims.play()
+- Bounce/shake khi dừng bằng Phaser Tween
+
+Glow / particle effects:
+- Dùng Phaser.GameObjects.Particles.ParticleEmitter
+- Shader effect nếu cần glow phức tạp
+
+Timing & easing:
+- duration, ease, yoyo, repeat được kiểm soát hoàn toàn qua Phaser Tween config
+- Không dùng CSS transition-duration hay Framer Motion variants cho game world
+```
+
+React DOM animations (modal transition, money float) vẫn có thể dùng CSS transition hoặc Framer Motion vì chúng nằm ngoài Phaser Canvas.
 
 ## 23.3 Recommended Timing
 

@@ -200,6 +200,15 @@ Keyboard support cơ bản nếu tiện
 Responsive vừa đủ để không vỡ layout ở màn hình phổ biến
 ```
 
+Phân định kỹ thuật frontend:
+
+```txt
+Game World (Board, Token, Dice): chạy trên Phaser Canvas (WebGL/Canvas)
+UI Layer (Modal, Menu, Panel, Player Panel, Action Buttons): chạy trên React DOM
+```
+
+Ranh giới này giúp tận dụng sức mạnh Phaser cho animation game world, trong khi giữ các modal phức tạp (Debt Resolution Modal, Property Modal) dưới dạng React DOM component thông thường.
+
 Out of scope:
 
 ```txt
@@ -1016,7 +1025,7 @@ Cutscene
 Advanced 3D effects
 ```
 
-Thay vào đó, project ưu tiên hoàn thiện hoạt ảnh 2D/2.5D chất lượng cao với các hiệu ứng như particle effects, sprite animation, easing, trail effects và glow effects để tạo cảm giác "juicy" và thỏa mãn cho game 2D thuần.
+Thay vào đó, project ưu tiên hoàn thiện hoạt ảnh 2D/2.5D chất lượng cao với các hiệu ứng như particle effects, sprite animation, easing, trail effects và glow effects để tạo cảm giác "juicy" và thỏa mãn cho game 2D thuần. Các hiệu ứng hạt (particle effects), sprite animation và trail effects sẽ do **Phaser** xử lý thông qua hệ thống Particles và Tweens của engine, không phụ thuộc vào CSS hay React animation library.
 
 ## 9.7 Mobile and Accessibility Advanced Scope
 

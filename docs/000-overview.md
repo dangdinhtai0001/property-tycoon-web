@@ -45,7 +45,7 @@ Dễ bắt đầu
 → Có hoạt ảnh 2D chất lượng cao làm tăng cảm giác chơi
 ````
 
-MVP được định hướng là một bản **Ambitious MVP 2D thuần**: chưa online, chưa AI, chưa trade tự do giữa người chơi; nhưng có thêm lớp tài chính nâng cao như bán nhà, thế chấp, gỡ thế chấp, lãi suất và Debt Resolution. Đặc biệt, MVP ưu tiên hoạt ảnh 2D/2.5D chất lượng cao (high-quality 2D animations) với các hiệu ứng đặc biệt cho xúc xắc, di chuyển token và tương tác UI để tăng cảm giác hồi hộp và thỏa mãn khi chơi.
+MVP được định hướng là một bản **Ambitious MVP 2D thuần**: chưa online, chưa AI, chưa trade tự do giữa người chơi; nhưng có thêm lớp tài chính nâng cao như bán nhà, thế chấp, gỡ thế chấp, lãi suất và Debt Resolution. Đặc biệt, MVP ưu tiên hoạt ảnh 2D/2.5D chất lượng cao (high-quality 2D animations) với các hiệu ứng đặc biệt cho xúc xắc, di chuyển token và tương tác UI để tăng cảm giác hồi hộp và thỏa mãn khi chơi. Mục tiêu "hoạt ảnh 2D/2.5D chất lượng cao" này được hiện thực hóa nhờ sức mạnh của game engine **Phaser**, đảm nhận toàn bộ việc render môi trường game (board, token, dice) trên Canvas/WebGL.
 
 ---
 
@@ -261,13 +261,16 @@ Stack đề xuất:
 ```txt
 Frontend: Vite + React + TypeScript
 State: Zustand hoặc Redux Toolkit
-Animation: Framer Motion
+Game Rendering: Phaser (WebGL/Canvas) — cho Board, Token, Dice
+UI Layer: React DOM — cho Modal, Menu, Panel
 Styling: Tailwind CSS hoặc CSS Modules
 Testing: Vitest + Playwright
 Storage MVP: localStorage
 Storage later: IndexedDB nếu cần nhiều save slot hoặc dữ liệu lớn
 Backend: none for MVP
 ```
+
+Kiến trúc là **Hybrid**: game logic thuần TypeScript, UI Modal/Menu bằng React DOM, và toàn bộ môi trường game (Board, Token, Dice) do Phaser (WebGL/Canvas) đảm nhận.
 
 Nguyên tắc kỹ thuật quan trọng nhất:
 
@@ -287,7 +290,7 @@ Cấu trúc mong muốn:
   tests/
 
 /ui
-  board/
+  phaser/        ← Phaser scenes, sprites, camera controllers
   panels/
   modals/
   animation/

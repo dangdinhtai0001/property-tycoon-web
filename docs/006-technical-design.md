@@ -70,7 +70,8 @@ Language: TypeScript
 Frontend framework: React
 Build tool: Vite
 State management: Zustand hoặc Redux Toolkit
-Animation: Framer Motion
+Game rendering engine: Phaser (WebGL/Canvas) — Board, Token, Dice
+UI animation (React DOM only): Framer Motion hoặc CSS transition — Modal, Panel
 Styling: Tailwind CSS hoặc CSS Modules
 Unit testing: Vitest
 E2E testing: Playwright
@@ -80,13 +81,26 @@ Backend: none
 Database server: none
 ```
 
+Kiến trúc là **Hybrid**:
+
+```txt
+Game World (Board, Token, Dice):
+- Render bởi Phaser (WebGL/Canvas)
+- Animation: Phaser Tweens, Timelines, Particles, SpriteSheet
+
+UI Layer (Modal, Panel, Menu):
+- Render bởi React DOM
+- Animation: Framer Motion hoặc CSS transition (giới hạn trong DOM)
+```
+
 ## 2.2 Recommended Default Choice
 
 Khuyến nghị cụ thể:
 
 ```txt
 Vite + React + TypeScript
-Zustand for UI/game store bridge
+Phaser cho game world rendering
+Zustand for UI/game store bridge — đồng bộ GameState xuống Phaser instance
 Pure TypeScript game engine
 Vitest for engine tests
 Playwright for critical UI flows
@@ -99,8 +113,9 @@ Lý do:
 Vite nhanh và đơn giản cho frontend app.
 React phù hợp với UI nhiều panel/modal.
 TypeScript giúp giảm bug state/action.
+Phaser cung cấp Tweens, Particles, SpriteSheet animation chuyên biệt cho game 2D.
 Pure game engine dễ unit test.
-Zustand nhẹ, ít boilerplate.
+Zustand nhẹ, ít boilerplate, phù hợp làm bridge giữa React và Phaser.
 Vitest tích hợp tốt với TypeScript/Vite ecosystem.
 Playwright phù hợp test flow end-to-end.
 localStorage đủ cho save JSON nhỏ ở MVP.
@@ -114,8 +129,8 @@ Có thể dùng:
 Redux Toolkit thay Zustand nếu muốn action/reducer pattern nghiêm ngặt hơn.
 XState nếu muốn state machine formal hơn.
 IndexedDB nếu save data lớn hoặc có nhiều save slot.
-PixiJS nếu board 2D cần canvas rendering phức tạp.
-Three.js ở phase 3D.
+PixiJS thay Phaser nếu cần canvas rendering nhẹ hơn (ít tính năng built-in hơn).
+Three.js ở phase 3D (permanent non-goal của project này).
 ```
 
 MVP không cần:
@@ -145,10 +160,27 @@ Game logic must be independent from UI rendering.
 
 ```txt
 Game engine không import React.
+Game engine không import Phaser.
 Game engine không đọc DOM.
 Game engine không phụ thuộc animation.
 Game engine không biết modal nào đang mở.
 Game engine chỉ nhận GameAction và trả về GameState mới.
+```
+
+Đồng bộ GameState xuống Phaser:
+
+```txt
+Zustand store giữ GameState (source of truth).
+Phaser scene subscribe vào store (hoặc nhận update qua EventEmitter).
+Khi GameState thay đổi, Phaser scene cập nhật sprites/tiles tương ứng.
+Phaser KHÔNG tự giữ game logic — chỉ là display layer.
+
+Ví dụ flow:
+dispatch(ROLL_DICE)
+→ GameState.players[0].position = 9
+→ Zustand notifies Phaser scene
+→ PhaserScene.tokenSprite.moveTo(tile[9])  ← animation
+→ React DOM re-renders Player Panel
 ```
 
 UI có nhiệm vụ:
@@ -398,6 +430,24 @@ src/
       diceAnimation.ts
       moneyAnimation.ts
 
+  phaser/
+    scenes/
+      BoardScene.ts          ← main game world scene
+      DiceScene.ts           ← dice sprite animation
+      UIScene.ts             ← optional overlay scene
+    sprites/
+      TokenSprite.ts
+      TileSprite.ts
+      BuildingSprite.ts
+    effects/
+      ParticleEffects.ts
+      GlowEffect.ts
+      TrailEffect.ts
+    camera/
+      BoardCamera.ts
+    bridge/
+      PhaserBridge.ts        ← sync GameState → Phaser scene
+
   storage/
     localStorageAdapter.ts
     indexedDbAdapter.ts
@@ -414,15 +464,19 @@ src/
 
 | Folder                   | Responsibility                                |
 | ------------------------ | --------------------------------------------- |
-| `game-engine/`           | Pure rule logic, state transition, validators |
-| `game-engine/data/`      | Board/card/property config                    |
-| `game-engine/rules/`     | Individual rule modules                       |
-| `game-engine/selectors/` | Derived state helpers                         |
-| `game-engine/services/`  | Save/load, migration, random helpers          |
-| `ui/`                    | React components only                         |
-| `ui/modals/`             | Modal UI                                      |
-| `ui/panels/`             | Game screen panels                            |
-| `storage/`               | Browser storage adapters                      |
+| Folder                   | Responsibility                                            |
+| ------------------------ | --------------------------------------------------------- |
+| `game-engine/`           | Pure rule logic, state transition, validators             |
+| `game-engine/data/`      | Board/card/property config                                |
+| `game-engine/rules/`     | Individual rule modules                                   |
+| `game-engine/selectors/` | Derived state helpers                                     |
+| `game-engine/services/`  | Save/load, migration, random helpers                      |
+| `ui/`                    | React components only (DOM layer)                         |
+| `ui/modals/`             | Modal UI (React DOM)                                      |
+| `ui/panels/`             | Game screen panels (React DOM)                            |
+| `ui/phaser/`             | Phaser scenes, sprites, effects, bridge (Canvas layer)    |
+| `ui/phaser/bridge/`      | PhaserBridge — đồng bộ GameState → Phaser instance        |
+| `storage/`               | Browser storage adapters                                  |
 | `tests/`                 | E2E and integration tests                     |
 
 ---
@@ -2015,21 +2069,21 @@ UI animation interpolates from previous to new position.
 No rule should wait on CSS animation to become true.
 ```
 
-## 15.3 Animation Queue System (UI Layer)
+## 15.3 Animation Queue System (Phaser Layer)
 
-MVP phải có Animation Queue ở phía UI để quản lý sequential animations từ game events:
+MVP phải có Animation Queue để quản lý sequential animations từ game events. Queue System gọi trực tiếp các method của Phaser instance để play animation tuần tự — không dispatch event để React component render animation.
 
 **Why Animation Queue:**
-- Nếu engine dispatch nhiều events cùng lúc, UI không cập nhật chớp nhoáng
+- Nếu engine dispatch nhiều events cùng lúc, animations không chạy đồng thời lộn xộn
 - Queue các events và chơi animations từ từ, từ event này sang event khác
 - Tạo cảm giác storytelling từng bước thay vì cập nhật state đột ngột
 
 **Example Flow:**
 ```txt
-DICE_ROLLED → dice animation 1000ms → wait
-PLAYER_MOVED → token hop animation 600ms → wait
-RENT_CHARGED → money float animation 800ms → wait
-[check if need Debt Resolution] → open modal
+DICE_ROLLED   → diceScene.roll()        → Phaser Tween/SpriteSheet → await
+PLAYER_MOVED  → tokenSprite.moveTo(9)   → Phaser Timeline hop      → await
+RENT_CHARGED  → moneyFloat.play(−200)   → React DOM float text     → await
+[check phase] → state.phase === DEBT_RESOLUTION → React opens modal
 ```
 
 **Architecture:**
@@ -2037,14 +2091,23 @@ RENT_CHARGED → money float animation 800ms → wait
 game-engine/
   reducer → returns { state, events[] }
 
+ui/phaser/bridge/
+  PhaserBridge
+    .handleEvent(event) → calls Phaser methods directly
+
 ui/
   AnimationQueue
     .enqueue(event)
-    .play(event) → Promise<void>
     .playSequential(events[]) → Promise<void>
+      - GameEvent.DICE_ROLLED   → PhaserBridge.diceScene.roll()
+      - GameEvent.PLAYER_MOVED  → PhaserBridge.tokenSprite.moveTo(tileIndex)
+      - GameEvent.MONEY_CHANGED → React DOM floating text (outside Phaser)
+      - GameEvent.CARD_DRAWN    → PhaserBridge.cardScene.reveal()
 ```
 
-Điều này giúp tạo momentum và cảm giác "juicy" cho game.
+**Không dùng CSS animation hay Framer Motion cho game world events.** Toàn bộ board/token/dice animation chạy qua Phaser API.
+
+Điều này giúp tạo momentum và cảm giác "juicy" cho game với easing và timing chính xác.
 
 ---
 

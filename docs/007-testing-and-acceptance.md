@@ -241,6 +241,21 @@ Jail Modal hiển thị đúng action
 
 Không cần test pixel-perfect.
 
+**Lưu ý quan trọng về Phaser Canvas:**
+
+Logic đồ họa trên Phaser Canvas (board tiles, token position, glow effects, particle) **không thể test bằng React Testing Library** vì chúng render trên WebGL/Canvas, không phải DOM.
+
+Kiểm thử UI game world cần dùng:
+
+```txt
+E2E tests (Playwright): chụp screenshot, kiểm tra visual state qua DOM overlay hoặc game log
+Manual/visual testing: quan sát trực tiếp animation và rendering
+Unit tests cho Phaser bridge logic: kiểm tra PhaserBridge gọi đúng method với đúng tham số
+Mock Phaser trong unit test: dùng spy/stub để verify tokenSprite.moveTo() được gọi
+```
+
+React DOM components (Modal, Panel) vẫn test được bằng React Testing Library như bình thường.
+
 ---
 
 ## 3.4 E2E Tests

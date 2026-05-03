@@ -160,7 +160,7 @@ Token di chuyển quanh viền
 Khu trung tâm dùng cho dice, log, card hoặc action panel
 ```
 
-Cách render này được tối ưu cho 2D/2.5D với các hiệu ứng hạt (particle effects), glow effects và shadow effects để tạo chiều sâu và cảm giác "juicy".
+Cách render này được tối ưu cho 2D/2.5D với các hiệu ứng hạt (particle effects), glow effects và shadow effects để tạo chiều sâu và cảm giác "juicy". Việc render các tile và tất cả hiệu ứng này sẽ được di chuyển khỏi CSS/DOM và quản lý hoàn toàn bằng **Phaser scene** — engine đảm nhận WebGL/Canvas rendering cho toàn bộ game world.
 
 ---
 
@@ -1379,6 +1379,16 @@ BoardConfig xác định tile position, type, group.
 Visual system áp dụng effect dựa trên state (owned, mortgaged, building level).
 Không hard-code effect vào board data.
 Tách visual layer khỏi game logic.
+```
+
+Triển khai kỹ thuật:
+
+```txt
+Tất cả visual effects trên board (particle, glow, shadow, sprite animation) đều do Phaser quản lý.
+Phaser scene đọc GameState và cập nhật sprites/tiles/effects tương ứng.
+Không dùng CSS animation hay React animation library cho board rendering.
+BoardConfig là data thuần — không chứa Phaser object trực tiếp.
+Phaser scene tự khởi tạo DisplayObject từ BoardConfig khi scene được tạo.
 ```
 
 ---

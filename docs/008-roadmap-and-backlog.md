@@ -155,7 +155,7 @@ Phase 6 — Online
 | Phase 2 — Ambitious MVP Finance             | Thêm finance nâng cao và Debt Resolution                    | MVP core complete       |
 | Phase 3 — MVP Polish                        | UI, save/load, animation, audio, test hardening             | MVP release candidate   |
 | Phase 4 — Advanced Rules                    | Trade, auction, quick mode, rule presets nâng cao           | Post-MVP                |
-| Phase 5 — Advanced 2D Polish & Juicy Anim   | Particle effects, sprite animation, easing, trail, glow     | Post-MVP visual polish  |
+| Phase 5 — Advanced 2D Polish & Juicy Anim   | Tích hợp Phaser engine, particle effects, sprite animation  | **In Progress**         |
 | Phase 6 — Online                            | Lobby, room, sync, reconnect                                | Post-MVP multiplayer    |
 
 ---
@@ -589,40 +589,49 @@ Không đưa vào MVP vì dễ tăng scope và kẹt UI.
 
 ## 10. Phase 5 — Advanced 2D Polish & Juicy Animations
 
+**Status: In Progress**
+
 ## 10.1 Goal
 
-Phase 5 nâng cấp visual experience và animation quality để tạo cảm giác "juicy" và thỏa mãn cho game 2D thuần.
+Phase 5 tích hợp **Phaser engine** làm rendering layer cho game world (Board, Token, Dice), đồng thời nâng cấp visual experience và animation quality để tạo cảm giác "juicy" và thỏa mãn cho game 2D thuần.
 
 ---
 
 ## 10.2 Candidate Features
 
 ```txt
-Particle effects:
+Phaser Architecture Setup:
+- Tích hợp Phaser vào Vite + React project
+- BoardScene: render 40 tiles trên Phaser Canvas
+- DiceScene: sprite-sheet animation cho xúc xắc
+- PhaserBridge: sync GameState (Zustand) → Phaser instance
+- AnimationQueue gọi Phaser methods trực tiếp
+
+Particle effects (Phaser Particles):
 - Dice landing dust/puff
 - Token movement trail
 - Property purchase sparkle
 - Building completed glow
 - Mortgage shimmer
 
-Sprite-based animations:
-- Dice sprite-sheet animation
-- Token hop/bounce with easing
+Sprite-based animations (Phaser Tweens + SpriteSheet):
+- Dice sprite-sheet animation (anims.play)
+- Token hop/bounce with easing (Phaser Timeline)
 - Card flip/reveal animation
 
-Glow & shadow effects:
+Glow & shadow effects (Phaser shaders/fx):
 - Tile highlight glow
 - Mortgaged property dimmer visual
 - Building construction glow
 - Token drop shadow during movement
 
-Advanced easing:
+Advanced easing (Phaser Tween config):
 - Token movement with ease-out/ease-in
 - Bounce curves for hop effect
 - Trail fade-out animation
 
 Juice & polish:
-- Visual feedback cho mỗi action
+- Visual feedback cho mỗi action qua Phaser events
 - Smooth transitions giữa states
 - Cumulative animation queue
 - Reduced motion option
@@ -892,10 +901,26 @@ Acceptance criteria:
 Acceptance criteria:
 
 ```txt
-1. Board hiển thị 40 ô.
+1. Board hiển thị 40 ô trên Phaser Canvas (không phải DOM).
 2. 4 góc đúng vị trí.
 3. Tile type dễ phân biệt.
 4. Board đọc được trên desktop.
+5. BoardScene khởi tạo từ BoardConfig data (data-driven, không hard-code).
+6. Phaser scene nhận GameState update qua PhaserBridge.
+```
+
+New tasks cần thêm:
+
+```txt
+E2-S3a — Setup Phaser trong Vite/React project
+  - Cài phaser package
+  - Mount Phaser canvas vào React component
+  - Không conflict với React DOM lifecycle
+
+E2-S3b — Implement PhaserBridge
+  - Subscribe Zustand store
+  - Notify BoardScene khi GameState thay đổi
+  - BoardScene update tile/token display theo state mới
 ```
 
 ---
@@ -1044,9 +1069,11 @@ Acceptance criteria:
 Acceptance criteria:
 
 ```txt
-1. Token move từng ô.
-2. Animation không block logic quá lâu.
+1. Token move từng ô trên Phaser Canvas (tokenSprite.moveTo() qua Phaser Tween).
+2. Animation không block game logic (GameState đã update trước khi animation xong).
 3. Có reduced/no-animation fallback nếu cần.
+4. AnimationQueue gọi Phaser method tuần tự (không dùng CSS transition).
+5. Hop/bounce effect dùng Phaser Timeline với easing curve.
 ```
 
 ---
