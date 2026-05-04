@@ -1,4 +1,4 @@
-import { type BoardTile, TileType, type Property, PropertyGroup } from '../../types/game';
+import { type BoardTile, TileType, type Property, PropertyGroup, PropertyKind } from '../../types/game';
 import { MORTGAGE_RATE } from '../../../config/gameplay';
 import { TILE_NAMES } from '../../../config/text';
 
@@ -18,6 +18,7 @@ type BaseTileConfig = {
 
 type PropertyTileConfig = BaseTileConfig & {
   type: TileType.PROPERTY;
+  kind?: PropertyKind; // Optional, can be inferred from groupId if missing
   price: number;
   groupId: PropertyGroup;
   rent?: number;
@@ -143,27 +144,39 @@ const createPropertyTile = ({
   imageUrl,
   price,
   groupId,
+  kind,
   rent,
   rentLevels,
   buildingCost,
   backgroundColor,
-}: PropertyTileConfig): Property => ({
-  id: tileId(position),
-  type: TileType.PROPERTY,
-  name,
-  shortName: shortName || name,
-  position,
-  price,
-  rent: rent ?? rentLevels?.[0] ?? 0,
-  groupId,
-  buildingLevel: 0,
-  buildingCost: buildingCost ?? BUILDING_COST_BY_GROUP[groupId] ?? 0,
-  backgroundColor: backgroundColor ?? getSpecialTileColor(TileType.PROPERTY),
-  ...(rentLevels ? { rentLevels: [...rentLevels] } : {}),
-  isMortgaged: false,
-  mortgageValue: price * MORTGAGE_RATE,
-  ...(imageUrl ? { imageUrl } : {}),
-});
+}: PropertyTileConfig): Property => {
+  // Infer kind from groupId if not provided
+  let inferredKind = kind;
+  if (!inferredKind) {
+    if (groupId === PropertyGroup.STATION) inferredKind = PropertyKind.STATION;
+    else if (groupId === PropertyGroup.UTILITY) inferredKind = PropertyKind.UTILITY;
+    else inferredKind = PropertyKind.LAND;
+  }
+
+  return {
+    id: tileId(position),
+    type: TileType.PROPERTY,
+    kind: inferredKind,
+    name,
+    shortName: shortName || name,
+    position,
+    price,
+    rent: rent ?? rentLevels?.[0] ?? 0,
+    groupId,
+    buildingLevel: 0,
+    buildingCost: buildingCost ?? BUILDING_COST_BY_GROUP[groupId] ?? 0,
+    backgroundColor: backgroundColor ?? getSpecialTileColor(TileType.PROPERTY),
+    ...(rentLevels ? { rentLevels: [...rentLevels] } : {}),
+    isMortgaged: false,
+    mortgageValue: price * MORTGAGE_RATE,
+    ...(imageUrl ? { imageUrl } : {}),
+  };
+};
 
 const createBoardTile = (config: BoardTileConfig): BoardTile => {
   if (config.type === TileType.PROPERTY) {
