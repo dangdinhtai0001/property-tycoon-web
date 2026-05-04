@@ -179,8 +179,12 @@ export class BoardScene extends Phaser.Scene {
 
     this.boardContainer.setPosition(offsetW, offsetH);
 
-    // Clear and redraw tiles if board configuration changed or first load
-    if (this.tiles.length === 0) {
+    // Redraw tiles if configuration changed or first load
+    if (this.tiles.length !== state.board.length && state.board.length > 0) {
+      this.tiles.forEach(t => t.destroy());
+      this.tiles = [];
+      this.tilesContainer.removeAll(true);
+
       state.board.forEach((tile, index) => {
         const layout = BoardScene.getTileLayout(index);
         const pos = this.getTilePosition(layout);

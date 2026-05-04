@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { useUIStore } from '../../app/store/useUIStore';
+import { useGameStore } from '../../app/store/useGameStore';
 import { eventBus } from '../../core/EventBus';
 import type { GameState } from '../../game-engine/types/game';
 
@@ -33,6 +34,12 @@ export class PhaserBridge {
       boardScene.events.on('tile-clicked', (tileId: string) => {
         useUIStore.getState().setInspectedPropertyId(tileId);
       });
+    }
+
+    // Trigger initial update with current state
+    const { state } = useGameStore.getState();
+    if (state.phase !== 'SETUP') {
+      this.updatePhaser(state);
     }
   }
 
