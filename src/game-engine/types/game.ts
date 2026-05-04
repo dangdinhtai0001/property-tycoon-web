@@ -86,11 +86,45 @@ export interface Player {
   avatarUrl?: string;
 }
 
+export type CardEffectType =
+  | 'RECEIVE_MONEY'
+  | 'PAY_MONEY'
+  | 'PAY_PER_PROPERTY'
+  | 'PAY_PER_BUILDING'
+  | 'MOVE_TO_TILE'
+  | 'MOVE_STEPS'
+  | 'MOVE_TO_NEAREST'
+  | 'MOVE_TO_NEAREST_UNOWNED_PROPERTY'
+  | 'TEMP_RENT_MODIFIER'
+  | 'TEMP_BUILD_COST_MODIFIER'
+  | 'TEMP_UNMORTGAGE_DISCOUNT'
+  | 'ONE_TIME_RENT_DISCOUNT'
+  | 'ONE_TIME_PURCHASE_DISCOUNT'
+  | 'DISABLE_ACTION_UNTIL_ROUND_END'
+  | 'ADJUST_BUILDING_LEVEL';
+
 export interface Card {
   id: string;
   type: TileType.CHANCE | TileType.FORTUNE;
+  title: string;
   description: string;
-  action: any;
+  effect: {
+    type: CardEffectType;
+    value?: number;
+    target?: string;
+    duration?: number;
+    tileId?: string;
+    position?: number;
+  };
+}
+
+export interface TemporaryModifier {
+  id: string;
+  playerId?: PlayerId;
+  effect: CardEffectType;
+  value: number;
+  target?: string;
+  remainingRounds: number;
 }
 
 export interface DebtState {
@@ -136,6 +170,9 @@ export interface GameState {
   auctionState?: AuctionState;
   tradeOffer?: TradeOffer;
   activeCard?: Card;
+  chanceDeck: Card[];
+  fortuneDeck: Card[];
+  temporaryModifiers: TemporaryModifier[];
   lastPurchaseId?: PropertyId;
   config: GameConfig;
 }
