@@ -1,4 +1,5 @@
 import { type GameState, type Property, TileType } from '../types/game';
+import { BUILDING_LIMITS } from '../../config/gameplay';
 
 export const canBuild = (state: GameState, propertyId: string): boolean => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
@@ -8,7 +9,7 @@ export const canBuild = (state: GameState, propertyId: string): boolean => {
   if (property.ownerId !== currentPlayer.id) return false;
   if (property.id === state.lastPurchaseId) return false; // Cannot build on turn bought
   if (property.isMortgaged) return false;
-  if (property.buildingLevel >= 5) return false; // Max 5 (Hotel)
+  if (property.buildingLevel >= BUILDING_LIMITS.house + BUILDING_LIMITS.hotel) return false; // Max houses + hotel
   if (currentPlayer.cash < property.buildingCost) return false;
 
   // Check if owner has all properties in the group
@@ -49,7 +50,7 @@ export const buildProperty = (state: GameState, propertyId: string): GameState =
     return t;
   });
 
-  const buildingName = property.buildingLevel === 4 ? 'Khách sạn' : `Nhà cấp ${property.buildingLevel + 1}`;
+  const buildingName = property.buildingLevel === BUILDING_LIMITS.house ? 'Khách sạn' : `Nhà cấp ${property.buildingLevel + 1}`;
   const logEntry = `${currentPlayer.name} đã xây ${buildingName} tại ${property.name} với chi phí ${property.buildingCost}$.`;
 
   return {

@@ -82,7 +82,53 @@ export const getTileIcon = (type: string, groupId?: string): string => {
  */
 export const TILE_NAMES: Record<number, string> = {
   0: 'Xuất phát',
-  // Remaining 39 tile names populated in Task 8 when basicBoard.ts is migrated
+  1: 'Làng cổ Đường Lâm',
+  2: 'Làng lụa Vạn Phúc',
+  3: 'Phố đi bộ Hồ Gươm',
+  4: 'Khí Vận',
+  5: 'Thành Cổ Loa',
+  6: 'Đền Ngọc Sơn',
+  7: 'Thuế thu nhập',
+  8: 'Bến xe Giáp Bát',
+  9: 'Làng gốm Bát Tràng',
+  10: 'Cơ Hội',
+  11: 'Chùa Tây Phương',
+  12: 'Công viên Yên Sở',
+  13: 'Nhà tù Hỏa Lò / Thăm nuôi',
+  14: 'Vườn quốc gia Ba Vì',
+  15: 'Phố Ngọc Lâm',
+  16: 'Nhà máy nước Yên Phụ',
+  17: 'Khu đô thị Việt Hưng',
+  18: 'Phố Nguyễn Văn Cừ',
+  19: 'Thuế bảo vệ môi trường',
+  20: 'Ga Hà Nội',
+  21: 'Văn Miếu - Quốc Tử Giám',
+  22: 'Thuế hạ tầng',
+  23: 'Khí Vận',
+  24: 'Công viên Thống Nhất',
+  25: 'Phố Xã Đàn',
+  26: 'Royal City Nguyễn Trãi',
+  27: 'Sân vận động Mỹ Đình',
+  28: 'Cơ Hội',
+  29: 'Trung tâm Hội nghị Quốc gia',
+  30: 'Keangnam Landmark 72',
+  31: 'Thuế hạ tầng',
+  32: 'Bến xe Mỹ Đình',
+  33: 'Phố Trần Duy Hưng',
+  34: 'Phố Duy Tân',
+  35: 'Nhà máy nước Pháp Vân',
+  36: 'Phố Xuân Diệu',
+  37: 'Vào Nhà tù Hỏa Lò',
+  38: 'Phố Liễu Giai',
+  39: 'Phố Kim Mã',
+  40: 'Khí Vận',
+  41: 'Phố Nguyễn Chí Thanh',
+  42: 'Ga Gia Lâm',
+  43: 'Cơ Hội',
+  44: 'Phố Tràng Tiền',
+  45: 'Phố Phan Đình Phùng',
+  46: 'Thuế xa xỉ',
+  47: 'Phố Hàng Đào',
 }
 
 /**
@@ -115,6 +161,17 @@ export const GAME_LOG = {
 }
 
 /**
- * Card texts keyed by card id. Populated in Task 8 when cards.ts is migrated.
+ * Card texts keyed by card id. Migrated from cards.ts.
  */
-export const CARD_TEXTS: Record<string, { title: string; description: string }> = {}
+export const CARD_TEXTS: Record<string, { title: string; description: string }> = {
+  'chance-1': { title: 'Khí Vận', description: 'Bị phạt quá tốc độ. Trả 15$.' },
+  'chance-2': { title: 'Khí Vận', description: 'Ngân hàng trả lãi. Nhận 50$.' },
+  'chance-3': { title: 'Khí Vận', description: 'Tiến đến ô Bắt Đầu. Nhận 200$.' },
+  'chance-4': { title: 'Khí Vận', description: 'Tiến đến Phố Hàng Đào.' },
+  'chance-5': { title: 'Khí Vận', description: 'Vào tù ngay lập tức. Không đi qua ô Bắt đầu, không nhận 200$.' },
+  'fortune-1': { title: 'Cơ Hội', description: 'Phí khám bệnh. Trả 50$.' },
+  'fortune-2': { title: 'Cơ Hội', description: 'Bán cổ phiếu có lãi. Nhận 100$.' },
+  'fortune-3': { title: 'Cơ Hội', description: 'Phí bảo hiểm đáo hạn. Nhận 100$.' },
+  'fortune-4': { title: 'Cơ Hội', description: 'Đi học. Trả 50$.' },
+  'fortune-5': { title: 'Cơ Hội', description: 'Vào tù ngay lập tức. Không đi qua ô Bắt đầu, không nhận 200$.' },
+}

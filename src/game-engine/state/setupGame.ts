@@ -1,9 +1,11 @@
 import { type GameState, Phase, type GameConfig } from '../types/game';
 import { BASIC_BOARD } from '../data/boards/basicBoard';
+import { STARTING_CASH, PASS_START_BONUS } from '../../config/gameplay';
+import { GAME_LOG } from '../../config/text';
 
 export const DEFAULT_CONFIG: GameConfig = {
-  startingCash: 1500,
-  passStartBonus: 200,
+  startingCash: STARTING_CASH,
+  passStartBonus: PASS_START_BONUS,
   enableAuction: false,
   rentMultiplier: 1,
   enableDebug: false,
@@ -30,7 +32,7 @@ export const createInitialGame = (
     phase: Phase.WAITING_TO_ROLL,
     board: BASIC_BOARD,
     doublesCount: 0,
-    log: ['Game đã bắt đầu!'],
+    log: [GAME_LOG.gameStarted()],
     config,
   };
 };

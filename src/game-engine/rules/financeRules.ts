@@ -1,4 +1,5 @@
 import { type GameState, type Property, TileType, Phase } from '../types/game';
+import { GAME_LOG } from '../../config/text';
 
 export const canMortgage = (state: GameState, propertyId: string): boolean => {
   const property = state.board.find(t => t.id === propertyId) as Property | undefined;
@@ -33,7 +34,7 @@ export const mortgageProperty = (state: GameState, propertyId: string): GameStat
     return t;
   });
 
-  const logEntry = `${currentPlayer.name} đã thế chấp ${property.name} và nhận ${property.mortgageValue}$.`;
+  const logEntry = GAME_LOG.playerMortgaged(currentPlayer.name, property.name, property.mortgageValue);
 
   return {
     ...state,

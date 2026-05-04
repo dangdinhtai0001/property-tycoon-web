@@ -1,4 +1,5 @@
 import { type GameState, type Property, TileType, PropertyGroup, Phase } from '../types/game';
+import { STATION_BASE_RENT, UTILITY_MULTIPLIER_SINGLE, UTILITY_MULTIPLIER_BOTH, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
 
 export const calculateRent = (state: GameState, property: Property, diceTotal: number = 0): number => {
   const ownerId = property.ownerId;
@@ -12,12 +13,12 @@ export const calculateRent = (state: GameState, property: Property, diceTotal: n
 
   if (property.groupId === PropertyGroup.STATION) {
     const stationCount = ownerProperties.filter(p => p.groupId === PropertyGroup.STATION).length;
-    return 25 * Math.pow(2, stationCount - 1) * (state.config?.rentMultiplier || 1);
+    return STATION_BASE_RENT * Math.pow(2, stationCount - 1) * (state.config?.rentMultiplier || 1);
   }
 
   if (property.groupId === PropertyGroup.UTILITY) {
     const utilityCount = ownerProperties.filter(p => p.groupId === PropertyGroup.UTILITY).length;
-    const multiplier = utilityCount === 2 ? 10 : 4;
+    const multiplier = utilityCount === 2 ? UTILITY_MULTIPLIER_BOTH : UTILITY_MULTIPLIER_SINGLE;
     return diceTotal * multiplier * (state.config?.rentMultiplier || 1);
   }
 
@@ -35,7 +36,7 @@ export const calculateRent = (state: GameState, property: Property, diceTotal: n
     const anyMortgagedInGroup = propertiesInGroup.some(p => p.isMortgaged);
 
     if (ownsAllInGroup && !anyMortgagedInGroup) {
-      baseRent = property.rent * 2;
+      baseRent = property.rent * GROUP_RENT_MULTIPLIER;
     } else {
       baseRent = property.rent;
     }

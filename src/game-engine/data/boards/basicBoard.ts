@@ -1,6 +1,6 @@
 import { type BoardTile, TileType, type Property, PropertyGroup } from '../../types/game';
-
-const MORTGAGE_RATIO = 0.5;
+import { MORTGAGE_RATE } from '../../../config/gameplay';
+import { TILE_NAMES } from '../../../config/text';
 
 const tileId = (position: number) => `tile-${position}`;
 
@@ -51,10 +51,10 @@ const getSpecialTileColor = (type: TileType): number | undefined => {
 
 const BOARD_TILE_CONFIGS = [
   // --- BOTTOM ROW (Pos 0 to 13) ---
-  { type: TileType.START, name: 'Xuất phát', shortName: 'BẮT ĐẦU', position: 0, imageUrl: '/assets/tiles/start.png' },
+  { type: TileType.START, name: TILE_NAMES[0], shortName: 'BẮT ĐẦU', position: 0, imageUrl: '/assets/tiles/start.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Làng cổ Đường Lâm',
+    name: TILE_NAMES[1],
     shortName: 'Đường Lâm',
     position: 1,
     imageUrl: '',
@@ -64,7 +64,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Làng lụa Vạn Phúc',
+    name: TILE_NAMES[2],
     shortName: 'Vạn Phúc',
     position: 2,
     imageUrl: '',
@@ -74,7 +74,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Phố đi bộ Hồ Gươm',
+    name: TILE_NAMES[3],
     shortName: 'Phố đi bộ',
     position: 3,
     imageUrl: '',
@@ -82,10 +82,10 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.BROWN,
     rentLevels: [4, 20, 60, 180, 320, 450],
   },
-  { type: TileType.CHANCE, name: 'Khí Vận', shortName: 'KHÍ VẬN', position: 4, imageUrl: '/assets/tiles/chance-vertical.png' },
+  { type: TileType.CHANCE, name: TILE_NAMES[4], shortName: 'KHÍ VẬN', position: 4, imageUrl: '/assets/tiles/chance-vertical.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Thành Cổ Loa',
+    name: TILE_NAMES[5],
     shortName: 'Cổ Loa',
     position: 5,
     imageUrl: '',
@@ -95,7 +95,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Đền Ngọc Sơn',
+    name: TILE_NAMES[6],
     shortName: 'Ngọc Sơn',
     position: 6,
     imageUrl: '',
@@ -103,10 +103,10 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.BROWN,
     rentLevels: [4, 20, 60, 180, 320, 450],
   },
-  { type: TileType.TAX, name: 'Thuế thu nhập', shortName: 'THUẾ', position: 7, imageUrl: '/assets/tiles/tax.png' },
+  { type: TileType.TAX, name: TILE_NAMES[7], shortName: 'THUẾ', position: 7, imageUrl: '/assets/tiles/tax.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Bến xe Giáp Bát',
+    name: TILE_NAMES[8],
     shortName: 'Giáp Bát',
     position: 8,
     imageUrl: '/assets/tiles/station.png',
@@ -116,7 +116,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Làng gốm Bát Tràng',
+    name: TILE_NAMES[9],
     shortName: 'Bát Tràng',
     position: 9,
     imageUrl: '',
@@ -124,10 +124,10 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.LIGHT_BLUE,
     rentLevels: [6, 30, 90, 270, 400, 550],
   },
-  { type: TileType.FORTUNE, name: 'Cơ Hội', shortName: 'CƠ HỘI', position: 10, imageUrl: '/assets/tiles/fortune-vertical.png' },
+  { type: TileType.FORTUNE, name: TILE_NAMES[10], shortName: 'CƠ HỘI', position: 10, imageUrl: '/assets/tiles/fortune-vertical.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Chùa Tây Phương',
+    name: TILE_NAMES[11],
     shortName: 'Tây Phương',
     position: 11,
     imageUrl: '',
@@ -137,7 +137,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Công viên Yên Sở',
+    name: TILE_NAMES[12],
     shortName: 'Yên Sở',
     position: 12,
     imageUrl: '',
@@ -145,12 +145,12 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.LIGHT_BLUE,
     rentLevels: [7, 35, 95, 280, 420, 580],
   },
-  { type: TileType.JAIL, name: 'Nhà tù Hỏa Lò / Thăm nuôi', shortName: 'NHÀ TÙ', position: 13, imageUrl: '/assets/tiles/jail.png' },
+  { type: TileType.JAIL, name: TILE_NAMES[13], shortName: 'NHÀ TÙ', position: 13, imageUrl: '/assets/tiles/jail.png' },
 
   // --- LEFT ROW (Pos 14 to 23) ---
   {
     type: TileType.PROPERTY,
-    name: 'Vườn quốc gia Ba Vì',
+    name: TILE_NAMES[14],
     shortName: 'Ba Vì',
     position: 14,
     imageUrl: '',
@@ -160,7 +160,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Phố Ngọc Lâm',
+    name: TILE_NAMES[15],
     shortName: 'Ngọc Lâm',
     position: 15,
     imageUrl: '',
@@ -170,7 +170,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Nhà máy nước Yên Phụ',
+    name: TILE_NAMES[16],
     shortName: 'Nước Yên Phụ',
     position: 16,
     imageUrl: '',
@@ -180,7 +180,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Khu đô thị Việt Hưng',
+    name: TILE_NAMES[17],
     shortName: 'Việt Hưng',
     position: 17,
     imageUrl: '',
@@ -190,7 +190,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Phố Nguyễn Văn Cừ',
+    name: TILE_NAMES[18],
     shortName: 'Nguyễn Văn Cừ',
     position: 18,
     imageUrl: '',
@@ -198,10 +198,10 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.PINK,
     rentLevels: [12, 60, 180, 500, 700, 900],
   },
-  { type: TileType.TAX, name: 'Thuế bảo vệ môi trường', shortName: 'THUẾ MT', position: 19, imageUrl: '/assets/tiles/tax.png' },
+  { type: TileType.TAX, name: TILE_NAMES[19], shortName: 'THUẾ MT', position: 19, imageUrl: '/assets/tiles/tax.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Ga Hà Nội',
+    name: TILE_NAMES[20],
     shortName: 'Ga Hà Nội',
     position: 20,
     imageUrl: '/assets/tiles/station.png',
@@ -211,7 +211,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Văn Miếu - Quốc Tử Giám',
+    name: TILE_NAMES[21],
     shortName: 'Văn Miếu',
     position: 21,
     imageUrl: '',
@@ -219,14 +219,14 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.ORANGE,
     rentLevels: [14, 70, 200, 550, 750, 950],
   },
-  { type: TileType.TAX, name: 'Thuế hạ tầng', shortName: 'THUẾ HT', position: 22, imageUrl: '/assets/tiles/tax.png' },
-  { type: TileType.CHANCE, name: 'Khí Vận', shortName: 'KHÍ VẬN', position: 23, imageUrl: '/assets/tiles/chance-horizontal.png' },
+  { type: TileType.TAX, name: TILE_NAMES[22], shortName: 'THUẾ HT', position: 22, imageUrl: '/assets/tiles/tax.png' },
+  { type: TileType.CHANCE, name: TILE_NAMES[23], shortName: 'KHÍ VẬN', position: 23, imageUrl: '/assets/tiles/chance-horizontal.png' },
 
   // --- TOP ROW (Pos 24 to 37) ---
-  { type: TileType.REST, name: 'Công viên Thống Nhất', shortName: 'CÔNG VIÊN', position: 24, imageUrl: '/assets/tiles/rest.png' },
+  { type: TileType.REST, name: TILE_NAMES[24], shortName: 'CÔNG VIÊN', position: 24, imageUrl: '/assets/tiles/rest.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Phố Xã Đàn',
+    name: TILE_NAMES[25],
     shortName: 'Xã Đàn',
     position: 25,
     imageUrl: '',
@@ -236,7 +236,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Royal City Nguyễn Trãi',
+    name: TILE_NAMES[26],
     shortName: 'Nguyễn Trãi',
     position: 26,
     imageUrl: '',
@@ -246,7 +246,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Sân vận động Mỹ Đình',
+    name: TILE_NAMES[27],
     shortName: 'Mỹ Đình',
     position: 27,
     imageUrl: '',
@@ -254,10 +254,10 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.RED,
     rentLevels: [18, 90, 250, 700, 875, 1050],
   },
-  { type: TileType.FORTUNE, name: 'Cơ Hội', shortName: 'CƠ HỘI', position: 28, imageUrl: '/assets/tiles/fortune-vertical.png' },
+  { type: TileType.FORTUNE, name: TILE_NAMES[28], shortName: 'CƠ HỘI', position: 28, imageUrl: '/assets/tiles/fortune-vertical.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Trung tâm Hội nghị Quốc gia',
+    name: TILE_NAMES[29],
     shortName: 'Hội nghị QG',
     position: 29,
     imageUrl: '',
@@ -267,7 +267,7 @@ const BOARD_TILE_CONFIGS = [
   },
   {
     type: TileType.PROPERTY,
-    name: 'Keangnam Landmark 72',
+    name: TILE_NAMES[30],
     shortName: 'Keangnam',
     position: 30,
     imageUrl: '',
@@ -275,10 +275,10 @@ const BOARD_TILE_CONFIGS = [
     groupId: PropertyGroup.RED,
     rentLevels: [20, 100, 300, 750, 925, 1100],
   },
-  { type: TileType.TAX, name: 'Thuế hạ tầng', shortName: 'THUẾ HT', position: 31, imageUrl: '/assets/tiles/tax.png' },
+  { type: TileType.TAX, name: TILE_NAMES[31], shortName: 'THUẾ HT', position: 31, imageUrl: '/assets/tiles/tax.png' },
   {
     type: TileType.PROPERTY,
-    name: 'Bến xe Mỹ Đình',
+    name: TILE_NAMES[32],
     shortName: 'Bến xe Mỹ Đình',
     position: 32,
     imageUrl: '/assets/tiles/station.png',
@@ -455,7 +455,7 @@ const createPropertyTile = ({
   backgroundColor: backgroundColor ?? getSpecialTileColor(TileType.PROPERTY),
   ...(rentLevels ? { rentLevels: [...rentLevels] } : {}),
   isMortgaged: false,
-  mortgageValue: price * MORTGAGE_RATIO,
+  mortgageValue: price * MORTGAGE_RATE,
   ...(imageUrl ? { imageUrl } : {}),
 });
 
