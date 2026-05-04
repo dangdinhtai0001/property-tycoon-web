@@ -89,54 +89,80 @@ export const PropertyInfoModal: React.FC = () => {
           <div className="p-6 flex flex-col gap-4">
             {isProperty ? (
               <>
+                {/* Current Ownership Status */}
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sở hữu bởi</span>
+                    <div className="flex items-center gap-2">
+                      {property.ownerId ? (
+                        <>
+                          <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: state.players.find(p => p.id === property.ownerId)?.color }} />
+                          <span className="font-black text-slate-800 tracking-tight">
+                            {state.players.find(p => p.id === property.ownerId)?.name}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-bold text-slate-400 italic">Chưa có chủ sở hữu</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Cấp độ hiện tại</span>
+                    <p className="font-black text-blue-600 uppercase tracking-tighter">
+                      {property.isMortgaged ? 'ĐANG THẾ CHẤP' : BUILDING_LEVEL_NAMES[property.buildingLevel]}
+                    </p>
+                  </div>
+                </div>
+
                 {/* Rent Table */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm font-black border-b border-slate-50 pb-2">
-                    <span className="text-slate-400 uppercase tracking-widest text-[10px]">Tình trạng</span>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-sm font-black border-b border-slate-50 pb-2 mb-2">
+                    <span className="text-slate-400 uppercase tracking-widest text-[10px]">Cấp công trình</span>
                     <span className="text-slate-400 uppercase tracking-widest text-[10px]">Tiền thuê</span>
                   </div>
                   
                   {property.kind === PropertyKind.LAND && (
                     <>
-                      <div className="flex justify-between items-center group">
-                        <span className="text-slate-700 font-bold">Tiền thuê đất</span>
-                        <span className="font-black text-slate-900">${rentLevels[0]}</span>
-                      </div>
-
-                      {rentLevels.slice(1, 5).map((rent, i) => (
-                        <div key={i} className="flex justify-between items-center group">
-                          <div className="flex gap-1 items-center">
-                            <div className="flex gap-0.5">
-                              {Array.from({ length: i + 1 }).map((_, j) => (
-                                <Home key={j} size={12} className="text-emerald-600 fill-emerald-600" />
-                              ))}
+                      {rentLevels.map((rent, i) => {
+                        const isCurrentLevel = property.buildingLevel === i;
+                        const ownerColor = property.ownerId ? state.players.find(p => p.id === property.ownerId)?.color : '#3b82f6';
+                        
+                        return (
+                          <div 
+                            key={i} 
+                            className={`flex justify-between items-center px-3 py-1.5 rounded-xl transition-all ${
+                              isCurrentLevel ? 'bg-slate-900 text-white shadow-lg scale-[1.02]' : 'group hover:bg-slate-50'
+                            }`}
+                            style={isCurrentLevel ? { backgroundColor: ownerColor } : {}}
+                          >
+                            <div className="flex gap-2 items-center">
+                              {i === 0 ? (
+                                <span className={isCurrentLevel ? 'text-white' : 'text-slate-700 font-bold'}>Giá thuê đất</span>
+                              ) : (
+                                <div className="flex gap-1 items-center">
+                                  <div className="flex gap-0.5">
+                                    {Array.from({ length: i }).map((_, j) => (
+                                      <Home key={j} size={10} className={isCurrentLevel ? 'text-white fill-white' : 'text-emerald-600 fill-emerald-600'} />
+                                    ))}
+                                    {i === 5 && <Landmark size={12} className={isCurrentLevel ? 'text-white fill-white' : 'text-amber-500 fill-amber-500'} />}
+                                  </div>
+                                  <span className={`text-xs font-bold ${isCurrentLevel ? 'text-white' : 'text-slate-600'}`}>
+                                    {BUILDING_LEVEL_NAMES[i]}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                            <span className="text-slate-600 text-sm font-bold ml-1">
-                              {BUILDING_LEVEL_NAMES[i + 1]}
-                            </span>
+                            <span className={`font-black ${isCurrentLevel ? 'text-white' : 'text-slate-900'}`}>${rent}</span>
                           </div>
-                          <span className="font-black text-slate-900">${rent}</span>
-                        </div>
-                      ))}
-
-                      {rentLevels[5] && (
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-dashed border-slate-200">
-                          <div className="flex gap-2 items-center">
-                            <Landmark size={14} className="text-amber-600 fill-amber-600" />
-                            <span className="text-slate-900 font-black">
-                               Siêu công trình {BUILDING_LEVEL_NAMES[5].toUpperCase()}
-                            </span>
-                          </div>
-                          <span className="font-black text-amber-600 text-lg">${rentLevels[5]}</span>
-                        </div>
-                      )}
+                        );
+                      })}
                     </>
                   )}
 
                   {property.kind === PropertyKind.STATION && (
                     <>
                       {[1, 2, 3, 4].map((count) => (
-                        <div key={count} className="flex justify-between items-center group">
+                        <div key={count} className="flex justify-between items-center px-3 py-2 group hover:bg-slate-50 rounded-xl">
                           <span className="text-slate-700 font-bold">Sở hữu {count} Bến xe</span>
                           <span className="font-black text-slate-900">${STATION_RENT_BY_COUNT[count]}</span>
                         </div>
@@ -146,11 +172,11 @@ export const PropertyInfoModal: React.FC = () => {
 
                   {property.kind === PropertyKind.UTILITY && (
                     <>
-                      <div className="flex justify-between items-center group">
+                      <div className="flex justify-between items-center px-3 py-2 group hover:bg-slate-50 rounded-xl">
                         <span className="text-slate-700 font-bold text-xs">Sở hữu 1 Tiện ích</span>
                         <span className="font-black text-slate-900 text-xs">Xúc xắc x {UTILITY_MULTIPLIER_BY_COUNT[1]}</span>
                       </div>
-                      <div className="flex justify-between items-center group">
+                      <div className="flex justify-between items-center px-3 py-2 group hover:bg-slate-50 rounded-xl">
                         <span className="text-slate-700 font-bold text-xs">Sở hữu 2 Tiện ích</span>
                         <span className="font-black text-slate-900 text-xs">Xúc xắc x {UTILITY_MULTIPLIER_BY_COUNT[2]}</span>
                       </div>

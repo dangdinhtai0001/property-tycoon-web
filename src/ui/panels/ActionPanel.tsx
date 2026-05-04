@@ -3,10 +3,10 @@ import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
 import { Phase, TileType, type Property } from '../../game-engine/types/game';
 import { canMortgage, canUnmortgage } from '../../game-engine/rules/financeRules';
-import { canBuild } from '../../game-engine/rules/buildingRules';
+import { canBuild, getBuildingCost } from '../../game-engine/rules/buildingRules';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, RotateCcw } from 'lucide-react';
+import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, RotateCcw, ArrowRight } from 'lucide-react';
 import { rollDice } from '../../game-engine/rules/diceRules';
 import { BUILDING_LEVEL_NAMES } from '../../config/text';
 
@@ -87,6 +87,55 @@ export const ActionPanel: React.FC = () => {
             <CheckCircle size={24} />
             <span className="text-sm tracking-wider uppercase">Mua {property.name} (${property.price})</span>
           </motion.button>
+        );
+      }
+
+      case Phase.BUILD_DECISION: {
+        const prop = currentTile as Property;
+        const currentCost = getBuildingCost(state, prop);
+        const canAfford = currentPlayer.cash >= currentCost;
+        const nextLevel = prop.buildingLevel + 1;
+        const nextBuildingName = BUILDING_LEVEL_NAMES[nextLevel];
+        const isLandmark = nextLevel === 5;
+
+        return (
+          <div className="flex flex-col gap-2 w-full">
+            <motion.button
+              whileHover={canAfford && !isBlocked ? { scale: 1.02, y: -2 } : {}}
+              whileTap={canAfford && !isBlocked ? { scale: 0.98 } : {}}
+              disabled={!canAfford || isBlocked}
+              onClick={() => {
+                enqueue({
+                  type: isLandmark ? 'LANDMARK_COMPLETE' : 'BUILDING_SPARKLE',
+                  payload: { 
+                    propertyName: prop.name, 
+                    buildingName: nextBuildingName,
+                    level: nextLevel,
+                    playerId: currentPlayer.id,
+                    color: currentPlayer.color
+                  },
+                  onComplete: () => dispatch({ type: 'BUILD', payload: { propertyId: prop.id } })
+                });
+              }}
+              className={`w-full py-4 font-black rounded-3xl shadow-xl flex flex-col items-center justify-center gap-1 transition-all ${
+                isLandmark 
+                  ? 'bg-amber-500 text-white shadow-amber-200' 
+                  : 'bg-orange-500 text-white shadow-orange-200'
+              } disabled:opacity-40`}
+            >
+              {isLandmark ? <Landmark size={24} /> : <Home size={24} />}
+              <span className="text-sm tracking-wider uppercase">Xây {nextBuildingName} (${currentCost})</span>
+            </motion.button>
+            <motion.button
+              whileHover={!isBlocked ? { scale: 1.02, y: -2 } : {}}
+              whileTap={!isBlocked ? { scale: 0.98 } : {}}
+              disabled={isBlocked}
+              onClick={() => dispatch({ type: 'END_TURN' })}
+              className="w-full py-2 bg-slate-100 text-slate-500 font-bold rounded-2xl flex items-center justify-center gap-2 text-xs uppercase"
+            >
+              <ArrowRight size={16} /> Bỏ qua & Kết thúc lượt
+            </motion.button>
+          </div>
         );
       }
 
@@ -187,7 +236,7 @@ export const ActionPanel: React.FC = () => {
 
     // Property Management (Build/Mortgage) - Show if property is owned by current player
     const isOwnedByCurrent = currentTile.type === TileType.PROPERTY && (currentTile as Property).ownerId === currentPlayer.id;
-    if ((state.phase === Phase.WAITING_TO_ROLL || state.phase === Phase.END_TURN || state.phase === Phase.DEBT_RESOLUTION) && isOwnedByCurrent) {
+    if ((state.phase === Phase.END_TURN || state.phase === Phase.DEBT_RESOLUTION) && isOwnedByCurrent) {
       const prop = currentTile as Property;
       
       // Build
@@ -287,6 +336,15 @@ export const ActionPanel: React.FC = () => {
         return remaining >= 0 
           ? `Sau khi mua ${prop.name}, bạn sẽ còn $${remaining.toLocaleString()}.`
           : `Bạn thiếu $${Math.abs(remaining).toLocaleString()} để mua tài sản này.`;
+      }
+      case Phase.BUILD_DECISION: {
+        const prop = currentTile as Property;
+        const cost = getBuildingCost(state, prop);
+        const nextLevel = prop.buildingLevel + 1;
+        const nextBuildingName = BUILDING_LEVEL_NAMES[nextLevel];
+        return currentPlayer.cash >= cost
+          ? `Chào mừng trở về! Bạn có muốn nâng cấp ${prop.name} lên ${nextBuildingName} với giá $${cost}?`
+          : `Bạn đã về đến nhà, nhưng hiện tại không đủ $${cost} để nâng cấp lên ${nextBuildingName}.`;
       }
       case Phase.DEBT_RESOLUTION: {
         const debt = state.debtState?.amount || 0;
