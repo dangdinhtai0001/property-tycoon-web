@@ -43,11 +43,14 @@ export class StateMachine<TPhase, TAction> {
       const fromMatch = Array.isArray(t.from)
         ? t.from.includes(current)
         : t.from === current
-      return fromMatch && t.action === action
-    })
-    if (!match) return null
-    if (match.guard && !match.guard(state)) return null
-    return match.to
+      
+      if (fromMatch && t.action === action) {
+        return !t.guard || t.guard(state);
+      }
+      return false;
+    });
+    
+    return match ? match.to : null;
   }
 
   /**

@@ -31,15 +31,18 @@ export const ActionPanel: React.FC = () => {
       type: 'DICE_ROLL',
       payload: { result },
       onComplete: async () => {
-        dispatch({ type: 'ROLL_DICE', payload: { dice: result } });
-        const totalSteps = result[0] + result[1];
-        for (let i = 0; i < totalSteps; i++) {
-          await new Promise(resolve => setTimeout(resolve, 400));
-          dispatch({ type: 'MOVE_ONE_STEP' });
+        try {
+          dispatch({ type: 'ROLL_DICE', payload: { dice: result } });
+          const totalSteps = result[0] + result[1];
+          for (let i = 0; i < totalSteps; i++) {
+            await new Promise(resolve => setTimeout(resolve, 400));
+            dispatch({ type: 'MOVE_ONE_STEP' });
+          }
+          await new Promise(resolve => setTimeout(resolve, 300));
+          dispatch({ type: 'RESOLVE_TILE' });
+        } finally {
+          setIsRolling(false);
         }
-        await new Promise(resolve => setTimeout(resolve, 300));
-        dispatch({ type: 'RESOLVE_TILE' });
-        setIsRolling(false);
       }
     });
   };
@@ -65,9 +68,10 @@ export const ActionPanel: React.FC = () => {
         const canAfford = currentPlayer.cash >= property.price;
         return (
           <motion.button
-            whileHover={canAfford && !isBlocked ? { scale: 1.02, y: -2 } : {}}
-            whileTap={canAfford && !isBlocked ? { scale: 0.98 } : {}}
-            disabled={!canAfford || isBlocked}
+            whileHover={canAfford ? { scale: 1.02, y: -2 } : {}}
+            whileTap={canAfford ? { scale: 0.98 } : {}}
+            // Remove isBlocked check here, phase BUY_DECISION is a stable state
+            disabled={!canAfford}
             onClick={() => {
               const remainingCash = currentPlayer.cash - property.price;
               enqueue({
@@ -204,22 +208,20 @@ export const ActionPanel: React.FC = () => {
           <Coins size={14} /> RA TÙ (50$)
         </button>
       );
-    }
-
-    // Skip Buying
+    }    // Skip Buying
     if (state.phase === Phase.BUY_DECISION) {
       actions.push(
         <button
           key="skip-buy"
           onClick={() => dispatch({ type: 'DECLINE_BUY_PROPERTY' })}
-          disabled={isBlocked}
+          // Never disable skip during BUY_DECISION phase
+          disabled={false} 
           className="flex-1 min-w-[120px] p-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
         >
-          <Ban size={14} /> BỎ QUA
+          <Ban size={14} /> Bỏ qua
         </button>
       );
     }
-
     // Trading
     if (state.phase === Phase.WAITING_TO_ROLL || state.phase === Phase.END_TURN) {
       actions.push(

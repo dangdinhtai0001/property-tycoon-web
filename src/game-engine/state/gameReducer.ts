@@ -169,9 +169,10 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     case 'DECLINE_BUY_PROPERTY': {
       if (!phaseMachine.canTransition(state.phase, 'DECLINE_BUY_PROPERTY', state)) return state;
       
+      const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+      const property = state.board[currentPlayer.position] as Property;
+
       if (state.config.enableAuction) {
-        const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
-        const property = state.board[currentPlayer.position] as Property;
         const activePlayers = state.players.filter(p => !p.isBankrupt).map(p => p.id);
         
         nextState = {
@@ -186,7 +187,11 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
           log: [`Bắt đầu đấu giá tài sản ${property.name}`, ...state.log],
         };
       } else {
-        nextState = { ...state, phase: Phase.END_TURN };
+        nextState = { 
+          ...state, 
+          phase: Phase.END_TURN,
+          log: [GAME_LOG.playerDeclinedPurchase(currentPlayer.name, property.name), ...state.log],
+        };
       }
       break;
     }

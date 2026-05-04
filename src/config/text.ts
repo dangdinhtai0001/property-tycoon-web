@@ -192,6 +192,8 @@ export const GAME_LOG = {
     `${playerName} nâng cấp ${propertyName} lên thành ${buildingName}. Tiền thuê tại đây đã tăng lên $${rent}.`,
   buyProperty: (playerName: string, propertyName: string, price: number) =>
     `${playerName} chi $${price} để mua ${propertyName}. Một bước đi quan trọng trong việc xây dựng đế chế bất động sản.`,
+  playerDeclinedPurchase: (playerName: string, propertyName: string) =>
+    `${playerName} đã từ chối mua ${propertyName} và tiếp tục cuộc hành trình.`,
   debtStarted: (playerName: string, amount: number, reason: string) =>
     `${playerName} không đủ tiền mặt để thanh toán $${amount} cho ${reason}. Giai đoạn giải quyết nợ bắt đầu.`,
   debtResolved: (playerName: string) =>
