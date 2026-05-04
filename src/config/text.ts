@@ -147,6 +147,16 @@ export const GROUP_THEMES: Record<string, string> = {
   UTILITY: 'Dịch Vụ Tiện Ích',
 };
 
+/** Names for building levels (Landmark Progression). */
+export const BUILDING_LEVEL_NAMES: Record<number, string> = {
+  0: 'Đất trống',
+  1: 'Nhà phố',
+  2: 'Shophouse',
+  3: 'Chung cư mini',
+  4: 'Cao ốc',
+  5: 'Landmark',
+};
+
 /**
  * Game log message templates. Each function returns a formatted Vietnamese string.
  * Consumed by gameReducer.ts and rules/*.ts.
@@ -170,6 +180,10 @@ export const GAME_LOG = {
     `${playerName} rút thẻ ${cardType}: ${description}`,
   playerPaidTax: (playerName: string, taxName: string, amount: number) =>
     `${playerName} nộp ${taxName} $${amount}.`,
+  landmarkCompleted: (playerName: string, propertyName: string) =>
+    `Chúc mừng! ${playerName} đã hoàn thành siêu công trình LANDMARK tại ${propertyName}!`,
+  playerBuilt: (playerName: string, buildingName: string, propertyName: string) =>
+    `${playerName} đã xây dựng ${buildingName} tại ${propertyName}.`,
   debugAddedCash: (playerName: string, amount: number) =>
     `[DEBUG] Đã thêm $${amount} cho ${playerName}`,
   debugJumped: (tileName: string, steps: number) =>

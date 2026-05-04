@@ -296,26 +296,33 @@ export class TileSprite extends Phaser.GameObjects.Container {
       this.buildingPips = [];
 
       if (property.buildingLevel > 0) {
-        const bx = this.background.width / 2 - 15;
-        const by = this.background.height / 2 - 15;
+        const bx = this.background.width / 2 - 20;
+        const by = this.background.height / 2 - 20;
 
+        // Visual for each level
+        const levelIcons = ['', '🏠', '🏪', '🏢', '🏬', '🏰'];
+        const icon = levelIcons[property.buildingLevel];
+        
+        const marker = this.scene.add.text(bx, by, icon, { 
+          fontSize: property.buildingLevel === 5 ? '24px' : '18px' 
+        }).setOrigin(0.5);
+        
+        this.statusContainer.add(marker);
+        this.buildingMarkers.push(marker);
+
+        // Special effect for Landmark (Level 5)
         if (property.buildingLevel === 5) {
-          // Level 5: Landmark Icon
-          const marker = this.scene.add.text(bx, by, '🏨', { fontSize: '14px' }).setOrigin(0.5);
-          this.statusContainer.add(marker);
-          this.buildingMarkers.push(marker);
-        } else {
-          // Level 1-4: Pips
-          const pipSize = THEME.effects.markers.buildingPipSize;
-          const gap = THEME.effects.markers.buildingPipGap;
-          const totalWidth = (property.buildingLevel * pipSize) + ((property.buildingLevel - 1) * gap);
-
-          for (let i = 0; i < property.buildingLevel; i++) {
-            const px = bx - totalWidth / 2 + (i * (pipSize + gap)) + pipSize / 2;
-            const pip = this.scene.add.arc(px, by, pipSize / 2, 0, 360, false, 0x334155).setStrokeStyle(1, 0xffffff);
-            this.statusContainer.add(pip);
-            this.buildingPips.push(pip);
-          }
+          marker.setShadow(0, 0, '#fbbf24', 10, true, true);
+          
+          // Add a subtle glow pulse
+          this.scene.tweens.add({
+            targets: marker,
+            scale: 1.2,
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+          });
         }
       }
 
