@@ -1,6 +1,16 @@
 import { type GameState, type Property, TileType, PropertyKind } from '../types/game';
 import { BUILDING_LIMITS } from '../../config/gameplay';
 
+export const getBuildingCost = (state: GameState, property: Property): number => {
+  let cost = property.buildingCost;
+  state.temporaryModifiers.forEach(mod => {
+    if (mod.effect === 'TEMP_BUILD_COST_MODIFIER' && mod.playerId === state.currentPlayerId) {
+      cost *= mod.value;
+    }
+  });
+  return Math.round(cost);
+};
+
 export const canBuild = (state: GameState, propertyId: string): boolean => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
   const property = state.board.find(t => t.id === propertyId) as Property | undefined;
@@ -10,7 +20,9 @@ export const canBuild = (state: GameState, propertyId: string): boolean => {
   if (property.id === state.lastPurchaseId) return false; // Cannot build on turn bought
   if (property.isMortgaged) return false;
   if (property.buildingLevel >= BUILDING_LIMITS.house + BUILDING_LIMITS.hotel) return false; // Max houses + hotel
-  if (currentPlayer.cash < property.buildingCost) return false;
+  
+  const currentCost = getBuildingCost(state, property);
+  if (currentPlayer.cash < currentCost) return false;
 
   // Check if owner has all properties in the group
   const propertiesInGroup = state.board.filter(
@@ -39,10 +51,11 @@ export const buildProperty = (state: GameState, propertyId: string): GameState =
 
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
   const property = state.board.find(t => t.id === propertyId) as Property;
+  const currentCost = getBuildingCost(state, property);
 
   const updatedPlayers = state.players.map(p => {
     if (p.id === currentPlayer.id) {
-      return { ...p, cash: p.cash - property.buildingCost };
+      return { ...p, cash: p.cash - currentCost };
     }
     return p;
   });
@@ -54,13 +67,15 @@ export const buildProperty = (state: GameState, propertyId: string): GameState =
     return t;
   });
 
-  const buildingName = property.buildingLevel === BUILDING_LIMITS.house ? 'Khách sạn' : `Nhà cấp ${property.buildingLevel + 1}`;
-  const logEntry = `${currentPlayer.name} đã xây ${buildingName} tại ${property.name} với chi phí ${property.buildingCost}$.`;
+  // Consume build cost modifier
+  const remainingModifiers = state.temporaryModifiers.filter(
+    mod => !(mod.effect === 'TEMP_BUILD_COST_MODIFIER' && mod.playerId === currentPlayer.id)
+  );
 
   return {
     ...state,
     players: updatedPlayers,
     board: updatedBoard,
-    log: [logEntry, ...state.log],
+    temporaryModifiers: remainingModifiers,
   };
 };

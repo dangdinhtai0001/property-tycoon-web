@@ -109,12 +109,12 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const tile = state.board[currentPlayer.position];
       if (tile.type !== TileType.CHANCE && tile.type !== TileType.FORTUNE) return state;
       
-      const card = drawCard(tile.type);
+      const { card, nextState: stateAfterDraw } = drawCard(tile.type, state);
       return {
-        ...state,
+        ...stateAfterDraw,
         activeCard: card,
         phase: Phase.SHOWING_CARD,
-        log: [`${currentPlayer.name} rút thẻ ${tile.type === TileType.CHANCE ? 'Khí Vận' : 'Cơ Hội'}: ${card.description}`, ...state.log]
+        log: [`${currentPlayer.name} rút thẻ ${tile.type === TileType.CHANCE ? 'Cơ Hội' : 'Khí Vận'}: ${card.title}`, ...state.log]
       };
     }
 
@@ -306,12 +306,18 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const currentIndex = state.players.findIndex(p => p.id === state.currentPlayerId);
       const nextIndex = (currentIndex + 1) % state.players.length;
       
+      // Update temporary modifiers: decrement rounds and remove expired ones
+      const updatedModifiers = state.temporaryModifiers
+        .map(m => ({ ...m, remainingRounds: m.remainingRounds - 1 }))
+        .filter(m => m.remainingRounds > 0);
+
       nextState = {
         ...state,
         currentPlayerId: state.players[nextIndex].id,
         phase: Phase.WAITING_TO_ROLL,
         lastDiceRoll: undefined,
         lastPurchaseId: undefined,
+        temporaryModifiers: updatedModifiers,
       };
       break;
     }

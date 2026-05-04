@@ -44,6 +44,16 @@ export const mortgageProperty = (state: GameState, propertyId: string): GameStat
   };
 };
 
+export const getUnmortgageCost = (state: GameState, property: Property): number => {
+  let cost = Math.ceil(property.mortgageValue * 1.1);
+  state.temporaryModifiers.forEach(mod => {
+    if (mod.effect === 'TEMP_UNMORTGAGE_DISCOUNT' && mod.playerId === state.currentPlayerId) {
+      cost *= mod.value;
+    }
+  });
+  return Math.round(cost);
+};
+
 export const canUnmortgage = (state: GameState, propertyId: string): boolean => {
   const property = state.board.find(t => t.id === propertyId) as Property | undefined;
   if (!property || property.type !== TileType.PROPERTY || !property.isMortgaged) return false;
@@ -51,7 +61,11 @@ export const canUnmortgage = (state: GameState, propertyId: string): boolean => 
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
   if (!currentPlayer || property.ownerId !== currentPlayer.id) return false;
 
-  const unmortgageCost = Math.ceil(property.mortgageValue * 1.1);
+  // Check for disabled actions
+  const isUnmortgageDisabled = state.temporaryModifiers.some(mod => mod.effect === 'DISABLE_ACTION_UNTIL_ROUND_END' && mod.target === 'UNMORTGAGE');
+  if (isUnmortgageDisabled) return false;
+
+  const unmortgageCost = getUnmortgageCost(state, property);
   if (currentPlayer.cash < unmortgageCost) return false;
 
   return true;
@@ -62,7 +76,7 @@ export const unmortgageProperty = (state: GameState, propertyId: string): GameSt
 
   const property = state.board.find(t => t.id === propertyId) as Property;
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
-  const unmortgageCost = Math.ceil(property.mortgageValue * 1.1);
+  const unmortgageCost = getUnmortgageCost(state, property);
 
   const updatedPlayers = state.players.map(p => {
     if (p.id === currentPlayer.id) {
@@ -78,12 +92,18 @@ export const unmortgageProperty = (state: GameState, propertyId: string): GameSt
     return t;
   });
 
+  // Consume discount modifier if applied
+  const remainingModifiers = state.temporaryModifiers.filter(
+    mod => !(mod.effect === 'TEMP_UNMORTGAGE_DISCOUNT' && mod.playerId === currentPlayer.id)
+  );
+
   const logEntry = GAME_LOG.playerUnmortgaged(currentPlayer.name, property.name, unmortgageCost);
 
   return {
     ...state,
     players: updatedPlayers,
     board: updatedBoard,
+    temporaryModifiers: remainingModifiers,
     log: [logEntry, ...state.log],
   };
 };

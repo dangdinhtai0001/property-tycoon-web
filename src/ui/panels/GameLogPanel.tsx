@@ -42,20 +42,41 @@ export const GameLogPanel: React.FC<GameLogPanelProps> = ({ onClose }) => {
               <span className="text-xs font-bold uppercase tracking-widest">Chưa có dữ liệu</span>
             </div>
           ) : (
-            state.log.map((entry, index) => (
-              <motion.div
-                key={`${index}-${entry.substring(0, 10)}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className={`p-3 rounded-2xl text-xs font-medium border-l-4 shadow-sm ${
-                  index === 0 
-                    ? 'bg-white border-blue-500 text-slate-800 shadow-blue-50' 
-                    : 'bg-white/50 border-slate-200 text-slate-500'
-                }`}
-              >
-                {entry}
-              </motion.div>
-            ))
+            state.log.map((entry, index) => {
+              // Find player whose name starts the log entry
+              const player = state.players.find(p => entry.startsWith(p.name));
+              const isLatest = index === 0;
+              
+              // Use player color with very low opacity for background (approx 8% = 15 in hex)
+              const playerBgColor = player ? `${player.color}15` : undefined;
+              const playerBorderColor = player ? player.color : undefined;
+
+              return (
+                <motion.div
+                  key={`${index}-${entry.substring(0, 15)}`}
+                  initial={{ opacity: 0, y: -30, scale: 0.95 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    transition: {
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 15
+                    }
+                  }}
+                  style={{ 
+                    backgroundColor: playerBgColor || (isLatest ? '#ffffff' : 'rgba(255,255,255,0.5)'),
+                    borderLeftColor: playerBorderColor || (isLatest ? '#3b82f6' : '#e2e8f0')
+                  }}
+                  className={`p-3 rounded-2xl text-xs font-medium border-l-4 shadow-sm transition-colors ${
+                    isLatest ? 'text-slate-800 shadow-blue-50/50' : 'text-slate-500'
+                  }`}
+                >
+                  {entry}
+                </motion.div>
+              );
+            })
           )}
         </AnimatePresence>
       </div>
