@@ -3,8 +3,9 @@ import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
 import { type Property, PropertyKind } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Landmark, Info } from 'lucide-react';
+import { X, Home, Landmark, Info, MapPin } from 'lucide-react';
 import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT } from '../../config/gameplay';
+import { GROUP_THEMES } from '../../config/text';
 
 export const PropertyInfoModal: React.FC = () => {
   const { state } = useGameStore();
@@ -56,11 +57,19 @@ export const PropertyInfoModal: React.FC = () => {
           
           {/* Card Header (Monopoly Style) */}
           <div className="p-4 border-b-2 border-slate-100">
-            <div className={`${colorClass} w-full py-6 px-4 rounded-lg text-white text-center border-2 border-black shadow-inner`}>
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-1 opacity-80">
-                {isProperty ? 'Giấy chứng nhận' : 'Thông tin ô'}
-              </p>
-              <h2 className="text-2xl font-black uppercase tracking-tight leading-tight">{property.name}</h2>
+            <div className={`${colorClass} w-full py-6 px-4 rounded-lg text-white text-center border-2 border-black shadow-inner relative overflow-hidden`}>
+              {/* Pattern Background for header */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '12px 12px' }} />
+              
+              <div className="relative z-10 flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-black/20 rounded-full backdrop-blur-sm mb-1">
+                  <MapPin size={10} className="text-white/80" />
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/90">
+                    {isProperty ? GROUP_THEMES[property.groupId] : 'Ô chức năng'}
+                  </p>
+                </div>
+                <h2 className="text-2xl font-black uppercase tracking-tight leading-tight drop-shadow-md">{property.name}</h2>
+              </div>
             </div>
           </div>
           
