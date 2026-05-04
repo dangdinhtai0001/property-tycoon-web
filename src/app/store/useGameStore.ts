@@ -11,7 +11,7 @@ interface GameStore {
   setActiveSlot: (slotId: string) => void
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
+export const useGameStore = create<GameStore>((set) => ({
   state: {
     players: [],
     currentPlayerId: '',
@@ -41,10 +41,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
 
       // Emit state change event to EventBus
-      eventBus.emit('game:state-changed', {
-        action,
-        prevState: store.state,
-        nextState: newState,
+      eventBus.emit('state:changed', {
+        prev: store.state,
+        next: newState,
       })
 
       return {

@@ -11,12 +11,12 @@ export function initializeAnimationSubscriber() {
   const prevAssetsRef: Record<string, { propertyCount: number; buildingCount: number }> = {}
   const prevBuildingLevelsRef: Record<string, number> = {}
 
-  eventBus.on('game:state-changed', ({ prevState, nextState }) => {
-    handleMoneyAnimations(prevState, nextState)
-    handleBuildingAnimations(prevState, nextState)
+  eventBus.on('state:changed', ({ prev, next }) => {
+    handleMoneyAnimations(prev, next)
+    handleBuildingAnimations(prev, next)
   })
 
-  function handleMoneyAnimations(prevState: GameState, nextState: GameState) {
+  function handleMoneyAnimations(_prevState: GameState, nextState: GameState) {
     const { enqueue } = useAnimationQueue.getState()
 
     nextState.players.forEach((player) => {
@@ -82,7 +82,7 @@ export function initializeAnimationSubscriber() {
     })
   }
 
-  function handleBuildingAnimations(prevState: GameState, nextState: GameState) {
+  function handleBuildingAnimations(_prevState: GameState, nextState: GameState) {
     const { enqueue } = useAnimationQueue.getState()
 
     nextState.board.forEach((tile) => {

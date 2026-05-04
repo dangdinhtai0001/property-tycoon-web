@@ -5,7 +5,6 @@ import { Phase } from '../../game-engine/types/game';
 import type { GameState, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
 import { DicePool } from '../pools/DicePool';
-import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
 import {
   getBoardTileCount,

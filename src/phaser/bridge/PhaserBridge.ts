@@ -18,8 +18,8 @@ export class PhaserBridge {
     this.game = game;
 
     // Listen to EventBus for state changes
-    eventBus.on('game:state-changed', ({ nextState }) => {
-      this.updatePhaser(nextState);
+    eventBus.on('state:changed', ({ next }) => {
+      this.updatePhaser(next);
     });
 
     // Listen to Phaser events

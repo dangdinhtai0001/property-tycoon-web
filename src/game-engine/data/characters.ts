@@ -1,4 +1,4 @@
-import { CHARACTER_SPRITES, type CharacterId } from '../../config/assets'
+import type { CharacterId } from '../../config/assets'
 
 /** Minimal character definition — sprite metadata lives in config/assets.ts. */
 export interface CharacterDef {
