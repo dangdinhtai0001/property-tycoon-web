@@ -1,48 +1,55 @@
-import { type GameState, type Property, TileType, PropertyGroup, Phase } from '../types/game';
-import { STATION_BASE_RENT, UTILITY_MULTIPLIER_SINGLE, UTILITY_MULTIPLIER_BOTH, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
+import { type GameState, type Property, TileType, PropertyGroup, Phase, PropertyKind } from '../types/game';
+import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
 
 export const calculateRent = (state: GameState, property: Property, diceTotal: number = 0): number => {
   const ownerId = property.ownerId;
   if (!ownerId) return 0;
 
+  const owner = state.players.find(p => p.id === ownerId);
+  if (!owner || owner.isBankrupt) return 0;
+
+  if (property.isMortgaged) return 0;
+
   const ownerProperties = state.board.filter(
     t => t.type === TileType.PROPERTY && (t as Property).ownerId === ownerId
   ) as Property[];
 
-  if (property.isMortgaged) return 0;
+  const rentMultiplier = state.config?.rentMultiplier || 1;
 
-  if (property.groupId === PropertyGroup.STATION) {
-    const stationCount = ownerProperties.filter(p => p.groupId === PropertyGroup.STATION).length;
-    return STATION_BASE_RENT * Math.pow(2, stationCount - 1) * (state.config?.rentMultiplier || 1);
+  // STATION logic
+  if (property.kind === PropertyKind.STATION) {
+    const stationCount = ownerProperties.filter(p => p.kind === PropertyKind.STATION).length;
+    const baseStationRent = STATION_RENT_BY_COUNT[Math.min(stationCount, STATION_RENT_BY_COUNT.length - 1)] || 0;
+    return baseStationRent * rentMultiplier;
   }
 
-  if (property.groupId === PropertyGroup.UTILITY) {
-    const utilityCount = ownerProperties.filter(p => p.groupId === PropertyGroup.UTILITY).length;
-    const multiplier = utilityCount === 2 ? UTILITY_MULTIPLIER_BOTH : UTILITY_MULTIPLIER_SINGLE;
-    return diceTotal * multiplier * (state.config?.rentMultiplier || 1);
+  // UTILITY logic
+  if (property.kind === PropertyKind.UTILITY) {
+    const utilityCount = ownerProperties.filter(p => p.kind === PropertyKind.UTILITY).length;
+    const multiplier = UTILITY_MULTIPLIER_BY_COUNT[Math.min(utilityCount, UTILITY_MULTIPLIER_BY_COUNT.length - 1)] || 0;
+    return diceTotal * multiplier * rentMultiplier;
   }
 
+  // LAND logic
   let baseRent = property.rent;
 
-  // LAND properties
   if (property.buildingLevel > 0 && property.rentLevels) {
     baseRent = property.rentLevels[property.buildingLevel];
   } else {
-    // No buildings
+    // No buildings, check full color group
     const propertiesInGroup = state.board.filter(
       t => t.type === TileType.PROPERTY && (t as Property).groupId === property.groupId
     ) as Property[];
+    
     const ownsAllInGroup = propertiesInGroup.every(p => p.ownerId === ownerId);
     const anyMortgagedInGroup = propertiesInGroup.some(p => p.isMortgaged);
 
     if (ownsAllInGroup && !anyMortgagedInGroup) {
       baseRent = property.rent * GROUP_RENT_MULTIPLIER;
-    } else {
-      baseRent = property.rent;
     }
   }
 
-  return baseRent * (state.config?.rentMultiplier || 1);
+  return baseRent * rentMultiplier;
 };
 
 export const payRent = (state: GameState): GameState => {
