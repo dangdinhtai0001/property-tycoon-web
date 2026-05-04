@@ -37,7 +37,7 @@ function App() {
   const [isGuideOpen, setIsGuideOpen] = React.useState(false);
 
   React.useEffect(() => {
-    // Initialize animation subscriber once
+    // Initialize animation subscriber once on mount
     initializeAnimationSubscriber();
 
     (window as any).game = {
@@ -45,7 +45,7 @@ function App() {
       addCash: (amount: number) => dispatch({ type: 'DEBUG_ADD_CASH', payload: { amount } }),
       state: state
     };
-  }, [dispatch, state]);
+  }, []); // Empty array ensures this runs only once
 
   if (state.phase === Phase.SETUP) {
     return (
