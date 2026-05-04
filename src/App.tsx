@@ -18,13 +18,12 @@ import { PauseMenu } from './ui/modals/PauseMenu';
 import { CardModal } from './ui/modals/CardModal';
 import { MoneyLossEffect } from './ui/animation/MoneyLossEffect';
 import { MoneyGainEffect } from './ui/animation/MoneyGainEffect';
-import { MoneyWatcher } from './ui/animation/MoneyWatcher';
 import { BuildingCelebration } from './ui/animation/BuildingCelebration';
-import { BuildingWatcher } from './ui/animation/BuildingWatcher';
 import { BuildModal } from './ui/modals/BuildModal';
 import { PropertyInfoModal } from './ui/modals/PropertyInfoModal';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
 import { QuickGuidePanel } from './ui/panels/QuickGuidePanel';
+import { initializeAnimationSubscriber } from './app/subscribers/animationSubscriber';
 import { Menu, ScrollText, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,6 +36,9 @@ function App() {
   const [isGuideOpen, setIsGuideOpen] = React.useState(false);
 
   React.useEffect(() => {
+    // Initialize animation subscriber once
+    initializeAnimationSubscriber();
+
     (window as any).game = {
       jumpTo: (pos: number) => dispatch({ type: 'TELEPORT_PLAYER', payload: { position: pos } }),
       addCash: (amount: number) => dispatch({ type: 'DEBUG_ADD_CASH', payload: { amount } }),
@@ -216,8 +218,6 @@ function App() {
       <MoneyLossEffect />
       <MoneyGainEffect />
       <BuildingCelebration />
-      <MoneyWatcher />
-      <BuildingWatcher />
       <DiceRollAnimation />
       <PurchaseCelebration />
       <ParticleSystem />
