@@ -55,8 +55,15 @@ export interface BoardTile {
   backgroundColor?: number;
 }
 
+export enum PropertyKind {
+  LAND = 'LAND',
+  STATION = 'STATION',
+  UTILITY = 'UTILITY',
+}
+
 export interface Property extends BoardTile {
   type: TileType.PROPERTY;
+  kind: PropertyKind;
   groupId: PropertyGroup;
   price: Money;
   rent: Money;

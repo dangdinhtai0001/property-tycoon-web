@@ -28,14 +28,11 @@ export const UNMORTGAGE_RATE = 0.55
 /** Rent multiplier when owner holds a full color group with no buildings. Consumed by rentRules.ts. */
 export const GROUP_RENT_MULTIPLIER = 2
 
-/** Base station rent for 1 station owned; doubles per additional station. Consumed by rentRules.ts. */
-export const STATION_BASE_RENT = 25
+/** Rent for stations based on number owned (0-4). Consumed by rentRules.ts. */
+export const STATION_RENT_BY_COUNT = [0, 25, 50, 100, 200] as const
 
-/** Dice total multiplier for single utility ownership. Consumed by rentRules.ts. */
-export const UTILITY_MULTIPLIER_SINGLE = 4
-
-/** Dice total multiplier when owning both utilities. Consumed by rentRules.ts. */
-export const UTILITY_MULTIPLIER_BOTH = 10
+/** Dice total multiplier for utilities based on number owned (0-2). Consumed by rentRules.ts. */
+export const UTILITY_MULTIPLIER_BY_COUNT = [0, 4, 10] as const
 
 /** Tax amount for the luxury tax tile. Consumed by gameReducer.ts. */
 export const TAX_LUXURY_AMOUNT = 150
