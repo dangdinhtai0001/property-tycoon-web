@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { PhaserBridge } from '../../phaser/bridge/PhaserBridge';
 import { Dice } from './Dice';
+import { ANIMATION } from '../../config/animation';
 
 const randomDie = () => Math.floor(Math.random() * 6) + 1;
 
@@ -16,16 +17,10 @@ const nextRollingFaces = (previous: number[] = []) => [
   randomDieExcept(previous[1]),
 ];
 
-const ROLL_DURATION = 1650;
-const RESULT_HOLD_DURATION = 1450;
-const EXIT_DURATION = 360;
-
-// Tốc độ đổi mặt nhanh để tạo cảm giác như máy jackpot/slot machine.
-const FACE_CHANGE_INTERVAL = 48;
-
-const SOFT_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-const SLOT_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const FLOAT_EASE: [number, number, number, number] = [0.45, 0, 0.55, 1];
+const { rollDuration, resultHoldDuration, exitDuration, faceChangeInterval, reducedMotionRollDuration, reducedMotionTotalDuration } = ANIMATION.dice;
+const SOFT_EASE = ANIMATION.easing.soft;
+const SLOT_EASE = ANIMATION.easing.slot;
+const FLOAT_EASE = ANIMATION.easing.float;
 
 type JackpotDiceProps = {
   face: number;
@@ -238,7 +233,7 @@ export const DiceRollAnimation: React.FC = () => {
     if (!shouldReduceMotion) {
       intervalRef.current = window.setInterval(() => {
         setTempFaces((previous) => nextRollingFaces(previous));
-      }, FACE_CHANGE_INTERVAL);
+      }, faceChangeInterval);
     }
 
     const stopRollingTimer = window.setTimeout(() => {
@@ -249,13 +244,13 @@ export const DiceRollAnimation: React.FC = () => {
 
       setTempFaces(targetResult);
       setRolling(false);
-    }, shouldReduceMotion ? 450 : ROLL_DURATION);
+    }, shouldReduceMotion ? reducedMotionRollDuration : rollDuration);
 
     const hideTimer = window.setTimeout(
       () => {
         setShowVisual(false);
       },
-      shouldReduceMotion ? 1200 : ROLL_DURATION + RESULT_HOLD_DURATION
+      shouldReduceMotion ? reducedMotionTotalDuration : rollDuration + resultHoldDuration
     );
 
     const finishTimer = window.setTimeout(
@@ -264,8 +259,8 @@ export const DiceRollAnimation: React.FC = () => {
         setAnimating(false);
       },
       shouldReduceMotion
-        ? 1200 + EXIT_DURATION
-        : ROLL_DURATION + RESULT_HOLD_DURATION + EXIT_DURATION
+        ? reducedMotionTotalDuration + exitDuration
+        : rollDuration + resultHoldDuration + exitDuration
     );
 
     timersRef.current.push(stopRollingTimer, hideTimer, finishTimer);
