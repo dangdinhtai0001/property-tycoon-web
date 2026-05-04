@@ -1,9 +1,10 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
-import { type Property } from '../../game-engine/types/game';
+import { type Property, PropertyKind } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Home, Landmark, Info } from 'lucide-react';
+import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT } from '../../config/gameplay';
 
 export const PropertyInfoModal: React.FC = () => {
   const { state } = useGameStore();
@@ -86,33 +87,61 @@ export const PropertyInfoModal: React.FC = () => {
                     <span className="text-slate-400 uppercase tracking-widest text-[10px]">Tiền thuê</span>
                   </div>
                   
-                  <div className="flex justify-between items-center group">
-                    <span className="text-slate-700 font-bold">Tiền thuê đất</span>
-                    <span className="font-black text-slate-900">${rentLevels[0]}</span>
-                  </div>
+                  {property.kind === PropertyKind.LAND && (
+                    <>
+                      <div className="flex justify-between items-center group">
+                        <span className="text-slate-700 font-bold">Tiền thuê đất</span>
+                        <span className="font-black text-slate-900">${rentLevels[0]}</span>
+                      </div>
 
-                  {rentLevels.slice(1, 5).map((rent, i) => (
-                    <div key={i} className="flex justify-between items-center group">
-                      <div className="flex gap-1 items-center">
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: i + 1 }).map((_, j) => (
-                            <Home key={j} size={12} className="text-emerald-600 fill-emerald-600" />
-                          ))}
+                      {rentLevels.slice(1, 5).map((rent, i) => (
+                        <div key={i} className="flex justify-between items-center group">
+                          <div className="flex gap-1 items-center">
+                            <div className="flex gap-0.5">
+                              {Array.from({ length: i + 1 }).map((_, j) => (
+                                <Home key={j} size={12} className="text-emerald-600 fill-emerald-600" />
+                              ))}
+                            </div>
+                            <span className="text-slate-600 text-sm font-bold ml-1">Với {i + 1} Căn nhà</span>
+                          </div>
+                          <span className="font-black text-slate-900">${rent}</span>
                         </div>
-                        <span className="text-slate-600 text-sm font-bold ml-1">Với {i + 1} Căn nhà</span>
-                      </div>
-                      <span className="font-black text-slate-900">${rent}</span>
-                    </div>
-                  ))}
+                      ))}
 
-                  {rentLevels[5] && (
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-dashed border-slate-200">
-                      <div className="flex gap-2 items-center">
-                        <Landmark size={14} className="text-red-600 fill-red-600" />
-                        <span className="text-slate-900 font-black">Với KHÁCH SẠN</span>
+                      {rentLevels[5] && (
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-dashed border-slate-200">
+                          <div className="flex gap-2 items-center">
+                            <Landmark size={14} className="text-red-600 fill-red-600" />
+                            <span className="text-slate-900 font-black">Với KHÁCH SẠN</span>
+                          </div>
+                          <span className="font-black text-red-600 text-lg">${rentLevels[5]}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {property.kind === PropertyKind.STATION && (
+                    <>
+                      {[1, 2, 3, 4].map((count) => (
+                        <div key={count} className="flex justify-between items-center group">
+                          <span className="text-slate-700 font-bold">Sở hữu {count} Bến xe</span>
+                          <span className="font-black text-slate-900">${STATION_RENT_BY_COUNT[count]}</span>
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {property.kind === PropertyKind.UTILITY && (
+                    <>
+                      <div className="flex justify-between items-center group">
+                        <span className="text-slate-700 font-bold text-xs">Sở hữu 1 Tiện ích</span>
+                        <span className="font-black text-slate-900 text-xs">Xúc xắc x {UTILITY_MULTIPLIER_BY_COUNT[1]}</span>
                       </div>
-                      <span className="font-black text-red-600 text-lg">${rentLevels[5]}</span>
-                    </div>
+                      <div className="flex justify-between items-center group">
+                        <span className="text-slate-700 font-bold text-xs">Sở hữu 2 Tiện ích</span>
+                        <span className="font-black text-slate-900 text-xs">Xúc xắc x {UTILITY_MULTIPLIER_BY_COUNT[2]}</span>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -120,10 +149,18 @@ export const PropertyInfoModal: React.FC = () => {
 
                 {/* Costs */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giá nhà</p>
-                    <p className="text-lg font-black text-slate-800">${property.buildingCost}</p>
-                  </div>
+                  {property.kind === PropertyKind.LAND && (
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giá nhà</p>
+                      <p className="text-lg font-black text-slate-800">${property.buildingCost}</p>
+                    </div>
+                  )}
+                  {property.kind !== PropertyKind.LAND && (
+                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Loại</p>
+                      <p className="text-xs font-black text-slate-800 uppercase">{property.kind === PropertyKind.STATION ? 'Bến xe' : 'Tiện ích'}</p>
+                    </div>
+                  )}
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Thế chấp</p>
                     <p className="text-lg font-black text-slate-800">${property.mortgageValue}</p>
@@ -132,7 +169,10 @@ export const PropertyInfoModal: React.FC = () => {
 
                 <div className="text-center">
                   <p className="text-[10px] text-slate-400 italic font-medium">
-                    Nếu một người chơi sở hữu tất cả các lô đất của một Nhóm cùng Màu, tiền thuê sẽ được gấp đôi trên các lô đất chưa được cải tạo trong nhóm đó.
+                    {property.kind === PropertyKind.LAND 
+                      ? 'Nếu sở hữu tất cả lô đất cùng nhóm màu, tiền thuê đất trống được gấp đôi.'
+                      : 'Tiền thuê tăng lên khi bạn sở hữu nhiều bất động sản cùng loại.'
+                    }
                   </p>
                 </div>
               </>
