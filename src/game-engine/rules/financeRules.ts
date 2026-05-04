@@ -1,5 +1,5 @@
 import { type GameState, type Property, TileType, Phase } from '../types/game';
-import { GAME_LOG } from '../../config/text';
+import { GAME_LOG, BUILDING_LEVEL_NAMES } from '../../config/text';
 
 export const canMortgage = (state: GameState, propertyId: string): boolean => {
   const property = state.board.find(t => t.id === propertyId) as Property | undefined;
@@ -78,7 +78,7 @@ export const unmortgageProperty = (state: GameState, propertyId: string): GameSt
     return t;
   });
 
-  const logEntry = `${currentPlayer.name} đã giải chấp ${property.name} với giá ${unmortgageCost}$.`;
+  const logEntry = GAME_LOG.playerUnmortgaged(currentPlayer.name, property.name, unmortgageCost);
 
   return {
     ...state,
@@ -127,8 +127,8 @@ export const sellBuilding = (state: GameState, propertyId: string): GameState =>
     return t;
   });
 
-  const buildingName = property.buildingLevel === 5 ? 'Khách sạn' : `Nhà`;
-  const logEntry = `${currentPlayer.name} đã bán 1 ${buildingName} tại ${property.name} và nhận ${sellValue}$.`;
+  const buildingName = BUILDING_LEVEL_NAMES[property.buildingLevel];
+  const logEntry = `${currentPlayer.name} đã bán ${buildingName} tại ${property.name} để thu hồi $${sellValue}.`;
 
   return {
     ...state,
@@ -156,7 +156,7 @@ export const resolveDebt = (state: GameState): GameState => {
   });
 
   const creditorName = oweTo === 'BANK' ? 'Ngân hàng' : state.players.find(p => p.id === oweTo)?.name;
-  const logEntry = `${currentPlayer.name} đã thanh toán khoản nợ ${amount}$ cho ${creditorName}.`;
+  const logEntry = GAME_LOG.debtResolved(currentPlayer.name);
 
   return {
     ...state,
@@ -198,7 +198,7 @@ export const declareBankruptcy = (state: GameState): GameState => {
   });
 
   const creditorName = oweTo === 'BANK' ? 'Ngân hàng' : state.players.find(p => p.id === oweTo)?.name;
-  const logEntry = `${currentPlayer.name} đã tuyên bố phá sản trước ${creditorName}!`;
+  const logEntry = GAME_LOG.bankruptcy(currentPlayer.name);
 
   // Check if only one player remains
   const activePlayers = updatedPlayers.filter(p => !p.isBankrupt);
@@ -209,7 +209,7 @@ export const declareBankruptcy = (state: GameState): GameState => {
       board: updatedBoard,
       phase: Phase.GAME_OVER,
       winnerId: activePlayers[0].id,
-      log: [logEntry, `${activePlayers[0].name} đã chiến thắng!`, ...state.log],
+      log: [logEntry, `Cuộc chơi kết thúc! ${activePlayers[0].name} đã trở thành Tỷ phú Bất động sản duy nhất còn trụ lại!`, ...state.log],
     };
   }
 

@@ -3,7 +3,7 @@ import { createInitialGame } from './setupGame';
 import { rollDice } from '../rules/diceRules';
 import { applyMovement } from '../rules/movementRules';
 import { buyProperty } from '../rules/propertyRules';
-import { payRent } from '../rules/rentRules';
+import { payRent, calculateRent } from '../rules/rentRules';
 import { buildProperty } from '../rules/buildingRules';
 import { payJailFine } from '../rules/jailRules';
 import { mortgageProperty, unmortgageProperty, sellBuilding, resolveDebt, declareBankruptcy } from '../rules/financeRules';
@@ -281,9 +281,12 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const nextLevel = prop.buildingLevel + 1;
       
       const builtState = buildProperty(state, action.payload.propertyId);
+      const updatedProp = builtState.board.find(t => t.id === action.payload.propertyId) as Property;
+      const newRent = calculateRent(builtState, updatedProp);
+
       const logMsg = nextLevel === 5 
         ? GAME_LOG.landmarkCompleted(player.name, prop.name)
-        : GAME_LOG.playerBuilt(player.name, BUILDING_LEVEL_NAMES[nextLevel], prop.name);
+        : GAME_LOG.playerBuilt(player.name, BUILDING_LEVEL_NAMES[nextLevel], prop.name, newRent);
         
       return {
         ...builtState,

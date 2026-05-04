@@ -1,5 +1,6 @@
 import { type GameState, type Property, TileType, PropertyGroup, Phase, PropertyKind } from '../types/game';
 import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
+import { GAME_LOG } from '../../config/text';
 
 export const calculateRent = (state: GameState, property: Property, diceTotal: number = 0): number => {
   const ownerId = property.ownerId;
@@ -82,7 +83,8 @@ export const payRent = (state: GameState): GameState => {
     return p;
   });
 
-  const logEntry = `${currentPlayer.name} đã trả ${rentAmount}$ tiền thuê cho ${owner.name} tại ${property.name}.`;
+  const logEntry = GAME_LOG.playerPaidRent(currentPlayer.name, rentAmount, owner.name, property.name);
+  const nextLog = [logEntry];
 
   let nextPhase = Phase.END_TURN;
   let debtState = undefined;
@@ -93,6 +95,7 @@ export const payRent = (state: GameState): GameState => {
       oweTo: owner.id,
       amount: rentAmount - currentPlayer.cash
     };
+    nextLog.push(GAME_LOG.debtStarted(currentPlayer.name, rentAmount, `tiền thuê tại ${property.name}`));
   }
 
   return {
@@ -100,6 +103,6 @@ export const payRent = (state: GameState): GameState => {
     players: updatedPlayers,
     phase: nextPhase,
     debtState,
-    log: [logEntry, ...state.log],
+    log: [...nextLog, ...state.log],
   };
 };

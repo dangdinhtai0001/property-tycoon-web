@@ -162,33 +162,49 @@ export const BUILDING_LEVEL_NAMES: Record<number, string> = {
  * Consumed by gameReducer.ts and rules/*.ts.
  */
 export const GAME_LOG = {
-  gameStarted: () => 'Game đã bắt đầu!',
+  gameStarted: () => 'Chào mừng các nhà đầu tư! Thành phố đã mở cửa, ván chơi chính thức bắt đầu.',
   playerLandedOn: (playerName: string, tileName: string) =>
-    `${playerName} đã dừng lại tại ${tileName}.`,
+    `${playerName} đã dừng chân tại ${tileName}.`,
+  playerMoved: (playerName: string, steps: number, tileName: string) =>
+    `${playerName} tiến thêm ${steps} bước và dừng lại tại ${tileName}.`,
   playerPaidRent: (playerName: string, amount: number, ownerName: string, propertyName: string) =>
-    `${playerName} đã trả ${amount}$ tiền thuê cho ${ownerName} tại ${propertyName}.`,
+    `${playerName} dừng tại ${propertyName} của ${ownerName} và phải trả $${amount} tiền thuê.`,
   playerPaidJailFine: (playerName: string, amount: number) =>
-    `${playerName} đã nộp phạt ${amount}$ để ra tù.`,
+    `${playerName} quyết định nộp phạt $${amount} để lấy lại tự do và tiếp tục cuộc chơi.`,
   playerMortgaged: (playerName: string, propertyName: string, amount: number) =>
-    `${playerName} đã thế chấp ${propertyName} và nhận ${amount}$.`,
+    `${playerName} thế chấp ${propertyName} để xoay sở thêm $${amount}. Tài sản này tạm thời không thu tiền thuê.`,
+  playerUnmortgaged: (playerName: string, propertyName: string, cost: number) =>
+    `${playerName} đã thanh toán $${cost} để giải chấp ${propertyName}. Việc kinh doanh tại đây đã hoạt động trở lại.`,
   auctionStarted: (propertyName: string) =>
-    `Bắt đầu đấu giá tài sản ${propertyName}`,
+    `Bắt đầu buổi đấu giá công khai cho khu đất ${propertyName}. Cơ hội cuối cho các nhà đầu tư nhanh tay!`,
   tradeProposed: (offererName: string, targetName: string) =>
-    `${offererName} đề nghị giao dịch với ${targetName}`,
-  tradeRejected: () => 'Giao dịch bị từ chối.',
+    `${offererName} đang đề nghị một thỏa thuận giao dịch chiến lược với ${targetName}.`,
+  tradeRejected: () => 'Thỏa thuận bất thành. Các bên không tìm được tiếng nói chung trong giao dịch này.',
+  tradeAccepted: (offererName: string, targetName: string) =>
+    `Giao dịch thành công! ${offererName} và ${targetName} đã đạt được thỏa thuận quan trọng.`,
   playerDrewCard: (playerName: string, cardType: string, description: string) =>
-    `${playerName} rút thẻ ${cardType}: ${description}`,
+    `${playerName} rút một thẻ ${cardType}: "${description}"`,
   playerPaidTax: (playerName: string, taxName: string, amount: number) =>
-    `${playerName} nộp ${taxName} $${amount}.`,
+    `${playerName} thực hiện nghĩa vụ đóng ${taxName} số tiền $${amount} cho thành phố.`,
   landmarkCompleted: (playerName: string, propertyName: string) =>
-    `Chúc mừng! ${playerName} đã hoàn thành siêu công trình LANDMARK tại ${propertyName}!`,
-  playerBuilt: (playerName: string, buildingName: string, propertyName: string) =>
-    `${playerName} đã xây dựng ${buildingName} tại ${propertyName}.`,
+    `Kinh ngạc chưa! ${playerName} đã hoàn thành siêu công trình LANDMARK tại ${propertyName}. Một biểu tượng mới của sự thịnh vượng!`,
+  playerBuilt: (playerName: string, buildingName: string, propertyName: string, rent: number) =>
+    `${playerName} nâng cấp ${propertyName} lên thành ${buildingName}. Tiền thuê tại đây đã tăng lên $${rent}.`,
+  buyProperty: (playerName: string, propertyName: string, price: number) =>
+    `${playerName} chi $${price} để mua ${propertyName}. Một bước đi quan trọng trong việc xây dựng đế chế bất động sản.`,
+  debtStarted: (playerName: string, amount: number, reason: string) =>
+    `${playerName} không đủ tiền mặt để thanh toán $${amount} cho ${reason}. Giai đoạn giải quyết nợ bắt đầu.`,
+  debtResolved: (playerName: string) =>
+    `${playerName} đã hoàn tất thanh toán nợ nần và có thể tiếp tục hành trình.`,
+  bankruptcy: (playerName: string) =>
+    `Đáng tiếc! ${playerName} đã tuyên bố phá sản. Toàn bộ tài sản đã được thu hồi hoặc bàn giao lại.`,
+  passStart: (playerName: string, amount: number) =>
+    `${playerName} đi qua Cổng Khởi Hành và nhận được $${amount} tiền đầu tư từ thành phố.`,
   debugAddedCash: (playerName: string, amount: number) =>
     `[DEBUG] Đã thêm $${amount} cho ${playerName}`,
   debugJumped: (tileName: string, steps: number) =>
     `[DEBUG] Nhảy đến ${tileName} (Vượt qua ${steps} ô)`,
-}
+};
 
 /**
  * Card texts keyed by card id. Migrated from cards.ts.
