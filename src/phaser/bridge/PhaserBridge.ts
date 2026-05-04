@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
-import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
+import { eventBus } from '../../core/EventBus';
 import type { GameState } from '../../game-engine/types/game';
 
 export class PhaserBridge {
   private static game: Phaser.Game | null = null;
-  private static unsubscribe: (() => void) | null = null;
 
   static showDiceRoll(result: number[]) {
     if (!this.game) return;
@@ -18,18 +17,10 @@ export class PhaserBridge {
   static initialize(game: Phaser.Game) {
     this.game = game;
 
-    // Initial state
-    const initialState = useGameStore.getState().state;
-    this.updatePhaser(initialState);
-
-    // Only call updatePhaser when game state changes, not UI state
-    this.unsubscribe = useGameStore.subscribe(
-      (store, prevStore) => {
-        if (store.state !== prevStore.state) {
-          this.updatePhaser(store.state);
-        }
-      }
-    );
+    // Listen to EventBus for state changes
+    eventBus.on('game:state-changed', ({ nextState }) => {
+      this.updatePhaser(nextState);
+    });
 
     // Listen to Phaser events
     game.events.on('tile-clicked', (tileId: string) => {
@@ -47,7 +38,7 @@ export class PhaserBridge {
 
   private static updatePhaser(state: GameState) {
     if (!this.game) return;
-    
+
     const boardScene = this.game.scene.getScene('BoardScene');
     if (boardScene && boardScene.scene.isActive()) {
       boardScene.events.emit('update-state', state);
@@ -58,10 +49,7 @@ export class PhaserBridge {
   }
 
   static destroy() {
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
-    }
+    // EventBus cleanup is handled globally
     this.game = null;
   }
 }
