@@ -4,6 +4,7 @@ import { TokenSprite } from '../sprites/TokenSprite';
 import { Phase } from '../../game-engine/types/game';
 import type { GameState, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
+import { DicePool } from '../pools/DicePool';
 import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
 import {
@@ -23,6 +24,7 @@ export class BoardScene extends Phaser.Scene {
   private boardSurface!: Phaser.GameObjects.Rectangle;
   private lastPlayersState: Map<string, { cash: number }> = new Map();
   private lastGlobalPurchaseId: string | undefined = undefined;
+  private dicePool!: DicePool;
 
   // --- Dynamic Geometry Configuration ---
   public static readonly GEOMETRY = { cols: 14, rows: 12 };
@@ -51,6 +53,9 @@ export class BoardScene extends Phaser.Scene {
     this.buildingsContainer = this.add.container(0, 0);
     this.tokensContainer = this.add.container(0, 0);
     this.diceContainer = this.add.container(0, 0);
+
+    // Initialize dice pool
+    this.dicePool = new DicePool(this, 100, 2);
 
     // Setup Board Background Image
     const bg = this.add.image(BoardScene.BOARD_W / 2, BoardScene.BOARD_H / 2, 'board-bg');
@@ -98,10 +103,18 @@ export class BoardScene extends Phaser.Scene {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
 
-    this.diceContainer.removeAll(true);
+    // Return any existing dice to the pool
+    const existingDice = this.diceContainer.getAll() as DiceSprite[];
+    existingDice.forEach(obj => {
+      if (obj instanceof DiceSprite) {
+        this.dicePool.release(obj);
+      }
+    });
+    this.diceContainer.removeAll(false);
 
-    const dice1 = new DiceSprite(this, centerX - 60, centerY, 100);
-    const dice2 = new DiceSprite(this, centerX + 60, centerY, 100);
+    // Acquire dice from pool
+    const dice1 = this.dicePool.acquireDice(centerX - 60, centerY);
+    const dice2 = this.dicePool.acquireDice(centerX + 60, centerY);
     this.diceContainer.add([dice1, dice2]);
 
     // Entrance animation
@@ -149,7 +162,14 @@ export class BoardScene extends Phaser.Scene {
       duration: 400,
       ease: 'Power2.easeIn',
       onComplete: () => {
-        this.diceContainer.removeAll(true);
+        // Return dice to pool instead of destroying
+        const dice = this.diceContainer.getAll() as DiceSprite[];
+        dice.forEach(obj => {
+          if (obj instanceof DiceSprite) {
+            this.dicePool.release(obj);
+          }
+        });
+        this.diceContainer.removeAll(false);
       }
     });
   }
