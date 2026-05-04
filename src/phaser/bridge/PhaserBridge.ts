@@ -15,6 +15,14 @@ export class PhaserBridge {
     }
   }
 
+  static zoomToTile(position: number, duration: number = 1000) {
+    if (!this.game) return;
+    const boardScene = this.game.scene.getScene('BoardScene');
+    if (boardScene) {
+      boardScene.events.emit('zoom-to-tile', { position, duration });
+    }
+  }
+
   static initialize(game: Phaser.Game) {
     this.game = game;
 

@@ -8,6 +8,7 @@ import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, RotateCcw } from 'lucide-react';
 import { rollDice } from '../../game-engine/rules/diceRules';
+import { BUILDING_LEVEL_NAMES } from '../../config/text';
 
 export const ActionPanel: React.FC = () => {
   const { state, dispatch } = useGameStore();
@@ -191,14 +192,35 @@ export const ActionPanel: React.FC = () => {
       
       // Build
       if (!prop.isMortgaged && canBuild(state, prop.id)) {
+        const nextLevel = prop.buildingLevel + 1;
+        const nextBuildingName = BUILDING_LEVEL_NAMES[nextLevel];
+        const isLandmark = nextLevel === 5;
+
         actions.push(
           <button
             key="build"
-            onClick={() => dispatch({ type: 'BUILD', payload: { propertyId: prop.id } })}
+            onClick={() => {
+              enqueue({
+                type: isLandmark ? 'LANDMARK_COMPLETE' : 'BUILDING_SPARKLE',
+                payload: { 
+                  propertyName: prop.name, 
+                  buildingName: nextBuildingName,
+                  level: nextLevel,
+                  playerId: currentPlayer.id,
+                  color: currentPlayer.color
+                },
+                onComplete: () => dispatch({ type: 'BUILD', payload: { propertyId: prop.id } })
+              });
+            }}
             disabled={isBlocked}
-            className="flex-1 min-w-[120px] p-3 bg-orange-100 text-orange-700 font-bold rounded-2xl border border-orange-200 flex items-center justify-center gap-2 text-[10px] disabled:opacity-50"
+            className={`flex-1 min-w-[120px] p-3 font-bold rounded-2xl border flex items-center justify-center gap-2 text-[10px] transition-all duration-300 ${
+              isLandmark 
+                ? 'bg-amber-100 text-amber-700 border-amber-300 animate-pulse' 
+                : 'bg-orange-100 text-orange-700 border-orange-200'
+            } disabled:opacity-50`}
           >
-            <Home size={14} /> XÂY NHÀ
+            {isLandmark ? <Landmark size={14} className="fill-amber-500" /> : <Home size={14} />} 
+            {isLandmark ? `XÂY ${nextBuildingName.toUpperCase()}` : `XÂY ${nextBuildingName.toUpperCase()}`}
           </button>
         );
       }

@@ -92,9 +92,12 @@ export class BoardScene extends Phaser.Scene {
       this.showDiceRoll(result);
     });
 
-    // Scene-level click listener for better reliability
     this.events.on('tile-clicked', (tileId: string) => {
       this.game.events.emit('tile-clicked', tileId);
+    });
+
+    this.events.on('zoom-to-tile', ({ position, duration }: { position: number, duration: number }) => {
+      this.zoomToTile(position, duration);
     });
   }
 
@@ -383,4 +386,22 @@ export class BoardScene extends Phaser.Scene {
     return { x, y, w, h };
   }
 
+  private zoomToTile(position: number, duration: number) {
+    const layout = BoardScene.getTileLayout(position);
+    const pos = this.getTilePosition(layout);
+    const offsetW = (this.cameras.main.width - BoardScene.BOARD_W) / 2;
+    const offsetH = (this.cameras.main.height - BoardScene.BOARD_H) / 2;
+
+    const targetX = pos.x + offsetW;
+    const targetY = pos.y + offsetH;
+
+    this.cameras.main.pan(targetX, targetY, duration, 'Power2');
+    this.cameras.main.zoomTo(1.4, duration, 'Power2');
+
+    // Auto zoom back after a while
+    this.time.delayedCall(duration + 2000, () => {
+      this.cameras.main.pan(this.cameras.main.width / 2, this.cameras.main.height / 2, 1000, 'Power2');
+      this.cameras.main.zoomTo(1, 1000, 'Power2');
+    });
+  }
 }

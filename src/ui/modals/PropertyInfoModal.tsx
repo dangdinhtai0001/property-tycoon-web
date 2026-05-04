@@ -5,7 +5,7 @@ import { type Property, PropertyKind } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Home, Landmark, Info, MapPin } from 'lucide-react';
 import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT } from '../../config/gameplay';
-import { GROUP_THEMES } from '../../config/text';
+import { GROUP_THEMES, BUILDING_LEVEL_NAMES } from '../../config/text';
 
 export const PropertyInfoModal: React.FC = () => {
   const { state } = useGameStore();
@@ -111,7 +111,9 @@ export const PropertyInfoModal: React.FC = () => {
                                 <Home key={j} size={12} className="text-emerald-600 fill-emerald-600" />
                               ))}
                             </div>
-                            <span className="text-slate-600 text-sm font-bold ml-1">Với {i + 1} Căn nhà</span>
+                            <span className="text-slate-600 text-sm font-bold ml-1">
+                              {BUILDING_LEVEL_NAMES[i + 1]}
+                            </span>
                           </div>
                           <span className="font-black text-slate-900">${rent}</span>
                         </div>
@@ -120,10 +122,12 @@ export const PropertyInfoModal: React.FC = () => {
                       {rentLevels[5] && (
                         <div className="flex justify-between items-center mt-2 pt-2 border-t border-dashed border-slate-200">
                           <div className="flex gap-2 items-center">
-                            <Landmark size={14} className="text-red-600 fill-red-600" />
-                            <span className="text-slate-900 font-black">Với KHÁCH SẠN</span>
+                            <Landmark size={14} className="text-amber-600 fill-amber-600" />
+                            <span className="text-slate-900 font-black">
+                               Siêu công trình {BUILDING_LEVEL_NAMES[5].toUpperCase()}
+                            </span>
                           </div>
-                          <span className="font-black text-red-600 text-lg">${rentLevels[5]}</span>
+                          <span className="font-black text-amber-600 text-lg">${rentLevels[5]}</span>
                         </div>
                       )}
                     </>

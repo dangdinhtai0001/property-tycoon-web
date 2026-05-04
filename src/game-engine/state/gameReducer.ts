@@ -10,7 +10,7 @@ import { mortgageProperty, unmortgageProperty, sellBuilding, resolveDebt, declar
 import { handleBid, handlePassBid } from '../rules/auctionRules';
 import { acceptTrade } from '../rules/tradeRules';
 import { drawCard, applyCardEffect } from '../rules/cardRules';
-import { GAME_LOG } from '../../config/text';
+import { GAME_LOG, BUILDING_LEVEL_NAMES } from '../../config/text';
 import { TAX_LUXURY_AMOUNT, TAX_INCOME_AMOUNT } from '../../config/gameplay';
 import { phaseMachine } from './phaseMachine';
 
@@ -276,8 +276,19 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
 
     case 'BUILD': {
       if (!phaseMachine.canTransition(state.phase, 'BUILD', state)) return state;
-      nextState = buildProperty(state, action.payload.propertyId);
-      break;
+      const player = state.players.find(p => p.id === state.currentPlayerId)!;
+      const prop = state.board.find(t => t.id === action.payload.propertyId) as Property;
+      const nextLevel = prop.buildingLevel + 1;
+      
+      const builtState = buildProperty(state, action.payload.propertyId);
+      const logMsg = nextLevel === 5 
+        ? GAME_LOG.landmarkCompleted(player.name, prop.name)
+        : GAME_LOG.playerBuilt(player.name, BUILDING_LEVEL_NAMES[nextLevel], prop.name);
+        
+      return {
+        ...builtState,
+        log: [logMsg, ...builtState.log]
+      };
     }
 
     case 'PAY_FINE': {

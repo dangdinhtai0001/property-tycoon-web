@@ -19,6 +19,7 @@ import { CardModal } from './ui/modals/CardModal';
 import { MoneyLossEffect } from './ui/animation/MoneyLossEffect';
 import { MoneyGainEffect } from './ui/animation/MoneyGainEffect';
 import { BuildingCelebration } from './ui/animation/BuildingCelebration';
+import { LandmarkCelebration } from './ui/animation/LandmarkCelebration';
 import { BuildModal } from './ui/modals/BuildModal';
 import { PropertyInfoModal } from './ui/modals/PropertyInfoModal';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
@@ -218,6 +219,7 @@ function App() {
       <MoneyLossEffect />
       <MoneyGainEffect />
       <BuildingCelebration />
+      <LandmarkCelebration />
       <DiceRollAnimation />
       <PurchaseCelebration />
       <ParticleSystem />
