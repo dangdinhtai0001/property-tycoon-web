@@ -105,6 +105,36 @@ export const EFFECTS = {
   mortgageStampColor: 0xDC2626,
 } as const
 
+/** Dice sprite configuration. */
+export const DICE = {
+  size: 80,
+  bodyColor: 0xffffff,
+  borderColor: 0xe2e8f0,
+  dotColor: 0x1e293b,
+  shadowColor: 0x000000,
+  shadowAlpha: 0.1,
+  shineColor: 0xffffff,
+  shineAlpha: 0.5,
+  cornerRadius: 12,
+  rollDuration: 1200,
+  rollSteps: 15,
+  landingDuration: 200,
+} as const
+
+/** Building sprite configuration. */
+export const BUILDING = {
+  house: {
+    color: 0x10b981, // emerald-500
+    size: 12,
+  },
+  hotel: {
+    color: 0xef4444, // red-500
+    size: 16,
+  },
+  borderColor: 0xffffff,
+  borderWidth: 1,
+} as const
+
 /** Player token colors in order of player index. */
 export const PLAYER_COLORS = [
   '#EF4444', '#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899',

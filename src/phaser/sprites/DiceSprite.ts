@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
+import { DICE } from '../../config/ui';
 
 export class DiceSprite extends Phaser.GameObjects.Container {
   private bodyGraphics: Phaser.GameObjects.Graphics;
   private dotsGraphics: Phaser.GameObjects.Graphics;
   private isRolling: boolean = false;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, size: number = 80) {
+  constructor(scene: Phaser.Scene, x: number, y: number, size: number = DICE.size) {
     super(scene, x, y);
 
     this.bodyGraphics = scene.add.graphics();
@@ -23,23 +24,23 @@ export class DiceSprite extends Phaser.GameObjects.Container {
     this.bodyGraphics.clear();
 
     // Shadow
-    this.bodyGraphics.fillStyle(0x000000, 0.1);
-    this.bodyGraphics.fillRoundedRect(-size / 2 + 4, -size / 2 + 4, size, size, 12);
+    this.bodyGraphics.fillStyle(DICE.shadowColor, DICE.shadowAlpha);
+    this.bodyGraphics.fillRoundedRect(-size / 2 + 4, -size / 2 + 4, size, size, DICE.cornerRadius);
 
     // Main body
-    this.bodyGraphics.fillStyle(0xffffff, 1);
-    this.bodyGraphics.lineStyle(2, 0xe2e8f0, 1);
-    this.bodyGraphics.fillRoundedRect(-size / 2, -size / 2, size, size, 12);
-    this.bodyGraphics.strokeRoundedRect(-size / 2, -size / 2, size, size, 12);
+    this.bodyGraphics.fillStyle(DICE.bodyColor, 1);
+    this.bodyGraphics.lineStyle(2, DICE.borderColor, 1);
+    this.bodyGraphics.fillRoundedRect(-size / 2, -size / 2, size, size, DICE.cornerRadius);
+    this.bodyGraphics.strokeRoundedRect(-size / 2, -size / 2, size, size, DICE.cornerRadius);
 
     // Subtle gradient/shine
-    this.bodyGraphics.fillStyle(0xffffff, 0.5);
+    this.bodyGraphics.fillStyle(DICE.shineColor, DICE.shineAlpha);
     this.bodyGraphics.fillRoundedRect(-size / 2 + 5, -size / 2 + 5, size - 10, size / 2 - 5, { tl: 8, tr: 8, bl: 0, br: 0 });
   }
 
   private drawDots(value: number, size: number) {
     this.dotsGraphics.clear();
-    this.dotsGraphics.fillStyle(0x1e293b, 1);
+    this.dotsGraphics.fillStyle(DICE.dotColor, 1);
 
     const dotSize = size * 0.1;
     const p = size * 0.25; // padding factor
@@ -59,12 +60,12 @@ export class DiceSprite extends Phaser.GameObjects.Container {
     });
   }
 
-  async roll(targetValue: number, size: number = 80): Promise<void> {
+  async roll(targetValue: number, size: number = DICE.size): Promise<void> {
     if (this.isRolling) return;
     this.isRolling = true;
 
-    const duration = 1200;
-    const steps = 15;
+    const duration = DICE.rollDuration;
+    const steps = DICE.rollSteps;
     const stepTime = duration / steps;
 
     // Simulation animation
@@ -98,7 +99,7 @@ export class DiceSprite extends Phaser.GameObjects.Container {
         targets: this,
         angle: 0,
         scale: 1.2,
-        duration: 200,
+        duration: DICE.landingDuration,
         yoyo: true,
         ease: 'Back.easeOut',
         onComplete: () => {

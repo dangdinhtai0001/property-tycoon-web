@@ -1,14 +1,16 @@
 import Phaser from 'phaser';
+import { BUILDING } from '../../config/ui';
 
 export class BuildingSprite extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene, x: number, y: number, type: 'house' | 'hotel') {
     super(scene, x, y);
 
-    const color = type === 'house' ? 0x10b981 : 0xef4444; // emerald-500 or red-500
-    const size = type === 'house' ? 12 : 16;
+    const config = type === 'house' ? BUILDING.house : BUILDING.hotel;
+    const color = config.color;
+    const size = config.size;
 
     const rect = scene.add.rectangle(0, 0, size, size, color)
-      .setStrokeStyle(1, 0xffffff);
+      .setStrokeStyle(BUILDING.borderWidth, BUILDING.borderColor);
     this.add(rect);
 
     if (type === 'hotel') {
