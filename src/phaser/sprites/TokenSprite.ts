@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Player } from '../../game-engine/types/game';
 import { THEME } from '../../ui/theme/tokens';
 import { CHARACTERS, getCharacter } from '../../game-engine/data/characters';
+import { CHARACTER_SPRITES } from '../../config/assets';
 
 // Tăng / giảm số này nếu nhân vật quá to hoặc quá nhỏ trên bàn cờ
 const TOKEN_SPRITE_SCALE_MULTIPLIER = 3.10;
@@ -9,23 +10,24 @@ const TOKEN_SPRITE_SCALE_MULTIPLIER = 3.10;
 type TokenAnimationState = 'idle' | 'run' | 'win' | 'sad';
 
 function getAnimationKey(charId: string, state: TokenAnimationState) {
-  const textureKey = getCharacter(charId).phaserKey;
+  const textureKey = CHARACTER_SPRITES[getCharacter(charId).id].phaserKey;
   return `${textureKey}_${state}`;
 }
 
 export function preloadTokenSpriteAssets(scene: Phaser.Scene) {
   CHARACTERS.forEach(char => {
+    const sprite = CHARACTER_SPRITES[char.id];
     scene.load.spritesheet(
-      char.phaserKey,
-      char.image,
-      { frameWidth: char.frameWidth, frameHeight: char.frameHeight }
+      sprite.phaserKey,
+      sprite.path,
+      { frameWidth: sprite.frameWidth, frameHeight: sprite.frameHeight }
     );
   });
 }
 
 export function createTokenSpriteAnimations(scene: Phaser.Scene) {
   CHARACTERS.forEach(char => {
-    const key = char.phaserKey;
+    const key = CHARACTER_SPRITES[char.id].phaserKey;
 
     if (!scene.anims.exists(`${key}_idle`)) {
       scene.anims.create({
@@ -107,7 +109,7 @@ export class TokenSprite extends Phaser.GameObjects.Container {
 
     // 3. Nhân vật 2D
     const charId = player.avatarUrl || 'ghost';
-    const textureKey = getCharacter(charId).phaserKey;
+    const textureKey = CHARACTER_SPRITES[getCharacter(charId).id].phaserKey;
 
     if (scene.textures.exists(textureKey)) {
       createTokenSpriteAnimations(scene);

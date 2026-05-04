@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import type { TokenAnimState } from '../../app/store/useGameStore';
+import { useUIStore } from '../../app/store/useUIStore';
+import type { TokenAnimState } from '../../app/store/useUIStore';
 import { Phase, TileType } from '../../game-engine/types/game';
 import type { Property, GameState, Player } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,8 @@ import {
 import { CharacterSprite } from '../shared/CharacterSprite';
 
 export const BoardStatus: React.FC = () => {
-  const { state, tokenAnimState } = useGameStore();
+  const { state } = useGameStore();
+  const { tokenAnimState } = useUIStore();
   const [displayedState, setDisplayedState] = useState<GameState>(state);
   const [isReady, setIsReady] = useState(false);
 

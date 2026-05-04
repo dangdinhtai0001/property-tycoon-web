@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { useGameStore } from '../../app/store/useGameStore';
+import { useUIStore } from '../../app/store/useUIStore';
 import type { GameState } from '../../game-engine/types/game';
 
 export class PhaserBridge {
@@ -21,7 +22,7 @@ export class PhaserBridge {
     const initialState = useGameStore.getState().state;
     this.updatePhaser(initialState);
 
-    // Only call updatePhaser when game state changes, not UI state like tokenAnimState
+    // Only call updatePhaser when game state changes, not UI state
     this.unsubscribe = useGameStore.subscribe(
       (store, prevStore) => {
         if (store.state !== prevStore.state) {
@@ -32,14 +33,14 @@ export class PhaserBridge {
 
     // Listen to Phaser events
     game.events.on('tile-clicked', (tileId: string) => {
-      useGameStore.getState().setInspectedPropertyId(tileId);
+      useUIStore.getState().setInspectedPropertyId(tileId);
     });
-    
+
     // Bubble up scene events
     const boardScene = game.scene.getScene('BoardScene');
     if (boardScene) {
       boardScene.events.on('tile-clicked', (tileId: string) => {
-        useGameStore.getState().setInspectedPropertyId(tileId);
+        useUIStore.getState().setInspectedPropertyId(tileId);
       });
     }
   }

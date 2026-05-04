@@ -1,11 +1,13 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
+import { useUIStore } from '../../app/store/useUIStore';
 import { type Property } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Home, Landmark, Info } from 'lucide-react';
 
 export const PropertyInfoModal: React.FC = () => {
-  const { state, inspectedPropertyId, setInspectedPropertyId } = useGameStore();
+  const { state } = useGameStore();
+  const { inspectedPropertyId, setInspectedPropertyId } = useUIStore();
   
   const property = state.board.find(t => t.id === inspectedPropertyId) as Property | undefined;
 

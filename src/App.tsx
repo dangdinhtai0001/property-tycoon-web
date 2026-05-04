@@ -7,6 +7,7 @@ import { PlayerListPanel } from './ui/panels/PlayerListPanel';
 import { ActionPanel } from './ui/panels/ActionPanel';
 import { GameLogPanel } from './ui/panels/GameLogPanel';
 import { useGameStore } from './app/store/useGameStore';
+import { useUIStore } from './app/store/useUIStore';
 import { MainMenu } from './ui/screens/MainMenu';
 import { CurrentTilePanel } from './ui/panels/CurrentTilePanel';
 import { Phase } from './game-engine/types/game';
@@ -28,7 +29,8 @@ import { Menu, ScrollText, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const { state, dispatch, showTradeModal, setShowTradeModal } = useGameStore();
+  const { state, dispatch } = useGameStore();
+  const { showTradeModal, setShowTradeModal } = useUIStore();
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isActionExpanded, setIsActionExpanded] = React.useState(true);

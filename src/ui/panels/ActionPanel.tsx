@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
+import { useUIStore } from '../../app/store/useUIStore';
 import { Phase, TileType, type Property } from '../../game-engine/types/game';
 import { canMortgage, canUnmortgage } from '../../game-engine/rules/financeRules';
 import { canBuild } from '../../game-engine/rules/buildingRules';
@@ -9,7 +10,8 @@ import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, Rotate
 import { rollDice } from '../../game-engine/rules/diceRules';
 
 export const ActionPanel: React.FC = () => {
-  const { state, dispatch, setShowTradeModal } = useGameStore();
+  const { state, dispatch } = useGameStore();
+  const { setShowTradeModal } = useUIStore();
   const { enqueue, isAnimating, queue } = useAnimationQueue();
   const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId)!;
   const currentTile = state.board[currentPlayer.position];

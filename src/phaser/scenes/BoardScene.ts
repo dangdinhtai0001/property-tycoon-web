@@ -5,6 +5,7 @@ import { Phase } from '../../game-engine/types/game';
 import type { GameState, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
 import { useGameStore } from '../../app/store/useGameStore';
+import { useUIStore } from '../../app/store/useUIStore';
 import {
   getBoardTileCount,
   getBoardTileLayout,
@@ -246,7 +247,7 @@ export class BoardScene extends Phaser.Scene {
         token.setJailed(player.jailTurns > 0);
         token.setBankrupt(player.isBankrupt || false);
         if (isCurrentPlayer && (player.jailTurns > 0 || player.isBankrupt)) {
-          useGameStore.getState().setTokenAnimState('sad');
+          useUIStore.getState().setTokenAnimState('sad');
         }
 
         // Ensure current player is always on top
@@ -259,7 +260,7 @@ export class BoardScene extends Phaser.Scene {
         const hasNewPurchase = state.lastPurchaseId !== this.lastGlobalPurchaseId && state.lastPurchaseId !== undefined;
         const isBuyer = hasNewPurchase && state.currentPlayerId === player.id;
 
-        const { setTokenAnimState } = useGameStore.getState();
+        const { setTokenAnimState } = useUIStore.getState();
         const isCurrentPlayerToken = player.id === state.currentPlayerId;
 
         if (lastState) {
@@ -267,13 +268,13 @@ export class BoardScene extends Phaser.Scene {
             token.setWinTemporarily(2000);
             if (isCurrentPlayerToken) {
               setTokenAnimState('win');
-              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+              setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), 2000);
             }
           } else if (player.cash < lastState.cash && !isBuyer) {
             token.setSadTemporarily(2000);
             if (isCurrentPlayerToken) {
               setTokenAnimState('sad');
-              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+              setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), 2000);
             }
           }
         }
@@ -301,7 +302,7 @@ export class BoardScene extends Phaser.Scene {
           if (isCurrentPlayerToken) {
             const moveDuration = path.length * 300;
             setTokenAnimState('run');
-            setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), moveDuration);
+            setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), moveDuration);
           }
           this.playerPositions.set(player.id, player.position);
         } else {
@@ -310,7 +311,7 @@ export class BoardScene extends Phaser.Scene {
             token.moveToPosition(targetX, targetY, 300);
             if (isCurrentPlayerToken) {
               setTokenAnimState('run');
-              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 300);
+              setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), 300);
             }
           }
         }
