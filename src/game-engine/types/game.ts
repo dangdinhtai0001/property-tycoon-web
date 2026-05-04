@@ -39,6 +39,8 @@ export enum PropertyGroup {
   YELLOW = 'YELLOW',
   GREEN = 'GREEN',
   DARK_BLUE = 'DARK_BLUE',
+  PURPLE = 'PURPLE',
+  GRAY = 'GRAY',
   STATION = 'STATION',
   UTILITY = 'UTILITY',
 }

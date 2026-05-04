@@ -1,4 +1,4 @@
-import { type GameState, type Property, TileType } from '../types/game';
+import { type GameState, type Property, TileType, PropertyGroup } from '../types/game';
 import { BUILDING_LIMITS } from '../../config/gameplay';
 
 export const canBuild = (state: GameState, propertyId: string): boolean => {
@@ -19,8 +19,12 @@ export const canBuild = (state: GameState, propertyId: string): boolean => {
 
   const ownsAll = propertiesInGroup.every(p => p.ownerId === currentPlayer.id);
   const anyMortgaged = propertiesInGroup.some(p => p.isMortgaged);
+  
   // Rule: Must own all properties in the group AND none can be mortgaged
   if (!ownsAll || anyMortgaged) return false;
+
+  // Rule: Only normal properties can have buildings (not Stations or Utilities)
+  if (property.groupId === PropertyGroup.STATION || property.groupId === PropertyGroup.UTILITY) return false;
 
   // Optional even-build rule: Cannot build if this building level is > any other property in group (that you own)
   const ownedPropertiesInGroup = propertiesInGroup.filter(p => p.ownerId === currentPlayer.id);
