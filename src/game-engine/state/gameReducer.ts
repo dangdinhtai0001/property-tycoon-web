@@ -46,9 +46,16 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'RESOLVE_TILE': {
+      if (state.phase !== Phase.MOVING && state.phase !== Phase.RESOLVING_TILE) {
+        console.warn(`[DEBUG] Chặn RESOLVE_TILE trùng lặp ở phase: ${state.phase}`);
+        return state;
+      }
+
       const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
       const tile = state.board[currentPlayer.position];
       
+      console.log(`[DEBUG] Đang xử lý ô ${tile.name} (loại: ${tile.type}) tại vị trí ${tile.position}`);
+
       const logEntry = GAME_LOG.playerLandedOn(currentPlayer.name, tile.name);
       const stateWithLog = { ...state, log: [logEntry, ...state.log] };
 
@@ -67,14 +74,28 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         return gameReducer(stateWithLog, { type: 'DRAW_CARD' });
       } else if (tile.type === TileType.TAX) {
         const taxAmount = tile.name.includes('xa xỉ') ? TAX_LUXURY_AMOUNT : TAX_INCOME_AMOUNT;
-        const updatedPlayers = stateWithLog.players.map(p =>
-          p.id === state.currentPlayerId ? { ...p, cash: p.cash - taxAmount } : p
-        );
+        
+        let nextPhaseForTax = Phase.END_TURN;
+        let debtState = undefined;
+        
+        const updatedPlayers = stateWithLog.players.map(p => {
+          if (p.id === state.currentPlayerId) {
+            const finalCash = Math.max(0, p.cash - taxAmount);
+            if (p.cash < taxAmount) {
+              nextPhaseForTax = Phase.DEBT_RESOLUTION;
+              debtState = { oweTo: 'BANK' as const, amount: taxAmount - p.cash };
+            }
+            return { ...p, cash: finalCash };
+          }
+          return p;
+        });
+
         return {
           ...stateWithLog,
           players: updatedPlayers,
           log: [GAME_LOG.playerPaidTax(currentPlayer.name, tile.name, taxAmount), ...stateWithLog.log],
-          phase: Phase.END_TURN
+          phase: nextPhaseForTax,
+          debtState
         };
       } else {
         nextPhase = Phase.END_TURN;
