@@ -25,7 +25,7 @@ export const SetupGameScreen: React.FC = () => {
       
       // Find next available character token
       const usedTokens = new Set(players.map(p => p.token));
-      const nextChar = CHARACTERS.find(c => !usedTokens.has(c)) || CHARACTERS[players.length % CHARACTERS.length];
+      const nextChar = CHARACTERS.find(c => !usedTokens.has(c.id)) || CHARACTERS[players.length % CHARACTERS.length];
 
       setPlayers([...players, {
         name: nextChar.name,

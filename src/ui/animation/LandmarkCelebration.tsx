@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
-import { Landmark, Sparkles, PartyPopper, Trophy } from 'lucide-react';
+import { Landmark, Sparkles, Trophy } from 'lucide-react';
 import { BUILDING_LEVEL_NAMES } from '../../config/text';
 import { PhaserBridge } from '../../phaser/bridge/PhaserBridge';
 
