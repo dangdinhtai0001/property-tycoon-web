@@ -1,4 +1,4 @@
-import { type GameState, type Property, TileType, PropertyGroup, Phase, PropertyKind } from '../types/game';
+import { type GameState, type Property, TileType, Phase, PropertyKind } from '../types/game';
 import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
 import { GAME_LOG } from '../../config/text';
 

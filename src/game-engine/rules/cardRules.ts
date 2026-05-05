@@ -24,10 +24,10 @@ export function applyCardEffect(state: GameState): GameState {
   const currentPlayerId = state.currentPlayerId;
   const currentPlayer = state.players.find(p => p.id === currentPlayerId)!;
   
-  let nextState = { ...state, activeCard: undefined };
+  let nextState: GameState = { ...state, activeCard: undefined };
   let logEntries: string[] = [];
 
-  const { type, value = 0, target, duration = 0, position, tileId } = card.effect;
+  const { type, value = 0, target, duration = 0, position } = card.effect;
 
   switch (type) {
     case 'RECEIVE_MONEY': {
@@ -113,7 +113,6 @@ export function applyCardEffect(state: GameState): GameState {
       if (position !== undefined) {
         const steps = (position - currentPlayer.position + state.board.length) % state.board.length;
         // Check if we pass START (unless it's Go To Jail)
-        const isJail = position === 13;
         nextState = applyMovement(nextState, steps, false);
         // Overwrite phase to ensure resolution
         nextState.phase = Phase.RESOLVING_TILE;

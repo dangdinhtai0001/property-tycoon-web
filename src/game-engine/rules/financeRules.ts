@@ -175,7 +175,6 @@ export const resolveDebt = (state: GameState): GameState => {
     return p;
   });
 
-  const creditorName = oweTo === 'BANK' ? 'Ngân hàng' : state.players.find(p => p.id === oweTo)?.name;
   const logEntry = GAME_LOG.debtResolved(currentPlayer.name);
 
   return {
@@ -217,7 +216,6 @@ export const declareBankruptcy = (state: GameState): GameState => {
     return p;
   });
 
-  const creditorName = oweTo === 'BANK' ? 'Ngân hàng' : state.players.find(p => p.id === oweTo)?.name;
   const logEntry = GAME_LOG.bankruptcy(currentPlayer.name);
 
   // Check if only one player remains
