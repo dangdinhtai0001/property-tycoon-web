@@ -1,11 +1,15 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { type Property } from '../../game-engine/types/game';
+import { useUIStore } from '../../app/store/useUIStore';
+import { type Property, PropertyKind } from '../../game-engine/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Landmark, Info } from 'lucide-react';
+import { X, Home, Landmark, Info, MapPin } from 'lucide-react';
+import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT } from '../../config/gameplay';
+import { GROUP_THEMES, BUILDING_LEVEL_NAMES } from '../../config/text';
 
 export const PropertyInfoModal: React.FC = () => {
-  const { state, inspectedPropertyId, setInspectedPropertyId } = useGameStore();
+  const { state } = useGameStore();
+  const { inspectedPropertyId, setInspectedPropertyId } = useUIStore();
   
   const property = state.board.find(t => t.id === inspectedPropertyId) as Property | undefined;
 
@@ -53,11 +57,19 @@ export const PropertyInfoModal: React.FC = () => {
           
           {/* Card Header (Monopoly Style) */}
           <div className="p-4 border-b-2 border-slate-100">
-            <div className={`${colorClass} w-full py-6 px-4 rounded-lg text-white text-center border-2 border-black shadow-inner`}>
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-1 opacity-80">
-                {isProperty ? 'Giấy chứng nhận' : 'Thông tin ô'}
-              </p>
-              <h2 className="text-2xl font-black uppercase tracking-tight leading-tight">{property.name}</h2>
+            <div className={`${colorClass} w-full py-6 px-4 rounded-lg text-white text-center border-2 border-black shadow-inner relative overflow-hidden`}>
+              {/* Pattern Background for header */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '12px 12px' }} />
+              
+              <div className="relative z-10 flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-black/20 rounded-full backdrop-blur-sm mb-1">
+                  <MapPin size={10} className="text-white/80" />
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/90">
+                    {isProperty ? GROUP_THEMES[property.groupId] : 'Ô chức năng'}
+                  </p>
+                </div>
+                <h2 className="text-2xl font-black uppercase tracking-tight leading-tight drop-shadow-md">{property.name}</h2>
+              </div>
             </div>
           </div>
           
@@ -77,40 +89,98 @@ export const PropertyInfoModal: React.FC = () => {
           <div className="p-6 flex flex-col gap-4">
             {isProperty ? (
               <>
+                {/* Current Ownership Status */}
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sở hữu bởi</span>
+                    <div className="flex items-center gap-2">
+                      {property.ownerId ? (
+                        <>
+                          <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: state.players.find(p => p.id === property.ownerId)?.color }} />
+                          <span className="font-black text-slate-800 tracking-tight">
+                            {state.players.find(p => p.id === property.ownerId)?.name}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-bold text-slate-400 italic">Chưa có chủ sở hữu</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Cấp độ hiện tại</span>
+                    <p className="font-black text-blue-600 uppercase tracking-tighter">
+                      {property.isMortgaged ? 'ĐANG THẾ CHẤP' : BUILDING_LEVEL_NAMES[property.buildingLevel]}
+                    </p>
+                  </div>
+                </div>
+
                 {/* Rent Table */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm font-black border-b border-slate-50 pb-2">
-                    <span className="text-slate-400 uppercase tracking-widest text-[10px]">Tình trạng</span>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-sm font-black border-b border-slate-50 pb-2 mb-2">
+                    <span className="text-slate-400 uppercase tracking-widest text-[10px]">Cấp công trình</span>
                     <span className="text-slate-400 uppercase tracking-widest text-[10px]">Tiền thuê</span>
                   </div>
                   
-                  <div className="flex justify-between items-center group">
-                    <span className="text-slate-700 font-bold">Tiền thuê đất</span>
-                    <span className="font-black text-slate-900">${rentLevels[0]}</span>
-                  </div>
+                  {property.kind === PropertyKind.LAND && (
+                    <>
+                      {rentLevels.map((rent, i) => {
+                        const isCurrentLevel = property.buildingLevel === i;
+                        const ownerColor = property.ownerId ? state.players.find(p => p.id === property.ownerId)?.color : '#3b82f6';
+                        
+                        return (
+                          <div 
+                            key={i} 
+                            className={`flex justify-between items-center px-3 py-1.5 rounded-xl transition-all ${
+                              isCurrentLevel ? 'bg-slate-900 text-white shadow-lg scale-[1.02]' : 'group hover:bg-slate-50'
+                            }`}
+                            style={isCurrentLevel ? { backgroundColor: ownerColor } : {}}
+                          >
+                            <div className="flex gap-2 items-center">
+                              {i === 0 ? (
+                                <span className={isCurrentLevel ? 'text-white' : 'text-slate-700 font-bold'}>Giá thuê đất</span>
+                              ) : (
+                                <div className="flex gap-1 items-center">
+                                  <div className="flex gap-0.5">
+                                    {Array.from({ length: i }).map((_, j) => (
+                                      <Home key={j} size={10} className={isCurrentLevel ? 'text-white fill-white' : 'text-emerald-600 fill-emerald-600'} />
+                                    ))}
+                                    {i === 5 && <Landmark size={12} className={isCurrentLevel ? 'text-white fill-white' : 'text-amber-500 fill-amber-500'} />}
+                                  </div>
+                                  <span className={`text-xs font-bold ${isCurrentLevel ? 'text-white' : 'text-slate-600'}`}>
+                                    {BUILDING_LEVEL_NAMES[i]}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <span className={`font-black ${isCurrentLevel ? 'text-white' : 'text-slate-900'}`}>${rent}</span>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
 
-                  {rentLevels.slice(1, 5).map((rent, i) => (
-                    <div key={i} className="flex justify-between items-center group">
-                      <div className="flex gap-1 items-center">
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: i + 1 }).map((_, j) => (
-                            <Home key={j} size={12} className="text-emerald-600 fill-emerald-600" />
-                          ))}
+                  {property.kind === PropertyKind.STATION && (
+                    <>
+                      {[1, 2, 3, 4].map((count) => (
+                        <div key={count} className="flex justify-between items-center px-3 py-2 group hover:bg-slate-50 rounded-xl">
+                          <span className="text-slate-700 font-bold">Sở hữu {count} Bến xe</span>
+                          <span className="font-black text-slate-900">${STATION_RENT_BY_COUNT[count]}</span>
                         </div>
-                        <span className="text-slate-600 text-sm font-bold ml-1">Với {i + 1} Căn nhà</span>
-                      </div>
-                      <span className="font-black text-slate-900">${rent}</span>
-                    </div>
-                  ))}
+                      ))}
+                    </>
+                  )}
 
-                  {rentLevels[5] && (
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-dashed border-slate-200">
-                      <div className="flex gap-2 items-center">
-                        <Landmark size={14} className="text-red-600 fill-red-600" />
-                        <span className="text-slate-900 font-black">Với KHÁCH SẠN</span>
+                  {property.kind === PropertyKind.UTILITY && (
+                    <>
+                      <div className="flex justify-between items-center px-3 py-2 group hover:bg-slate-50 rounded-xl">
+                        <span className="text-slate-700 font-bold text-xs">Sở hữu 1 Tiện ích</span>
+                        <span className="font-black text-slate-900 text-xs">Xúc xắc x {UTILITY_MULTIPLIER_BY_COUNT[1]}</span>
                       </div>
-                      <span className="font-black text-red-600 text-lg">${rentLevels[5]}</span>
-                    </div>
+                      <div className="flex justify-between items-center px-3 py-2 group hover:bg-slate-50 rounded-xl">
+                        <span className="text-slate-700 font-bold text-xs">Sở hữu 2 Tiện ích</span>
+                        <span className="font-black text-slate-900 text-xs">Xúc xắc x {UTILITY_MULTIPLIER_BY_COUNT[2]}</span>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -118,10 +188,18 @@ export const PropertyInfoModal: React.FC = () => {
 
                 {/* Costs */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giá nhà</p>
-                    <p className="text-lg font-black text-slate-800">${property.buildingCost}</p>
-                  </div>
+                  {property.kind === PropertyKind.LAND && (
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giá nhà</p>
+                      <p className="text-lg font-black text-slate-800">${property.buildingCost}</p>
+                    </div>
+                  )}
+                  {property.kind !== PropertyKind.LAND && (
+                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Loại</p>
+                      <p className="text-xs font-black text-slate-800 uppercase">{property.kind === PropertyKind.STATION ? 'Bến xe' : 'Tiện ích'}</p>
+                    </div>
+                  )}
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Thế chấp</p>
                     <p className="text-lg font-black text-slate-800">${property.mortgageValue}</p>
@@ -130,7 +208,10 @@ export const PropertyInfoModal: React.FC = () => {
 
                 <div className="text-center">
                   <p className="text-[10px] text-slate-400 italic font-medium">
-                    Nếu một người chơi sở hữu tất cả các lô đất của một Nhóm cùng Màu, tiền thuê sẽ được gấp đôi trên các lô đất chưa được cải tạo trong nhóm đó.
+                    {property.kind === PropertyKind.LAND 
+                      ? 'Nếu sở hữu tất cả lô đất cùng nhóm màu, tiền thuê đất trống được gấp đôi.'
+                      : 'Tiền thuê tăng lên khi bạn sở hữu nhiều bất động sản cùng loại.'
+                    }
                   </p>
                 </div>
               </>

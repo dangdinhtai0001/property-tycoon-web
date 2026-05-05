@@ -1,7 +1,7 @@
 import { type GameState, Phase } from '../types/game';
 import { rollDice, isDouble } from './diceRules';
-
-const JAIL_FINE = 50;
+import { JAIL_FINE } from '../../config/gameplay';
+import { GAME_LOG } from '../../config/text';
 
 export const payJailFine = (state: GameState): GameState => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
@@ -23,7 +23,7 @@ export const payJailFine = (state: GameState): GameState => {
   return {
     ...state,
     players: updatedPlayers,
-    log: [`${currentPlayer.name} đã nộp phạt ${JAIL_FINE}$ để ra tù.`, ...state.log],
+    log: [GAME_LOG.playerPaidJailFine(currentPlayer.name, JAIL_FINE), ...state.log],
     phase: Phase.WAITING_TO_ROLL, // After paying fine, can roll normally
   };
 };

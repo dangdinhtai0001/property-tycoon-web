@@ -1,4 +1,5 @@
 import { type GameState } from '../types/game';
+import { GAME_LOG } from '../../config/text';
 
 export const calculateNewPosition = (currentPosition: number, steps: number, boardSize: number): { position: number; passedStart: boolean } => {
   const newPosition = (currentPosition + steps) % boardSize;
@@ -32,12 +33,15 @@ export const applyMovement = (state: GameState, steps: number, silent: boolean =
     };
   }
 
-  const logEntry = `${currentPlayer.name} di chuyển ${steps} ô đến ${state.board[position].name}${passedStart ? ` và nhận ${passStartBonus}$ khi đi qua Bắt đầu` : ''}.`;
+  const logEntries = [GAME_LOG.playerMoved(currentPlayer.name, steps, state.board[position].name)];
+  if (passedStart) {
+    logEntries.push(GAME_LOG.passStart(currentPlayer.name, passStartBonus));
+  }
 
   return {
     ...state,
     players: updatedPlayers,
-    log: [logEntry, ...state.log],
+    log: [...logEntries, ...state.log],
   };
 };
 

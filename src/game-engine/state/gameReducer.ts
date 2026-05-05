@@ -3,13 +3,16 @@ import { createInitialGame } from './setupGame';
 import { rollDice } from '../rules/diceRules';
 import { applyMovement } from '../rules/movementRules';
 import { buyProperty } from '../rules/propertyRules';
-import { payRent } from '../rules/rentRules';
+import { payRent, calculateRent } from '../rules/rentRules';
 import { buildProperty } from '../rules/buildingRules';
 import { payJailFine } from '../rules/jailRules';
 import { mortgageProperty, unmortgageProperty, sellBuilding, resolveDebt, declareBankruptcy } from '../rules/financeRules';
 import { handleBid, handlePassBid } from '../rules/auctionRules';
 import { acceptTrade } from '../rules/tradeRules';
 import { drawCard, applyCardEffect } from '../rules/cardRules';
+import { GAME_LOG, BUILDING_LEVEL_NAMES } from '../../config/text';
+import { TAX_LUXURY_AMOUNT, TAX_INCOME_AMOUNT } from '../../config/gameplay';
+import { phaseMachine } from './phaseMachine';
 
 export function assertGameInvariants(state: GameState): void {
   for (const player of state.players) {
@@ -27,7 +30,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       break;
 
     case 'ROLL_DICE': {
-      if (state.phase !== Phase.WAITING_TO_ROLL) return state;
+      if (!phaseMachine.canTransition(state.phase, 'ROLL_DICE', state)) return state;
       const dice = action.payload?.dice || rollDice();
       
       // If we only want to set the dice and not move yet (for step-by-step animation)
@@ -43,10 +46,17 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'RESOLVE_TILE': {
+      if (state.phase !== Phase.MOVING && state.phase !== Phase.RESOLVING_TILE) {
+        console.warn(`[DEBUG] Chặn RESOLVE_TILE trùng lặp ở phase: ${state.phase}`);
+        return state;
+      }
+
       const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
       const tile = state.board[currentPlayer.position];
       
-      const logEntry = `${currentPlayer.name} đã dừng lại tại ${tile.name}.`;
+      console.log(`[DEBUG] Đang xử lý ô ${tile.name} (loại: ${tile.type}) tại vị trí ${tile.position}`);
+
+      const logEntry = GAME_LOG.playerLandedOn(currentPlayer.name, tile.name);
       const stateWithLog = { ...state, log: [logEntry, ...state.log] };
 
       let nextPhase = Phase.RESOLVING_TILE;
@@ -63,15 +73,29 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       } else if (tile.type === TileType.CHANCE || tile.type === TileType.FORTUNE) {
         return gameReducer(stateWithLog, { type: 'DRAW_CARD' });
       } else if (tile.type === TileType.TAX) {
-        const taxAmount = tile.name.includes('xa xỉ') ? 150 : 200;
-        const updatedPlayers = stateWithLog.players.map(p => 
-          p.id === state.currentPlayerId ? { ...p, cash: p.cash - taxAmount } : p
-        );
+        const taxAmount = tile.name.includes('xa xỉ') ? TAX_LUXURY_AMOUNT : TAX_INCOME_AMOUNT;
+        
+        let nextPhaseForTax = Phase.END_TURN;
+        let debtState = undefined;
+        
+        const updatedPlayers = stateWithLog.players.map(p => {
+          if (p.id === state.currentPlayerId) {
+            const finalCash = Math.max(0, p.cash - taxAmount);
+            if (p.cash < taxAmount) {
+              nextPhaseForTax = Phase.DEBT_RESOLUTION;
+              debtState = { oweTo: 'BANK' as const, amount: taxAmount - p.cash };
+            }
+            return { ...p, cash: finalCash };
+          }
+          return p;
+        });
+
         return {
           ...stateWithLog,
           players: updatedPlayers,
-          log: [`${currentPlayer.name} nộp ${tile.name} $${taxAmount}.`, ...stateWithLog.log],
-          phase: Phase.END_TURN
+          log: [GAME_LOG.playerPaidTax(currentPlayer.name, tile.name, taxAmount), ...stateWithLog.log],
+          phase: nextPhaseForTax,
+          debtState
         };
       } else {
         nextPhase = Phase.END_TURN;
@@ -85,17 +109,17 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const tile = state.board[currentPlayer.position];
       if (tile.type !== TileType.CHANCE && tile.type !== TileType.FORTUNE) return state;
       
-      const card = drawCard(tile.type);
+      const { card, nextState: stateAfterDraw } = drawCard(tile.type, state);
       return {
-        ...state,
+        ...stateAfterDraw,
         activeCard: card,
         phase: Phase.SHOWING_CARD,
-        log: [`${currentPlayer.name} rút thẻ ${tile.type === TileType.CHANCE ? 'Khí Vận' : 'Cơ Hội'}: ${card.description}`, ...state.log]
+        log: [`${currentPlayer.name} rút thẻ ${tile.type === TileType.CHANCE ? 'Cơ Hội' : 'Khí Vận'}: ${card.title}`, ...state.log]
       };
     }
 
     case 'APPLY_CARD': {
-      if (state.phase !== Phase.SHOWING_CARD || !state.activeCard) return state;
+      if (!phaseMachine.canTransition(state.phase, 'APPLY_CARD', state) || !state.activeCard) return state;
       const result = applyCardEffect(state);
       // Card moved the player — auto-resolve the new tile so the game doesn't get stuck
       if (result.phase === Phase.RESOLVING_TILE) {
@@ -136,18 +160,19 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'BUY_PROPERTY': {
-      if (state.phase !== Phase.BUY_DECISION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'BUY_PROPERTY', state)) return state;
       const boughtState = buyProperty(state, action.payload.propertyId);
       nextState = { ...boughtState, phase: Phase.END_TURN, lastPurchaseId: action.payload.propertyId };
       break;
     }
 
     case 'DECLINE_BUY_PROPERTY': {
-      if (state.phase !== Phase.BUY_DECISION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'DECLINE_BUY_PROPERTY', state)) return state;
       
+      const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
+      const property = state.board[currentPlayer.position] as Property;
+
       if (state.config.enableAuction) {
-        const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)!;
-        const property = state.board[currentPlayer.position] as Property;
         const activePlayers = state.players.filter(p => !p.isBankrupt).map(p => p.id);
         
         nextState = {
@@ -162,19 +187,23 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
           log: [`Bắt đầu đấu giá tài sản ${property.name}`, ...state.log],
         };
       } else {
-        nextState = { ...state, phase: Phase.END_TURN };
+        nextState = { 
+          ...state, 
+          phase: Phase.END_TURN,
+          log: [GAME_LOG.playerDeclinedPurchase(currentPlayer.name, property.name), ...state.log],
+        };
       }
       break;
     }
 
     case 'BID': {
-      if (state.phase !== Phase.AUCTION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'BID', state)) return state;
       nextState = handleBid(state, action.payload.amount);
       break;
     }
 
     case 'PASS_BID': {
-      if (state.phase !== Phase.AUCTION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'PASS_BID', state)) return state;
       nextState = handlePassBid(state);
       break;
     }
@@ -191,13 +220,13 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'ACCEPT_TRADE': {
-      if (state.phase !== Phase.TRADE) return state;
+      if (!phaseMachine.canTransition(state.phase, 'ACCEPT_TRADE', state)) return state;
       nextState = acceptTrade(state);
       break;
     }
 
     case 'REJECT_TRADE': {
-      if (state.phase !== Phase.TRADE) return state;
+      if (!phaseMachine.canTransition(state.phase, 'REJECT_TRADE', state)) return state;
       nextState = {
         ...state,
         phase: Phase.WAITING_TO_ROLL,
@@ -239,41 +268,61 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     }
 
     case 'RESOLVE_DEBT': {
-      if (state.phase !== Phase.DEBT_RESOLUTION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'RESOLVE_DEBT', state)) return state;
       nextState = resolveDebt(state);
       break;
     }
 
     case 'DECLARE_BANKRUPTCY': {
-      if (state.phase !== Phase.DEBT_RESOLUTION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'DECLARE_BANKRUPTCY', state)) return state;
       nextState = declareBankruptcy(state);
       break;
     }
 
     case 'BUILD': {
-      if (state.phase !== Phase.WAITING_TO_ROLL && state.phase !== Phase.END_TURN) return state;
-      nextState = buildProperty(state, action.payload.propertyId);
-      break;
+      if (!phaseMachine.canTransition(state.phase, 'BUILD', state)) return state;
+      const player = state.players.find(p => p.id === state.currentPlayerId)!;
+      const prop = state.board.find(t => t.id === action.payload.propertyId) as Property;
+      const nextLevel = prop.buildingLevel + 1;
+      
+      const builtState = buildProperty(state, action.payload.propertyId);
+      const updatedProp = builtState.board.find(t => t.id === action.payload.propertyId) as Property;
+      const newRent = calculateRent(builtState, updatedProp);
+
+      const logMsg = nextLevel === 5 
+        ? GAME_LOG.landmarkCompleted(player.name, prop.name)
+        : GAME_LOG.playerBuilt(player.name, BUILDING_LEVEL_NAMES[nextLevel], prop.name, newRent);
+        
+      return {
+        ...builtState,
+        log: [logMsg, ...builtState.log]
+      };
     }
 
     case 'PAY_FINE': {
-      if (state.phase !== Phase.WAITING_TO_ROLL) return state;
+      if (!phaseMachine.canTransition(state.phase, 'PAY_FINE', state)) return state;
       nextState = payJailFine(state);
       break;
     }
 
     case 'END_TURN': {
-      if (state.phase !== Phase.END_TURN && state.phase !== Phase.BUILD_DECISION) return state;
+      if (!phaseMachine.canTransition(state.phase, 'END_TURN', state)) return state;
       
       const currentIndex = state.players.findIndex(p => p.id === state.currentPlayerId);
       const nextIndex = (currentIndex + 1) % state.players.length;
       
+      // Update temporary modifiers: decrement rounds and remove expired ones
+      const updatedModifiers = state.temporaryModifiers
+        .map(m => ({ ...m, remainingRounds: m.remainingRounds - 1 }))
+        .filter(m => m.remainingRounds > 0);
+
       nextState = {
         ...state,
         currentPlayerId: state.players[nextIndex].id,
         phase: Phase.WAITING_TO_ROLL,
         lastDiceRoll: undefined,
         lastPurchaseId: undefined,
+        temporaryModifiers: updatedModifiers,
       };
       break;
     }

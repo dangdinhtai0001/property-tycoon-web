@@ -1,4 +1,5 @@
 import { type GameState, type Property, TileType } from '../types/game';
+import { GAME_LOG } from '../../config/text';
 
 export const buyProperty = (state: GameState, propertyId: string): GameState => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
@@ -22,7 +23,7 @@ export const buyProperty = (state: GameState, propertyId: string): GameState => 
     return t;
   });
 
-  const logEntry = `${currentPlayer.name} đã mua ${property.name} với giá ${property.price}$.`;
+  const logEntry = GAME_LOG.buyProperty(currentPlayer.name, property.name, property.price);
 
   return {
     ...state,

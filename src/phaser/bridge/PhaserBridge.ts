@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
+import { useUIStore } from '../../app/store/useUIStore';
 import { useGameStore } from '../../app/store/useGameStore';
+import { eventBus } from '../../core/EventBus';
 import type { GameState } from '../../game-engine/types/game';
 
 export class PhaserBridge {
   private static game: Phaser.Game | null = null;
-  private static unsubscribe: (() => void) | null = null;
 
   static showDiceRoll(result: number[]) {
     if (!this.game) return;
@@ -14,39 +15,45 @@ export class PhaserBridge {
     }
   }
 
+  static zoomToTile(position: number, duration: number = 1000) {
+    if (!this.game) return;
+    const boardScene = this.game.scene.getScene('BoardScene');
+    if (boardScene) {
+      boardScene.events.emit('zoom-to-tile', { position, duration });
+    }
+  }
+
   static initialize(game: Phaser.Game) {
     this.game = game;
 
-    // Initial state
-    const initialState = useGameStore.getState().state;
-    this.updatePhaser(initialState);
-
-    // Only call updatePhaser when game state changes, not UI state like tokenAnimState
-    this.unsubscribe = useGameStore.subscribe(
-      (store, prevStore) => {
-        if (store.state !== prevStore.state) {
-          this.updatePhaser(store.state);
-        }
-      }
-    );
+    // Listen to EventBus for state changes
+    eventBus.on('state:changed', ({ next }) => {
+      this.updatePhaser(next);
+    });
 
     // Listen to Phaser events
     game.events.on('tile-clicked', (tileId: string) => {
-      useGameStore.getState().setInspectedPropertyId(tileId);
+      useUIStore.getState().setInspectedPropertyId(tileId);
     });
-    
+
     // Bubble up scene events
     const boardScene = game.scene.getScene('BoardScene');
     if (boardScene) {
       boardScene.events.on('tile-clicked', (tileId: string) => {
-        useGameStore.getState().setInspectedPropertyId(tileId);
+        useUIStore.getState().setInspectedPropertyId(tileId);
       });
+    }
+
+    // Trigger initial update with current state
+    const { state } = useGameStore.getState();
+    if (state.phase !== 'SETUP') {
+      this.updatePhaser(state);
     }
   }
 
   private static updatePhaser(state: GameState) {
     if (!this.game) return;
-    
+
     const boardScene = this.game.scene.getScene('BoardScene');
     if (boardScene && boardScene.scene.isActive()) {
       boardScene.events.emit('update-state', state);
@@ -57,10 +64,7 @@ export class PhaserBridge {
   }
 
   static destroy() {
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
-    }
+    // EventBus cleanup is handled globally
     this.game = null;
   }
 }

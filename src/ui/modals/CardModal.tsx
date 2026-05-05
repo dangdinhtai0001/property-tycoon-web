@@ -29,7 +29,27 @@ export const CardModal: React.FC = () => {
   // Khí Vận -> Vàng (Yellow/Amber), Cơ Hội -> Đỏ (Red/Rose)
   const colorClass = isChance ? 'from-amber-400 to-orange-500' : 'from-red-500 to-rose-700';
   const icon = isChance ? <TrendingUp size={48} /> : <Sparkles size={48} />;
-  const title = isChance ? 'KHÍ VẬN' : 'CƠ HỘI';
+  const titleText = isChance ? 'CƠ HỘI' : 'KHÍ VẬN';
+
+  const getEffectSummary = (effect: any) => {
+    const { type, value, target, position } = effect;
+    switch (type) {
+      case 'RECEIVE_MONEY': return `Nhận $${value}${target === 'LOWEST_CASH' ? ' (Hỗ trợ người khó khăn)' : ''}`;
+      case 'PAY_MONEY': return `Trả $${value}`;
+      case 'PAY_PER_PROPERTY': return `Trả $${value} cho mỗi tài sản`;
+      case 'PAY_PER_BUILDING': return `Trả $${value} cho mỗi cấp công trình`;
+      case 'MOVE_TO_TILE': return `Di chuyển đến ô số ${position}`;
+      case 'MOVE_STEPS': return `Di chuyển ${value > 0 ? 'tiến' : 'lùi'} ${Math.abs(value)} bước`;
+      case 'MOVE_TO_NEAREST_UNOWNED_PROPERTY': return `Tiến đến bất động sản trống gần nhất`;
+      case 'TEMP_RENT_MODIFIER': return `Nhân ${value} lần tiền thuê tại ${target === 'STATION' ? 'Bến xe' : 'nhóm đất'} trong ${effect.duration} lượt`;
+      case 'TEMP_BUILD_COST_MODIFIER': return `Giảm ${Math.round((1 - value) * 100)}% chi phí xây dựng lượt tới`;
+      case 'ADJUST_BUILDING_LEVEL': return `${value > 0 ? 'Tăng' : 'Giảm'} ${Math.abs(value)} cấp công trình`;
+      case 'DISABLE_ACTION_UNTIL_ROUND_END': return `Tạm dừng hành động: ${target}`;
+      case 'ONE_TIME_RENT_DISCOUNT': return `Giảm ${Math.round((1 - value) * 100)}% tiền thuê lần tới`;
+      case 'ONE_TIME_PURCHASE_DISCOUNT': return `Giảm ${Math.round((1 - value) * 100)}% giá mua đất lần tới`;
+      default: return 'Có biến động xảy ra';
+    }
+  };
 
   const handlePick = (index: number) => {
     setSelectedIndex(index);
@@ -51,7 +71,7 @@ export const CardModal: React.FC = () => {
             className="text-center mb-12"
           >
             <h2 className={`text-4xl font-black tracking-[0.3em] uppercase text-transparent bg-clip-text bg-gradient-to-r ${colorClass}`}>
-              {interaction === 'REVEALED' ? title : 'ĐANG RÚT THẺ...'}
+              {interaction === 'REVEALED' ? titleText : 'ĐANG RÚT THẺ...'}
             </h2>
             <p className="text-slate-400 font-bold mt-2 uppercase tracking-widest">
               {interaction === 'PICKING' ? 'Hãy chọn 1 trong 3 tấm thẻ bên dưới' : ''}
@@ -150,19 +170,22 @@ export const CardModal: React.FC = () => {
                   <div className="bg-white/20 p-4 rounded-[2rem] mb-3 backdrop-blur-md">
                     {icon}
                   </div>
-                  <h2 className="text-3xl font-black tracking-[0.3em] uppercase">{title}</h2>
+                  <h2 className="text-xl font-black tracking-tighter uppercase px-4 text-center leading-tight">{card.title}</h2>
                 </div>
 
                 {/* Card Content */}
                 <div className="p-10 text-center bg-white">
                   <div className="mb-8">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 rounded-full text-[11px] font-black text-slate-500 uppercase tracking-widest mb-6">
-                      <AlertCircle size={14} />
-                      Thông báo từ vận mệnh
-                    </div>
-                    <p className="text-2xl font-bold text-slate-800 leading-relaxed italic px-4">
+                    <p className="text-xl font-bold text-slate-800 leading-relaxed italic px-4 mb-6">
                       "{card.description}"
                     </p>
+
+                    <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-5">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Ảnh hưởng thực tế</span>
+                      <p className="text-md font-black text-blue-600 uppercase">
+                        {getEffectSummary(card.effect)}
+                      </p>
+                    </div>
                   </div>
 
                   <motion.button

@@ -13,21 +13,24 @@ export const SetupGameScreen: React.FC = () => {
   const { dispatch } = useGameStore();
   const [players, setPlayers] = useState<{ name: string; color: string; token: string }[]>([
     { name: CHARACTERS[0].name, color: COLORS[0], token: CHARACTERS[0].id },
-    { name: CHARACTERS[0].name, color: COLORS[1], token: CHARACTERS[0].id },
+    { name: CHARACTERS[1].name, color: COLORS[1], token: CHARACTERS[1].id },
   ]);
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
 
   const addPlayer = () => {
     if (players.length < 6) {
-      // Find next available color and token
+      // Find next available color
       const usedColors = new Set(players.map(p => p.color));
       const nextColor = COLORS.find(c => !usedColors.has(c)) || COLORS[players.length];
-      const nextToken = CHARACTERS[0].id;
+      
+      // Find next available character token
+      const usedTokens = new Set(players.map(p => p.token));
+      const nextChar = CHARACTERS.find(c => !usedTokens.has(c)) || CHARACTERS[players.length % CHARACTERS.length];
 
       setPlayers([...players, {
-        name: CHARACTERS[0].name,
+        name: nextChar.name,
         color: nextColor,
-        token: nextToken
+        token: nextChar.id
       }]);
     }
   };

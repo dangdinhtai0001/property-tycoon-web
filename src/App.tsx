@@ -7,6 +7,7 @@ import { PlayerListPanel } from './ui/panels/PlayerListPanel';
 import { ActionPanel } from './ui/panels/ActionPanel';
 import { GameLogPanel } from './ui/panels/GameLogPanel';
 import { useGameStore } from './app/store/useGameStore';
+import { useUIStore } from './app/store/useUIStore';
 import { MainMenu } from './ui/screens/MainMenu';
 import { CurrentTilePanel } from './ui/panels/CurrentTilePanel';
 import { Phase } from './game-engine/types/game';
@@ -17,30 +18,34 @@ import { PauseMenu } from './ui/modals/PauseMenu';
 import { CardModal } from './ui/modals/CardModal';
 import { MoneyLossEffect } from './ui/animation/MoneyLossEffect';
 import { MoneyGainEffect } from './ui/animation/MoneyGainEffect';
-import { MoneyWatcher } from './ui/animation/MoneyWatcher';
 import { BuildingCelebration } from './ui/animation/BuildingCelebration';
-import { BuildingWatcher } from './ui/animation/BuildingWatcher';
+import { LandmarkCelebration } from './ui/animation/LandmarkCelebration';
 import { BuildModal } from './ui/modals/BuildModal';
 import { PropertyInfoModal } from './ui/modals/PropertyInfoModal';
 import { EndGameScreen } from './ui/screens/EndGameScreen';
 import { QuickGuidePanel } from './ui/panels/QuickGuidePanel';
+import { initializeAnimationSubscriber } from './app/subscribers/animationSubscriber';
 import { Menu, ScrollText, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const { state, dispatch, showTradeModal, setShowTradeModal } = useGameStore();
+  const { state, dispatch } = useGameStore();
+  const { showTradeModal, setShowTradeModal } = useUIStore();
   const [isPauseOpen, setIsPauseOpen] = React.useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isActionExpanded, setIsActionExpanded] = React.useState(true);
   const [isGuideOpen, setIsGuideOpen] = React.useState(false);
 
   React.useEffect(() => {
+    // Initialize animation subscriber once on mount
+    initializeAnimationSubscriber();
+
     (window as any).game = {
       jumpTo: (pos: number) => dispatch({ type: 'TELEPORT_PLAYER', payload: { position: pos } }),
       addCash: (amount: number) => dispatch({ type: 'DEBUG_ADD_CASH', payload: { amount } }),
       state: state
     };
-  }, [dispatch, state]);
+  }, []); // Empty array ensures this runs only once
 
   if (state.phase === Phase.SETUP) {
     return (
@@ -214,8 +219,7 @@ function App() {
       <MoneyLossEffect />
       <MoneyGainEffect />
       <BuildingCelebration />
-      <MoneyWatcher />
-      <BuildingWatcher />
+      <LandmarkCelebration />
       <DiceRollAnimation />
       <PurchaseCelebration />
       <ParticleSystem />

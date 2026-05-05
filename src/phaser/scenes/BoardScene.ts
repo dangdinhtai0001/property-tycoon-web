@@ -4,7 +4,8 @@ import { TokenSprite } from '../sprites/TokenSprite';
 import { Phase } from '../../game-engine/types/game';
 import type { GameState, Player } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
-import { useGameStore } from '../../app/store/useGameStore';
+import { DicePool } from '../pools/DicePool';
+import { useUIStore } from '../../app/store/useUIStore';
 import {
   getBoardTileCount,
   getBoardTileLayout,
@@ -22,6 +23,7 @@ export class BoardScene extends Phaser.Scene {
   private boardSurface!: Phaser.GameObjects.Rectangle;
   private lastPlayersState: Map<string, { cash: number }> = new Map();
   private lastGlobalPurchaseId: string | undefined = undefined;
+  private dicePool!: DicePool;
 
   // --- Dynamic Geometry Configuration ---
   public static readonly GEOMETRY = { cols: 14, rows: 12 };
@@ -50,6 +52,9 @@ export class BoardScene extends Phaser.Scene {
     this.buildingsContainer = this.add.container(0, 0);
     this.tokensContainer = this.add.container(0, 0);
     this.diceContainer = this.add.container(0, 0);
+
+    // Initialize dice pool
+    this.dicePool = new DicePool(this, 100, 2);
 
     // Setup Board Background Image
     const bg = this.add.image(BoardScene.BOARD_W / 2, BoardScene.BOARD_H / 2, 'board-bg');
@@ -87,9 +92,12 @@ export class BoardScene extends Phaser.Scene {
       this.showDiceRoll(result);
     });
 
-    // Scene-level click listener for better reliability
     this.events.on('tile-clicked', (tileId: string) => {
       this.game.events.emit('tile-clicked', tileId);
+    });
+
+    this.events.on('zoom-to-tile', ({ position, duration }: { position: number, duration: number }) => {
+      this.zoomToTile(position, duration);
     });
   }
 
@@ -97,10 +105,18 @@ export class BoardScene extends Phaser.Scene {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
 
-    this.diceContainer.removeAll(true);
+    // Return any existing dice to the pool
+    const existingDice = this.diceContainer.getAll() as DiceSprite[];
+    existingDice.forEach(obj => {
+      if (obj instanceof DiceSprite) {
+        this.dicePool.release(obj);
+      }
+    });
+    this.diceContainer.removeAll(false);
 
-    const dice1 = new DiceSprite(this, centerX - 60, centerY, 100);
-    const dice2 = new DiceSprite(this, centerX + 60, centerY, 100);
+    // Acquire dice from pool
+    const dice1 = this.dicePool.acquireDice(centerX - 60, centerY);
+    const dice2 = this.dicePool.acquireDice(centerX + 60, centerY);
     this.diceContainer.add([dice1, dice2]);
 
     // Entrance animation
@@ -148,7 +164,14 @@ export class BoardScene extends Phaser.Scene {
       duration: 400,
       ease: 'Power2.easeIn',
       onComplete: () => {
-        this.diceContainer.removeAll(true);
+        // Return dice to pool instead of destroying
+        const dice = this.diceContainer.getAll() as DiceSprite[];
+        dice.forEach(obj => {
+          if (obj instanceof DiceSprite) {
+            this.dicePool.release(obj);
+          }
+        });
+        this.diceContainer.removeAll(false);
       }
     });
   }
@@ -159,8 +182,12 @@ export class BoardScene extends Phaser.Scene {
 
     this.boardContainer.setPosition(offsetW, offsetH);
 
-    // Clear and redraw tiles if board configuration changed or first load
-    if (this.tiles.length === 0) {
+    // Redraw tiles if configuration changed or first load
+    if (this.tiles.length !== state.board.length && state.board.length > 0) {
+      this.tiles.forEach(t => t.destroy());
+      this.tiles = [];
+      this.tilesContainer.removeAll(true);
+
       state.board.forEach((tile, index) => {
         const layout = BoardScene.getTileLayout(index);
         const pos = this.getTilePosition(layout);
@@ -246,7 +273,7 @@ export class BoardScene extends Phaser.Scene {
         token.setJailed(player.jailTurns > 0);
         token.setBankrupt(player.isBankrupt || false);
         if (isCurrentPlayer && (player.jailTurns > 0 || player.isBankrupt)) {
-          useGameStore.getState().setTokenAnimState('sad');
+          useUIStore.getState().setTokenAnimState('sad');
         }
 
         // Ensure current player is always on top
@@ -259,7 +286,7 @@ export class BoardScene extends Phaser.Scene {
         const hasNewPurchase = state.lastPurchaseId !== this.lastGlobalPurchaseId && state.lastPurchaseId !== undefined;
         const isBuyer = hasNewPurchase && state.currentPlayerId === player.id;
 
-        const { setTokenAnimState } = useGameStore.getState();
+        const { setTokenAnimState } = useUIStore.getState();
         const isCurrentPlayerToken = player.id === state.currentPlayerId;
 
         if (lastState) {
@@ -267,13 +294,13 @@ export class BoardScene extends Phaser.Scene {
             token.setWinTemporarily(2000);
             if (isCurrentPlayerToken) {
               setTokenAnimState('win');
-              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+              setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), 2000);
             }
           } else if (player.cash < lastState.cash && !isBuyer) {
             token.setSadTemporarily(2000);
             if (isCurrentPlayerToken) {
               setTokenAnimState('sad');
-              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 2000);
+              setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), 2000);
             }
           }
         }
@@ -301,7 +328,7 @@ export class BoardScene extends Phaser.Scene {
           if (isCurrentPlayerToken) {
             const moveDuration = path.length * 300;
             setTokenAnimState('run');
-            setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), moveDuration);
+            setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), moveDuration);
           }
           this.playerPositions.set(player.id, player.position);
         } else {
@@ -310,7 +337,7 @@ export class BoardScene extends Phaser.Scene {
             token.moveToPosition(targetX, targetY, 300);
             if (isCurrentPlayerToken) {
               setTokenAnimState('run');
-              setTimeout(() => useGameStore.getState().setTokenAnimState('idle'), 300);
+              setTimeout(() => useUIStore.getState().setTokenAnimState('idle'), 300);
             }
           }
         }
@@ -359,4 +386,22 @@ export class BoardScene extends Phaser.Scene {
     return { x, y, w, h };
   }
 
+  private zoomToTile(position: number, duration: number) {
+    const layout = BoardScene.getTileLayout(position);
+    const pos = this.getTilePosition(layout);
+    const offsetW = (this.cameras.main.width - BoardScene.BOARD_W) / 2;
+    const offsetH = (this.cameras.main.height - BoardScene.BOARD_H) / 2;
+
+    const targetX = pos.x + offsetW;
+    const targetY = pos.y + offsetH;
+
+    this.cameras.main.pan(targetX, targetY, duration, 'Power2');
+    this.cameras.main.zoomTo(1.4, duration, 'Power2');
+
+    // Auto zoom back after a while
+    this.time.delayedCall(duration + 2000, () => {
+      this.cameras.main.pan(this.cameras.main.width / 2, this.cameras.main.height / 2, 1000, 'Power2');
+      this.cameras.main.zoomTo(1, 1000, 'Power2');
+    });
+  }
 }

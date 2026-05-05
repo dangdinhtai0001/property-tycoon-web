@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCharacter } from '../../game-engine/data/characters';
+import { CHARACTER_SPRITES } from '../../config/assets';
 
 export type AnimState = 'idle' | 'run' | 'win' | 'sad';
 
@@ -27,6 +28,7 @@ interface Props {
 export const CharacterSprite: React.FC<Props> = ({ charId, animState, className = '' }) => {
   const [frame, setFrame] = useState(0);
   const char = getCharacter(charId);
+  const sprite = CHARACTER_SPRITES[char.id];
 
   useEffect(() => {
     if (!animState) return;
@@ -43,7 +45,7 @@ export const CharacterSprite: React.FC<Props> = ({ charId, animState, className 
     <div
       className={`absolute inset-0 ${className}`}
       style={{
-        backgroundImage: `url(${char.image})`,
+        backgroundImage: `url(${sprite.path})`,
         backgroundSize: '400% 400%',
         backgroundPosition: `${xOffset}% ${yOffset}%`,
         imageRendering: 'pixelated',

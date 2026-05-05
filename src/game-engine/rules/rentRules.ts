@@ -1,47 +1,72 @@
-import { type GameState, type Property, TileType, PropertyGroup, Phase } from '../types/game';
+import { type GameState, type Property, TileType, PropertyGroup, Phase, PropertyKind } from '../types/game';
+import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
+import { GAME_LOG } from '../../config/text';
 
 export const calculateRent = (state: GameState, property: Property, diceTotal: number = 0): number => {
   const ownerId = property.ownerId;
   if (!ownerId) return 0;
 
+  const owner = state.players.find(p => p.id === ownerId);
+  if (!owner || owner.isBankrupt) return 0;
+
+  if (property.isMortgaged) return 0;
+
   const ownerProperties = state.board.filter(
     t => t.type === TileType.PROPERTY && (t as Property).ownerId === ownerId
   ) as Property[];
 
-  if (property.isMortgaged) return 0;
+  // Base rent multiplier from config
+  let finalMultiplier = state.config?.rentMultiplier || 1;
 
-  if (property.groupId === PropertyGroup.STATION) {
-    const stationCount = ownerProperties.filter(p => p.groupId === PropertyGroup.STATION).length;
-    return 25 * Math.pow(2, stationCount - 1) * (state.config?.rentMultiplier || 1);
+  // Apply temporary modifiers from cards
+  state.temporaryModifiers.forEach(mod => {
+    if (mod.effect === 'TEMP_RENT_MODIFIER') {
+      if (mod.target === 'STATION' && property.kind === PropertyKind.STATION) {
+        finalMultiplier *= mod.value;
+      } else if (mod.target === property.groupId) {
+        finalMultiplier *= mod.value;
+      }
+    }
+    // ONE_TIME_RENT_DISCOUNT applies when the CURRENT player is the one paying rent
+    if (mod.effect === 'ONE_TIME_RENT_DISCOUNT' && mod.playerId === state.currentPlayerId) {
+      finalMultiplier *= mod.value;
+    }
+  });
+
+  // STATION logic
+  if (property.kind === PropertyKind.STATION) {
+    const stationCount = ownerProperties.filter(p => p.kind === PropertyKind.STATION).length;
+    const baseStationRent = STATION_RENT_BY_COUNT[Math.min(stationCount, STATION_RENT_BY_COUNT.length - 1)] || 0;
+    return Math.round(baseStationRent * finalMultiplier);
   }
 
-  if (property.groupId === PropertyGroup.UTILITY) {
-    const utilityCount = ownerProperties.filter(p => p.groupId === PropertyGroup.UTILITY).length;
-    const multiplier = utilityCount === 2 ? 10 : 4;
-    return diceTotal * multiplier * (state.config?.rentMultiplier || 1);
+  // UTILITY logic
+  if (property.kind === PropertyKind.UTILITY) {
+    const utilityCount = ownerProperties.filter(p => p.kind === PropertyKind.UTILITY).length;
+    const multiplier = UTILITY_MULTIPLIER_BY_COUNT[Math.min(utilityCount, UTILITY_MULTIPLIER_BY_COUNT.length - 1)] || 0;
+    return Math.round(diceTotal * multiplier * finalMultiplier);
   }
 
+  // LAND logic
   let baseRent = property.rent;
 
-  // LAND properties
   if (property.buildingLevel > 0 && property.rentLevels) {
     baseRent = property.rentLevels[property.buildingLevel];
   } else {
-    // No buildings
+    // No buildings, check full color group
     const propertiesInGroup = state.board.filter(
       t => t.type === TileType.PROPERTY && (t as Property).groupId === property.groupId
     ) as Property[];
+    
     const ownsAllInGroup = propertiesInGroup.every(p => p.ownerId === ownerId);
     const anyMortgagedInGroup = propertiesInGroup.some(p => p.isMortgaged);
 
     if (ownsAllInGroup && !anyMortgagedInGroup) {
-      baseRent = property.rent * 2;
-    } else {
-      baseRent = property.rent;
+      baseRent = property.rent * GROUP_RENT_MULTIPLIER;
     }
   }
 
-  return baseRent * (state.config?.rentMultiplier || 1);
+  return Math.round(baseRent * finalMultiplier);
 };
 
 export const payRent = (state: GameState): GameState => {
@@ -62,19 +87,22 @@ export const payRent = (state: GameState): GameState => {
 
   const updatedPlayers = state.players.map(p => {
     if (p.id === currentPlayer.id) {
-      // Don't go below 0, instead create debt
       const finalCash = Math.max(0, p.cash - rentAmount);
       return { ...p, cash: finalCash };
     }
     if (p.id === owner.id) {
-      // Owner only receives what the player can afford immediately? 
-      // Rule: Owner receives full amount, even if player goes into debt.
       return { ...p, cash: p.cash + rentAmount };
     }
     return p;
   });
 
-  const logEntry = `${currentPlayer.name} đã trả ${rentAmount}$ tiền thuê cho ${owner.name} tại ${property.name}.`;
+  // Remove one-time discounts if applied
+  const remainingModifiers = state.temporaryModifiers.filter(
+    mod => !(mod.effect === 'ONE_TIME_RENT_DISCOUNT' && mod.playerId === currentPlayer.id)
+  );
+
+  const logEntry = GAME_LOG.playerPaidRent(currentPlayer.name, rentAmount, owner.name, property.name);
+  const nextLog = [logEntry];
 
   let nextPhase = Phase.END_TURN;
   let debtState = undefined;
@@ -85,6 +113,7 @@ export const payRent = (state: GameState): GameState => {
       oweTo: owner.id,
       amount: rentAmount - currentPlayer.cash
     };
+    nextLog.push(GAME_LOG.debtStarted(currentPlayer.name, rentAmount, `tiền thuê tại ${property.name}`));
   }
 
   return {
@@ -92,6 +121,7 @@ export const payRent = (state: GameState): GameState => {
     players: updatedPlayers,
     phase: nextPhase,
     debtState,
-    log: [logEntry, ...state.log],
+    temporaryModifiers: remainingModifiers,
+    log: [...nextLog, ...state.log],
   };
 };

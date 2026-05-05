@@ -10,6 +10,8 @@ export const THEME = {
       YELLOW: 0xFACC15,     // Yellow-400
       GREEN: 0x22C55E,      // Green-500
       DARK_BLUE: 0x1E40AF,  // Blue-800
+      PURPLE: 0xA855F7,     // Purple-500
+      GRAY: 0x64748B,       // Slate-500
     },
     // Special Tile Types
     types: {
