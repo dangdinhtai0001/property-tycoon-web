@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { payRent } from '../rules/rentRules';
-import { type GameState, Phase, TileType, type Property, PropertyGroup } from '../types/game';
+import { type GameState, Phase, TileType, type Property, PropertyGroup, PropertyKind } from '../types/game';
 
 describe('Rent Rules', () => {
   const mockProperty: Property = {
     id: 'prop-1',
     type: TileType.PROPERTY,
+    kind: PropertyKind.LAND,
     name: 'Test Property',
     position: 1,
     price: 100,
@@ -45,6 +46,9 @@ describe('Rent Rules', () => {
     ],
     doublesCount: 0,
     log: [],
+    chanceDeck: [],
+    fortuneDeck: [],
+    temporaryModifiers: [],
     config: { startingCash: 1500, passStartBonus: 200, enableAuction: false, rentMultiplier: 1 },
   };
 
