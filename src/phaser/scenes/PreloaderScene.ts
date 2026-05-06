@@ -6,6 +6,7 @@ import {
 import { preloadStartGateAnimationAssets } from '../sprites/StartGateAnimation';
 import { preloadLandTileAnimationAssets } from '../sprites/LandTileActivationAnimation';
 import { preloadStationTileAnimationAssets } from '../sprites/StationTileAnimation';
+import { preloadUtilityTileAnimationAssets } from '../sprites/UtilityTileAnimation';
 
 export class PreloaderScene extends Phaser.Scene {
   private progressBar?: Phaser.GameObjects.Graphics;
@@ -26,6 +27,7 @@ export class PreloaderScene extends Phaser.Scene {
     preloadStartGateAnimationAssets(this);
     preloadLandTileAnimationAssets(this);
     preloadStationTileAnimationAssets(this);
+    preloadUtilityTileAnimationAssets(this);
     this.load.svg('home', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/home.svg');
     this.load.svg('landmark', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/landmark.svg');
     this.load.image('board-bg', '/assets/bg/bg-02.png');

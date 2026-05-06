@@ -75,8 +75,10 @@ export const PlayerListPanel: React.FC = () => {
               }`}
               style={{ 
                 borderRadius: 'calc(var(--panel-radius) / 2)',
-                borderColor: isCurrent ? player.color : undefined,
                 borderLeftWidth: '12px',
+                borderTopColor: isCurrent ? player.color : undefined,
+                borderRightColor: isCurrent ? player.color : undefined,
+                borderBottomColor: isCurrent ? player.color : undefined,
                 borderLeftColor: player.color
               }}
             >

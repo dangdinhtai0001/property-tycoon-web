@@ -33,6 +33,7 @@ const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({
   const startGate = BOARD_TILE_EFFECTS.startGateActivate;
   const landGarden = BOARD_TILE_EFFECTS.landGardenActivate;
   const station = BOARD_TILE_EFFECTS.stationActivate;
+  const utility = BOARD_TILE_EFFECTS.utilityActivate;
 
   if (currentTile.type === TileType.START) {
     return (
@@ -103,6 +104,33 @@ const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({
                 "--sprite-sheet-height": `${station.sheetHeight}px`,
                 "--sprite-frame-inset-x": "1px",
                 "--sprite-sheet-url": `url(${station.path})`,
+              } as React.CSSProperties
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    currentTile.type === TileType.PROPERTY &&
+    (currentTile as Property).kind === PropertyKind.UTILITY
+  ) {
+    return (
+      <div className="relative w-full">
+        <div className="absolute inset-x-8 bottom-3 h-5 rounded-full bg-cyan-300/20 blur-md" />
+        <div className="relative mx-auto h-[176px] w-[176px] md:h-[208px] md:w-[208px]">
+          <div
+            className="board-status-utility-sprite absolute left-1/2 top-1/2"
+            style={
+              {
+                "--sprite-columns": `${utility.columns}`,
+                "--sprite-rows": `${utility.rows}`,
+                "--sprite-frame-count": `${utility.frameCount}`,
+                "--sprite-sheet-width": `${utility.sheetWidth}px`,
+                "--sprite-sheet-height": `${utility.sheetHeight}px`,
+                "--sprite-frame-inset-x": "1px",
+                "--sprite-sheet-url": `url(${utility.path})`,
               } as React.CSSProperties
             }
           />

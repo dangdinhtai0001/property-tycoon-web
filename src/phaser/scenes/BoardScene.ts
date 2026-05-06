@@ -26,6 +26,7 @@ export class BoardScene extends Phaser.Scene {
   private lastPlayersState: Map<string, { cash: number }> = new Map();
   private lastGlobalPurchaseId: string | undefined = undefined;
   private lastLandEffectKey?: string;
+  private lastUtilityEffectKey?: string;
   private dicePool!: DicePool;
 
   // --- Dynamic Geometry Configuration ---
@@ -439,6 +440,14 @@ export class BoardScene extends Phaser.Scene {
       state.phase === Phase.BUY_DECISION
         ? `${state.currentPlayerId}:${currentTile.id}:${state.phase}`
         : undefined;
+    const activeUtilityEffectKey =
+      currentPlayer &&
+      currentTile?.type === TileType.PROPERTY &&
+      (currentTile as Property).kind === PropertyKind.UTILITY &&
+      !(currentTile as Property).ownerId &&
+      state.phase === Phase.BUY_DECISION
+        ? `${state.currentPlayerId}:${currentTile.id}:${state.phase}`
+        : undefined;
 
     state.board.forEach((tile, index) => {
       const sprite = this.tiles[index];
@@ -452,12 +461,18 @@ export class BoardScene extends Phaser.Scene {
       const shouldUseStationSprite =
         property.kind === PropertyKind.STATION &&
         !property.isMortgaged;
+      const shouldUseUtilitySprite =
+        property.kind === PropertyKind.UTILITY &&
+        !property.isMortgaged;
 
       if (!shouldUseLandSprite) {
         sprite.stopLandActivation();
       }
       if (!shouldUseStationSprite) {
         sprite.stopStationAnimation();
+      }
+      if (!shouldUseUtilitySprite) {
+        sprite.stopUtilityAnimation();
       }
 
       const isActiveTile = activeEffectKey !== undefined && index === activePosition;
@@ -485,8 +500,21 @@ export class BoardScene extends Phaser.Scene {
           sprite.showIdleStationAnimation();
         }
       }
+
+      if (shouldUseUtilitySprite) {
+        const isActiveUtilityTile = activeUtilityEffectKey !== undefined && index === activePosition;
+
+        if (isActiveUtilityTile) {
+          if (activeUtilityEffectKey !== this.lastUtilityEffectKey) {
+            sprite.triggerUtilityActivation(true);
+          }
+        } else {
+          sprite.showIdleUtilityAnimation();
+        }
+      }
     });
 
     this.lastLandEffectKey = activeEffectKey;
+    this.lastUtilityEffectKey = activeUtilityEffectKey;
   }
 }

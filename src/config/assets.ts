@@ -103,6 +103,16 @@ export const BOARD_TILE_EFFECTS = {
     rows: 1,
     durationMs: 1100,
   },
+  utilityActivate: {
+    path: '/assets/board/tiles/utility/smart-utility-hub-activation-sequence-12f-12c-1r-1625x217.png',
+    phaserKey: 'utility_activate',
+    sheetWidth: 1625,
+    sheetHeight: 217,
+    frameCount: 12,
+    columns: 12,
+    rows: 1,
+    durationMs: 1080,
+  },
 } as const
 
 /** SVG icon sprite sheet path. Consumed by PreloaderScene.ts. */
