@@ -1,12 +1,13 @@
-import React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { TileType } from '../../game-engine/types/game';
-import type { BoardTile, Player } from '../../game-engine/types/game';
-import { BOARD_TILE_EFFECTS } from '../../config/assets';
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { PropertyKind, TileType } from "../../game-engine/types/game";
+import type { BoardTile, Player, Property } from "../../game-engine/types/game";
+import { BOARD_TILE_EFFECTS } from "../../config/assets";
 
-export const BoardStatusLeftPanel: React.FC<{ currentTile?: BoardTile; players: Player[] }> = ({
-  currentTile,
-}) => {
+export const BoardStatusLeftPanel: React.FC<{
+  currentTile?: BoardTile;
+  players: Player[];
+}> = ({ currentTile }) => {
   if (!currentTile) return null;
 
   return (
@@ -26,8 +27,12 @@ export const BoardStatusLeftPanel: React.FC<{ currentTile?: BoardTile; players: 
   );
 };
 
-const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({ currentTile }) => {
+const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({
+  currentTile,
+}) => {
   const startGate = BOARD_TILE_EFFECTS.startGateActivate;
+  const landGarden = BOARD_TILE_EFFECTS.landGardenActivate;
+  const station = BOARD_TILE_EFFECTS.stationActivate;
 
   if (currentTile.type === TileType.START) {
     return (
@@ -38,12 +43,66 @@ const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({ currentTile })
             className="board-status-start-sprite absolute left-1/2 top-1/2"
             style={
               {
-                '--sprite-frame-width': `${startGate.frameWidth}px`,
-                '--sprite-frame-height': `${startGate.frameHeight}px`,
-                '--sprite-columns': `${startGate.columns}`,
-                '--sprite-rows': `${startGate.rows}`,
-                '--sprite-frame-count': `${startGate.frameCount}`,
-                '--sprite-sheet-url': `url(${startGate.path})`,
+                "--sprite-frame-width": `${startGate.frameWidth}px`,
+                "--sprite-frame-height": `${startGate.frameHeight}px`,
+                "--sprite-columns": `${startGate.columns}`,
+                "--sprite-rows": `${startGate.rows}`,
+                "--sprite-frame-count": `${startGate.frameCount}`,
+                "--sprite-sheet-url": `url(${startGate.path})`,
+              } as React.CSSProperties
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    currentTile.type === TileType.PROPERTY &&
+    (currentTile as Property).kind === PropertyKind.LAND
+  ) {
+    return (
+      <div className="relative w-full">
+        <div className="absolute inset-x-10 bottom-3 h-5 rounded-full bg-emerald-300/25 blur-md" />
+        <div className="relative mx-auto h-[176px] w-[176px] md:h-[208px] md:w-[208px]">
+          <div
+            className="board-status-land-sprite absolute left-1/2 top-1/2"
+            style={
+              {
+                "--sprite-columns": `${landGarden.columns}`,
+                "--sprite-rows": `${landGarden.rows}`,
+                "--sprite-frame-count": `${landGarden.frameCount}`,
+                "--sprite-sheet-width": `${landGarden.sheetWidth}px`,
+                "--sprite-sheet-height": `${landGarden.sheetHeight}px`,
+                "--sprite-frame-inset-x": "0px",
+                "--sprite-sheet-url": `url(${landGarden.path})`,
+              } as React.CSSProperties
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    currentTile.type === TileType.PROPERTY &&
+    (currentTile as Property).kind === PropertyKind.STATION
+  ) {
+    return (
+      <div className="relative w-full">
+        <div className="absolute inset-x-8 bottom-3 h-5 rounded-full bg-sky-300/20 blur-md" />
+        <div className="relative mx-auto h-[176px] w-[176px] md:h-[208px] md:w-[208px]">
+          <div
+            className="board-status-station-sprite absolute left-1/2 top-1/2"
+            style={
+              {
+                "--sprite-columns": `${station.columns}`,
+                "--sprite-rows": `${station.rows}`,
+                "--sprite-frame-count": `${station.frameCount}`,
+                "--sprite-sheet-width": `${station.sheetWidth}px`,
+                "--sprite-sheet-height": `${station.sheetHeight}px`,
+                "--sprite-frame-inset-x": "1px",
+                "--sprite-sheet-url": `url(${station.path})`,
               } as React.CSSProperties
             }
           />
@@ -70,7 +129,9 @@ const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({ currentTile })
   return (
     <div className="relative w-full">
       <div className="mx-auto flex h-[168px] w-[168px] items-center justify-center md:h-[196px] md:w-[196px]">
-        <span className="text-7xl drop-shadow-[0_10px_24px_rgba(15,23,42,0.24)] md:text-8xl">{getTileEmoji(currentTile)}</span>
+        <span className="text-7xl drop-shadow-[0_10px_24px_rgba(15,23,42,0.24)] md:text-8xl">
+          {getTileEmoji(currentTile)}
+        </span>
       </div>
     </div>
   );
@@ -79,21 +140,21 @@ const TileEffectSprite: React.FC<{ currentTile: BoardTile }> = ({ currentTile })
 const getTileEmoji = (tile: BoardTile) => {
   switch (tile.type) {
     case TileType.PROPERTY:
-      return '🏙️';
+      return "🏙️";
     case TileType.CHANCE:
-      return '🎴';
+      return "🎴";
     case TileType.FORTUNE:
-      return '✨';
+      return "✨";
     case TileType.TAX:
-      return '💸';
+      return "💸";
     case TileType.JAIL:
-      return '🚔';
+      return "🚔";
     case TileType.GO_TO_JAIL:
-      return '⛓️';
+      return "⛓️";
     case TileType.REST:
-      return '🌿';
+      return "🌿";
     case TileType.START:
     default:
-      return '🚩';
+      return "🚩";
   }
 };

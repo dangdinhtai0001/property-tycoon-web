@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
-import { Phase } from '../../game-engine/types/game';
-import type { GameState, Player } from '../../game-engine/types/game';
+import { Phase, PropertyKind, TileType } from '../../game-engine/types/game';
+import type { GameState, Player, Property } from '../../game-engine/types/game';
 import { DiceSprite } from '../sprites/DiceSprite';
 import { DicePool } from '../pools/DicePool';
 import { useUIStore } from '../../app/store/useUIStore';
@@ -25,6 +25,7 @@ export class BoardScene extends Phaser.Scene {
   private boardSurface!: Phaser.GameObjects.Rectangle;
   private lastPlayersState: Map<string, { cash: number }> = new Map();
   private lastGlobalPurchaseId: string | undefined = undefined;
+  private lastLandEffectKey?: string;
   private dicePool!: DicePool;
 
   // --- Dynamic Geometry Configuration ---
@@ -217,6 +218,8 @@ export class BoardScene extends Phaser.Scene {
         }
       }
     });
+
+    this.updateLandTileEffect(state);
 
     // Update tokens with smooth movement and stacking
     const playersByPosition: Record<number, Player[]> = {};
@@ -422,5 +425,68 @@ export class BoardScene extends Phaser.Scene {
     const delay = activationStep * durationPerTile;
     startTile.triggerStartGateActivation(delay);
     this.tilesContainer.bringToTop(startTile);
+  }
+
+  private updateLandTileEffect(state: GameState) {
+    const currentPlayer = state.players.find((player) => player.id === state.currentPlayerId);
+    const activePosition = currentPlayer ? currentPlayer.position : undefined;
+    const currentTile = activePosition !== undefined ? state.board[activePosition] : undefined;
+    const activeEffectKey =
+      currentPlayer &&
+      currentTile?.type === TileType.PROPERTY &&
+      (currentTile as Property).kind === PropertyKind.LAND &&
+      !(currentTile as Property).ownerId &&
+      state.phase === Phase.BUY_DECISION
+        ? `${state.currentPlayerId}:${currentTile.id}:${state.phase}`
+        : undefined;
+
+    state.board.forEach((tile, index) => {
+      const sprite = this.tiles[index];
+      if (!sprite || tile.type !== TileType.PROPERTY) return;
+
+      const property = tile as Property;
+      const shouldUseLandSprite =
+        property.kind === PropertyKind.LAND &&
+        property.buildingLevel === 0 &&
+        !property.isMortgaged;
+      const shouldUseStationSprite =
+        property.kind === PropertyKind.STATION &&
+        !property.isMortgaged;
+
+      if (!shouldUseLandSprite) {
+        sprite.stopLandActivation();
+      }
+      if (!shouldUseStationSprite) {
+        sprite.stopStationAnimation();
+      }
+
+      const isActiveTile = activeEffectKey !== undefined && index === activePosition;
+      if (shouldUseLandSprite) {
+        if (isActiveTile) {
+          if (activeEffectKey !== this.lastLandEffectKey) {
+            sprite.triggerLandActivation(true);
+          }
+        } else {
+          sprite.showIdleLandAnimation();
+        }
+      }
+
+      if (shouldUseStationSprite) {
+        const isActiveStationTile =
+          currentPlayer &&
+          index === activePosition &&
+          state.phase === Phase.BUY_DECISION &&
+          property.kind === PropertyKind.STATION &&
+          !property.ownerId;
+
+        if (isActiveStationTile) {
+          sprite.triggerStationActivation(true);
+        } else {
+          sprite.showIdleStationAnimation();
+        }
+      }
+    });
+
+    this.lastLandEffectKey = activeEffectKey;
   }
 }

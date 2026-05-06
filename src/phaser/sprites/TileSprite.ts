@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
-import { TileType, PropertyGroup } from '../../game-engine/types/game';
+import { TileType, PropertyGroup, PropertyKind } from '../../game-engine/types/game';
 import type { BoardTile, Property, Player } from '../../game-engine/types/game';
 import { THEME, getTileIcon, getCornerHint } from '../../ui/theme/tokens';
 import { type BoardTileLayout } from '../../game-engine/utils/boardGeometry';
 import { StartGateAnimation, createStartGateAnimation } from './StartGateAnimation';
+import { LandTileActivationAnimation } from './LandTileActivationAnimation';
+import { StationTileAnimation } from './StationTileAnimation';
 
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
@@ -20,6 +22,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private mortgageOverlay?: Phaser.GameObjects.Rectangle;
   private jailedBadge?: Phaser.GameObjects.Container;
   private startGateAnimation?: StartGateAnimation;
+  private landActivationAnimation?: LandTileActivationAnimation;
+  private stationAnimation?: StationTileAnimation;
 
   constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile, layout: BoardTileLayout) {
     super(scene, x, y);
@@ -166,6 +170,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
   ) {
     const stripH = THEME.spacing.stripHeight;
     const stripColor = this.getStripColor(property);
+    const isLandProperty = property?.kind === PropertyKind.LAND;
+    const isStationProperty = property?.kind === PropertyKind.STATION;
 
     if (stripColor !== null) {
       const sy = isTop ? height / 2 - stripH / 2 : -height / 2 + stripH / 2;
@@ -174,9 +180,15 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }
 
     const innerY = isTop ? -10 : 10;
-    const icon = getTileIcon(tile.type, property?.groupId);
-    this.iconText = scene.add.text(0, innerY - 45, icon, { fontSize: '44px' }).setOrigin(0.5);
-    this.add(this.iconText);
+    if (isLandProperty) {
+      this.renderLandActivationOverlay(scene, width, height, 0, innerY - 28);
+    } else if (isStationProperty) {
+      this.renderStationOverlay(scene, width, height, 0, innerY - 26);
+    } else {
+      const icon = getTileIcon(tile.type, property?.groupId);
+      this.iconText = scene.add.text(0, innerY - 45, icon, { fontSize: '44px' }).setOrigin(0.5);
+      this.add(this.iconText);
+    }
 
     const displayName = tile.shortName || tile.name;
     this.nameText = scene.add.text(0, innerY, displayName, {
@@ -185,8 +197,11 @@ export class TileSprite extends Phaser.GameObjects.Container {
       fontStyle: 'bold',
       fontFamily: THEME.typography.fontFamily,
       align: 'center',
-      wordWrap: { width: width - 10 }
+      wordWrap: { width: width - 12 }
     }).setOrigin(0.5);
+    if (isLandProperty || isStationProperty) {
+      this.nameText.setY(innerY + 20);
+    }
     this.add(this.nameText);
 
     let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
@@ -196,6 +211,9 @@ export class TileSprite extends Phaser.GameObjects.Container {
       fontStyle: 'bold',
       fontFamily: THEME.typography.fontFamily
     }).setOrigin(0.5);
+    if (isLandProperty || isStationProperty) {
+      this.priceText.setY(innerY + 54);
+    }
     this.add(this.priceText);
 
 
@@ -211,6 +229,8 @@ export class TileSprite extends Phaser.GameObjects.Container {
   ) {
     const stripW = THEME.spacing.stripHeight;
     const stripColor = this.getStripColor(property);
+    const isLandProperty = property?.kind === PropertyKind.LAND;
+    const isStationProperty = property?.kind === PropertyKind.STATION;
 
     if (stripColor !== null) {
       const sx = isLeft ? width / 2 - stripW / 2 : -width / 2 + stripW / 2;
@@ -219,9 +239,15 @@ export class TileSprite extends Phaser.GameObjects.Container {
     }
 
     const contentX = isLeft ? -10 : 10;
-    const icon = getTileIcon(tile.type, property?.groupId);
-    this.iconText = scene.add.text(contentX - 45, 0, icon, { fontSize: '44px' }).setOrigin(0.5);
-    this.add(this.iconText);
+    if (isLandProperty) {
+      this.renderLandActivationOverlay(scene, width, height, contentX - 42, 0);
+    } else if (isStationProperty) {
+      this.renderStationOverlay(scene, width, height, contentX - 42, 0);
+    } else {
+      const icon = getTileIcon(tile.type, property?.groupId);
+      this.iconText = scene.add.text(contentX - 45, 0, icon, { fontSize: '44px' }).setOrigin(0.5);
+      this.add(this.iconText);
+    }
 
     const displayName = tile.shortName || tile.name;
     this.nameText = scene.add.text(contentX - 15, -15, displayName, {
@@ -230,8 +256,11 @@ export class TileSprite extends Phaser.GameObjects.Container {
       fontStyle: 'bold',
       fontFamily: THEME.typography.fontFamily,
       align: 'left',
-      wordWrap: { width: width - 75 }
+      wordWrap: { width: width - 84 }
     }).setOrigin(0, 0.5);
+    if (isLandProperty || isStationProperty) {
+      this.nameText.setX(contentX - 6);
+    }
     this.add(this.nameText);
 
     let priceStr = property ? `$${property.price}` : (tile.type === TileType.TAX ? (tile.name.includes('xa xỉ') ? '$150' : '$200') : '');
@@ -241,9 +270,24 @@ export class TileSprite extends Phaser.GameObjects.Container {
       fontStyle: 'bold',
       fontFamily: THEME.typography.fontFamily
     }).setOrigin(0, 0.5);
+    if (isLandProperty || isStationProperty) {
+      this.priceText.setX(contentX - 6);
+    }
     this.add(this.priceText);
 
 
+  }
+
+  private renderLandActivationOverlay(scene: Phaser.Scene, width: number, height: number, x: number, y: number) {
+    this.landActivationAnimation = new LandTileActivationAnimation(scene, width, height);
+    this.landActivationAnimation.setPosition(x, y);
+    this.add(this.landActivationAnimation);
+  }
+
+  private renderStationOverlay(scene: Phaser.Scene, width: number, height: number, x: number, y: number) {
+    this.stationAnimation = new StationTileAnimation(scene, width, height);
+    this.stationAnimation.setPosition(x, y);
+    this.add(this.stationAnimation);
   }
 
   private getStripColor(property: Property | null): number | null {
@@ -470,6 +514,30 @@ export class TileSprite extends Phaser.GameObjects.Container {
 
   public triggerStartGateActivation(delay: number = 0) {
     this.startGateAnimation?.playActivation(delay);
+  }
+
+  public triggerLandActivation(loopAfter = true) {
+    this.landActivationAnimation?.activate(loopAfter);
+  }
+
+  public showIdleLandAnimation() {
+    this.landActivationAnimation?.showIdle();
+  }
+
+  public stopLandActivation() {
+    this.landActivationAnimation?.deactivate();
+  }
+
+  public triggerStationActivation(loopAfter = true) {
+    this.stationAnimation?.activate(loopAfter);
+  }
+
+  public showIdleStationAnimation() {
+    this.stationAnimation?.showIdle();
+  }
+
+  public stopStationAnimation() {
+    this.stationAnimation?.deactivate();
   }
 }
 

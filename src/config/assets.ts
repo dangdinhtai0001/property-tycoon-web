@@ -83,6 +83,26 @@ export const BOARD_TILE_EFFECTS = {
     rows: 2,
     animationKey: 'startGateActivate',
   },
+  landGardenActivate: {
+    path: '/assets/board/tiles/land/gentle-garden-animation-cycle-12f-12c-1r-2000x227.png',
+    phaserKey: 'land_garden_activate',
+    sheetWidth: 2000,
+    sheetHeight: 227,
+    frameCount: 12,
+    columns: 12,
+    rows: 1,
+    durationMs: 1020,
+  },
+  stationActivate: {
+    path: '/assets/board/tiles/station/isometric-animated-train-station-sprites-12f-12c-1r-2000x247.png',
+    phaserKey: 'station_activate',
+    sheetWidth: 2000,
+    sheetHeight: 247,
+    frameCount: 12,
+    columns: 12,
+    rows: 1,
+    durationMs: 1100,
+  },
 } as const
 
 /** SVG icon sprite sheet path. Consumed by PreloaderScene.ts. */
