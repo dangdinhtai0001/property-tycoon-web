@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import {
   preloadTokenSpriteAssets,
 } from '../sprites/TokenSprite';
+import { preloadStartGateAnimationAssets } from '../sprites/StartGateAnimation';
 
 export class PreloaderScene extends Phaser.Scene {
   private progressBar?: Phaser.GameObjects.Graphics;
@@ -20,6 +21,7 @@ export class PreloaderScene extends Phaser.Scene {
   preload() {
     // Load assets
     preloadTokenSpriteAssets(this);
+    preloadStartGateAnimationAssets(this);
     this.load.svg('home', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/home.svg');
     this.load.svg('landmark', 'https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/landmark.svg');
     this.load.image('board-bg', '/assets/bg/bg-02.png');

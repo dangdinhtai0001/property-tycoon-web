@@ -12,6 +12,8 @@ import {
 } from '../../game-engine/utils/boardGeometry';
 
 export class BoardScene extends Phaser.Scene {
+  private static readonly START_TILE_POSITION = 0;
+  private static readonly START_TILE_STEP_DURATION = 300;
   private tiles: TileSprite[] = [];
   private tokens: Map<string, TokenSprite> = new Map();
   private playerPositions: Map<string, number> = new Map();
@@ -309,6 +311,7 @@ export class BoardScene extends Phaser.Scene {
         // Xử lý di chuyển
         if (lastPos !== undefined && lastPos !== player.position) {
           const path: { x: number, y: number }[] = [];
+          const pathPositions: number[] = [];
           let current = lastPos;
           const totalTiles = getBoardTileCount(BoardScene.GEOMETRY);
           const forwardDist = (player.position - lastPos + totalTiles) % totalTiles;
@@ -322,9 +325,11 @@ export class BoardScene extends Phaser.Scene {
             const ox = (current === player.position) ? stackOffsetX : 0;
             const oy = (current === player.position) ? stackOffsetY : 0;
             path.push({ x: p.x + ox, y: p.y + oy });
+            pathPositions.push(current);
             if (path.length > totalTiles) break;
           }
           token.moveAlongPath(path);
+          this.triggerStartTileAnimation(pathPositions, BoardScene.START_TILE_STEP_DURATION);
           if (isCurrentPlayerToken) {
             const moveDuration = path.length * 300;
             setTokenAnimState('run');
@@ -403,5 +408,19 @@ export class BoardScene extends Phaser.Scene {
       this.cameras.main.pan(this.cameras.main.width / 2, this.cameras.main.height / 2, 1000, 'Power2');
       this.cameras.main.zoomTo(1, 1000, 'Power2');
     });
+  }
+
+  private triggerStartTileAnimation(pathPositions: number[], durationPerTile: number) {
+    if (pathPositions.length === 0) return;
+
+    const startTile = this.tiles[BoardScene.START_TILE_POSITION];
+    if (!startTile) return;
+
+    const activationStep = pathPositions.indexOf(BoardScene.START_TILE_POSITION);
+    if (activationStep === -1) return;
+
+    const delay = activationStep * durationPerTile;
+    startTile.triggerStartGateActivation(delay);
+    this.tilesContainer.bringToTop(startTile);
   }
 }

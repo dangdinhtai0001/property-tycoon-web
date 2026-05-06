@@ -71,6 +71,20 @@ export const TILE_CARD_BACKS = {
   fortune: '/assets/tiles/fortune_back.png',
 } as const
 
+/** Board tile effect sprite sheets. Consumed by Phaser tile animation helpers. */
+export const BOARD_TILE_EFFECTS = {
+  startGateActivate: {
+    path: '/assets/board/tiles/start/start-gate-activate-12f-6c-2r-2000x667.png',
+    phaserKey: 'start_gate_activate',
+    frameWidth: 333,
+    frameHeight: 333,
+    frameCount: 12,
+    columns: 6,
+    rows: 2,
+    animationKey: 'startGateActivate',
+  },
+} as const
+
 /** SVG icon sprite sheet path. Consumed by PreloaderScene.ts. */
 export const ICON_SVG_PATH = '/icons.svg' as const
 

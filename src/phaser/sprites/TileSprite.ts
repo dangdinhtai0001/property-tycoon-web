@@ -3,6 +3,7 @@ import { TileType, PropertyGroup } from '../../game-engine/types/game';
 import type { BoardTile, Property, Player } from '../../game-engine/types/game';
 import { THEME, getTileIcon, getCornerHint } from '../../ui/theme/tokens';
 import { type BoardTileLayout } from '../../game-engine/utils/boardGeometry';
+import { StartGateAnimation, createStartGateAnimation } from './StartGateAnimation';
 
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;
@@ -18,6 +19,7 @@ export class TileSprite extends Phaser.GameObjects.Container {
   private buildingMarkers: Phaser.GameObjects.Text[] = [];
   private mortgageOverlay?: Phaser.GameObjects.Rectangle;
   private jailedBadge?: Phaser.GameObjects.Container;
+  private startGateAnimation?: StartGateAnimation;
 
   constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number, tile: BoardTile, layout: BoardTileLayout) {
     super(scene, x, y);
@@ -96,6 +98,11 @@ export class TileSprite extends Phaser.GameObjects.Container {
     const accent = scene.add.rectangle(ax, ay, aw, ah, style.accent);
     this.add(accent);
 
+    if (tile.type === TileType.START && scene.textures.exists('start_gate_activate')) {
+      this.renderStartCornerLayout(scene, width, height, tile, style.text);
+      return;
+    }
+
     // 3. Icon
     const icon = getTileIcon(tile.type);
     this.iconText = scene.add.text(0, -25, icon, { fontSize: '72px' }).setOrigin(0.5);
@@ -122,6 +129,31 @@ export class TileSprite extends Phaser.GameObjects.Container {
       fontFamily: THEME.typography.fontFamily
     }).setOrigin(0.5).setAlpha(0.7);
     this.add(hintText);
+  }
+
+  private renderStartCornerLayout(
+    scene: Phaser.Scene,
+    width: number,
+    height: number,
+    tile: BoardTile,
+    textColor: string
+  ) {
+    createStartGateAnimation(scene);
+
+    this.startGateAnimation = new StartGateAnimation(scene, width, height);
+    this.startGateAnimation.setPosition(0, -4);
+    this.add(this.startGateAnimation);
+
+    const displayName = tile.shortName || tile.name;
+    this.nameText = scene.add.text(0, 58, displayName.toUpperCase(), {
+      fontSize: '14px',
+      color: textColor,
+      fontStyle: '900',
+      fontFamily: THEME.typography.fontFamily,
+      align: 'center',
+      wordWrap: { width: width - 26 }
+    }).setOrigin(0.5);
+    this.add(this.nameText);
   }
 
   private renderVerticalLayout(
@@ -434,6 +466,10 @@ export class TileSprite extends Phaser.GameObjects.Container {
     } else {
       this.highlight?.setVisible(false);
     }
+  }
+
+  public triggerStartGateActivation(delay: number = 0) {
+    this.startGateAnimation?.playActivation(delay);
   }
 }
 
