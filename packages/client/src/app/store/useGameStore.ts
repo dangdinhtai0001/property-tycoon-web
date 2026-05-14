@@ -18,6 +18,8 @@ interface GameStore {
   setActiveSlot: (slotId: string) => void
   setMode: (mode: 'offline' | 'online') => void
   setNetworkManager: (nm: NetworkManager | null) => void
+  setRoomId: (roomId: string | null) => void
+  setPlayerId: (playerId: string | null) => void
   setFullState: (state: GameState) => void
 }
 
@@ -52,6 +54,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setNetworkManager: (nm) => set({ networkManager: nm, isConnected: true }),
+
+  setRoomId: (roomId) => set({ roomId }),
+
+  setPlayerId: (playerId) => set({ playerId }),
 
   setFullState: (newState) => {
     const prev = get().state

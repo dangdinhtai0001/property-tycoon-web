@@ -20,6 +20,8 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
 
   const setMode = useGameStore((s) => s.setMode);
   const setNetworkManager = useGameStore((s) => s.setNetworkManager);
+  const setRoomId_store = useGameStore((s) => s.setRoomId);
+  const setPlayerId = useGameStore((s) => s.setPlayerId);
   const setFullState = useGameStore((s) => s.setFullState);
   const serverUrl = 'http://localhost:3000';
 
@@ -77,6 +79,8 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
       setNm(manager);
       setMode('online');
       setNetworkManager(manager);
+      setRoomId_store(rid);
+      setPlayerId(result.playerId);
       setStatus('');
     } catch (err: any) { setStatus(`Error: ${err.message}`); }
   }
@@ -95,6 +99,8 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
       setNm(manager);
       setMode('online');
       setNetworkManager(manager);
+      setRoomId_store(roomId.trim().toUpperCase());
+      setPlayerId(result.playerId);
       setStatus('');
     } catch (err: any) { setStatus(`Error: ${err.message}`); }
   }
