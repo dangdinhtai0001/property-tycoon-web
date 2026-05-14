@@ -46,6 +46,10 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
       console.log('[Lobby] gameStarted');
       setFullState(initialState);
     };
+    manager.onAssignedPlayerId = (gamePlayerId) => {
+      console.log('[Lobby] assignedPlayerId:', gamePlayerId);
+      setPlayerId(gamePlayerId);
+    };
     manager.onError = (msg) => {
       console.log('[Lobby] error:', msg);
       setStatus(msg);

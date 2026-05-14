@@ -13,6 +13,7 @@ export class NetworkManager {
   onPlayerLeft: ((playerId: string) => void) | null = null;
   onPlayerList: ((players: PlayerInfo[]) => void) | null = null;
   onGameStarted: ((initialState: GameState) => void) | null = null;
+  onAssignedPlayerId: ((playerId: string) => void) | null = null;
   onGameOver: ((winnerId: string) => void) | null = null;
   onError: ((message: string) => void) | null = null;
   onDisconnect: ((reason: string) => void) | null = null;
@@ -52,6 +53,7 @@ export class NetworkManager {
     this.socket.on('playerLeft', (data: { socketId: string }) => this.onPlayerLeft?.(data.socketId));
     this.socket.on('playerList', (data: { players: PlayerInfo[] }) => this.onPlayerList?.(data.players));
     this.socket.on('gameStarted', (data: { initialState: GameState }) => this.onGameStarted?.(data.initialState));
+    this.socket.on('assignedPlayerId', (data: { playerId: string }) => this.onAssignedPlayerId?.(data.playerId));
     this.socket.on('gameOver', (data: { winnerId: string }) => this.onGameOver?.(data.winnerId));
     this.socket.on('actionError', (data: { message: string }) => this.onError?.(data.message));
     this.socket.on('disconnect', (reason: string) => this.onDisconnect?.(reason));
