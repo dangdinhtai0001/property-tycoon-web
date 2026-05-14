@@ -50,7 +50,6 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
       const room = manager.getRoom(roomId);
       if (!controller || !room) { socket.emit('error', { message: 'Room not found' }); return; }
       if (room.hostSocketId !== socket.id) { socket.emit('error', { message: 'Only the host can start the game' }); return; }
-      if (room.players.size < 2) { socket.emit('error', { message: 'Need at least 2 players to start' }); return; }
 
       const state = controller.getState();
       const result = controller.applyAction({

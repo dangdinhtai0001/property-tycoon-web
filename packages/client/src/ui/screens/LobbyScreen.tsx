@@ -99,8 +99,6 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
 
   // --- RENDER: Room Lobby (after create/join) ---
   if (inLobby) {
-    const canStart = isHost && players.length >= 2;
-
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white gap-6 p-8">
         <button onClick={handleLeave} className="absolute top-4 left-4 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">← Leave</button>
@@ -145,14 +143,9 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
         {isHost ? (
           <button
             onClick={handleStartGame}
-            disabled={!canStart}
-            className={`px-8 py-4 rounded-2xl text-xl font-black transition-all ${
-              canStart
-                ? 'bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/30'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}
+            className="px-8 py-4 rounded-2xl text-xl font-black bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/30 transition-all"
           >
-            {canStart ? '🚀 BẮT ĐẦU VÁN' : `Cần ít nhất 2 người chơi (hiện có ${players.length})`}
+            🚀 BẮT ĐẦU VÁN
           </button>
         ) : (
           <div className="text-center">
