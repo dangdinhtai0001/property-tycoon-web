@@ -85,7 +85,7 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
         manager.setRoomStatus(roomId, 'playing');
         io.to(roomId).emit('gameStarted', { initialState: result.state });
         io.to(roomId).emit('gameStateUpdate', { state: result.state });
-        log(roomId, `Game started, phase=${result.state.phase}`);
+        log(roomId, `Game started, ${result.state.players.length} players, phase=${result.state.phase}`);
       } else {
         log(roomId, `Start failed: ${result.error}`);
         socket.emit('error', { message: result.error || 'Failed to start game' });
