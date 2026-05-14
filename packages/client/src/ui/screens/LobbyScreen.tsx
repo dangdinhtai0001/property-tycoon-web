@@ -23,15 +23,33 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
 
   // Wire up NetworkManager callbacks
   const setupCallbacks = useCallback((manager: NetworkManager) => {
-    manager.onPlayerList = (plist) => setPlayers(plist);
-    manager.onPlayerJoined = () => {}; // handled by playerList broadcast
-    manager.onPlayerLeft = () => {};   // handled by playerList broadcast
-    manager.onGameStarted = (initialState) => {
-      setFullState(initialState);
-      // GameScreen will render automatically via App.tsx phase check
+    manager.onPlayerList = (plist) => {
+      console.log('[Lobby] playerList received:', plist);
+      setPlayers(plist);
     };
-    manager.onError = (msg) => setStatus(msg);
-    manager.onDisconnect = () => setStatus('Disconnected from server');
+    manager.onPlayerJoined = (player) => {
+      console.log('[Lobby] playerJoined:', player);
+      setPlayers(prev => {
+        const exists = prev.some(p => p.socketId === player.socketId);
+        return exists ? prev : [...prev, player];
+      });
+    };
+    manager.onPlayerLeft = (socketId) => {
+      console.log('[Lobby] playerLeft:', socketId);
+      setPlayers(prev => prev.filter(p => p.socketId !== socketId));
+    };
+    manager.onGameStarted = (initialState) => {
+      console.log('[Lobby] gameStarted');
+      setFullState(initialState);
+    };
+    manager.onError = (msg) => {
+      console.log('[Lobby] error:', msg);
+      setStatus(msg);
+    };
+    manager.onDisconnect = () => {
+      console.log('[Lobby] disconnected');
+      setStatus('Disconnected from server');
+    };
   }, [setFullState]);
 
   // Cleanup on unmount
