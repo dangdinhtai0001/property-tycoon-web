@@ -1,4 +1,4 @@
-import { type GameState, type Property, TileType, PropertyKind } from '../types/game';
+import { type GameState, type Property, TileType, PropertyKind } from '@property-tycoon/shared';
 import { BUILDING_LIMITS } from '@property-tycoon/shared';
 
 export const getBuildingCost = (state: GameState, property: Property): number => {

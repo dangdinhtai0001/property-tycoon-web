@@ -6,10 +6,7 @@ import type { GameState, Player } from '@property-tycoon/shared';
 import { DiceSprite } from '../sprites/DiceSprite';
 import { DicePool } from '../pools/DicePool';
 import { useUIStore } from '../../app/store/useUIStore';
-import {
-  getBoardTileCount,
-  getBoardTileLayout,
-} from '../../game-engine/utils/boardGeometry';
+import { getBoardTileCount, getBoardTileLayout } from '@property-tycoon/engine';
 
 export class BoardScene extends Phaser.Scene {
   private tiles: TileSprite[] = [];

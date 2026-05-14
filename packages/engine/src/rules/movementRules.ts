@@ -1,4 +1,4 @@
-import { type GameState } from '../types/game';
+import { type GameState } from '@property-tycoon/shared';
 import { GAME_LOG } from '@property-tycoon/shared';
 
 export const calculateNewPosition = (currentPosition: number, steps: number, boardSize: number): { position: number; passedStart: boolean } => {

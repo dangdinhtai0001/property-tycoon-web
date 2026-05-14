@@ -2,6 +2,7 @@ export type PlayerId = string;
 export type PropertyId = string;
 export type TileId = string;
 export type Money = number;
+export type CharacterId = 'ghost' | 'cat' | 'magician' | 'rouge' | 'light knight';
 
 export enum Phase {
   SETUP = 'SETUP',

@@ -1,4 +1,4 @@
-import { type GameState, Phase, type GameConfig } from '../types/game';
+import { type GameState, Phase, type GameConfig } from '@property-tycoon/shared';
 import { BASIC_BOARD } from '../data/boards/basicBoard';
 import { STARTING_CASH, PASS_START_BONUS } from '@property-tycoon/shared';
 import { GAME_LOG } from '@property-tycoon/shared';

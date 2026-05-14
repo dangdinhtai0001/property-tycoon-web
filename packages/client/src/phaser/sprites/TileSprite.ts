@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { TileType, PropertyGroup } from '@property-tycoon/shared';
 import type { BoardTile, Property, Player } from '@property-tycoon/shared';
 import { THEME, getTileIcon, getCornerHint } from '../../ui/theme/tokens';
-import { type BoardTileLayout } from '../../game-engine/utils/boardGeometry';
+import { type BoardTileLayout } from '@property-tycoon/engine';
 
 export class TileSprite extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Rectangle;

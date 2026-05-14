@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { type GameConfig } from '@property-tycoon/shared';
-import { DEFAULT_CONFIG } from '../../game-engine/state/setupGame';
+import { DEFAULT_CONFIG, CHARACTERS } from '@property-tycoon/engine';
 import { Users, Shield, Zap, Trash2, Plus, Info, CheckCircle2, AlertCircle, Landmark, Dices } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CHARACTERS } from '../../game-engine/data/characters';
 import { CharacterSprite } from '../shared/CharacterSprite';
 
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCharacter } from '../../game-engine/data/characters';
+import { getCharacter } from '@property-tycoon/engine';
 import { CHARACTER_SPRITES } from '../../config/assets';
 
 export type AnimState = 'idle' | 'run' | 'win' | 'sad';

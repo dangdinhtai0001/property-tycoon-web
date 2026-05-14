@@ -2,12 +2,10 @@ import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
 import { Phase, TileType, type Property } from '@property-tycoon/shared';
-import { canMortgage, canUnmortgage } from '../../game-engine/rules/financeRules';
-import { canBuild, getBuildingCost } from '../../game-engine/rules/buildingRules';
+import { canMortgage, canUnmortgage, canBuild, getBuildingCost, rollDice } from '@property-tycoon/engine';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, RotateCcw, ArrowRight } from 'lucide-react';
-import { rollDice } from '../../game-engine/rules/diceRules';
 import { BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
 
 export const ActionPanel: React.FC = () => {

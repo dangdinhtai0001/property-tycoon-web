@@ -1,4 +1,4 @@
-import { type BoardTile, TileType, type Property, PropertyGroup, PropertyKind } from '../../types/game';
+import { type BoardTile, TileType, type Property, PropertyGroup, PropertyKind } from '@property-tycoon/shared';
 import { MORTGAGE_RATE } from '@property-tycoon/shared';
 import { TILE_NAMES } from '@property-tycoon/shared';
 

@@ -6,7 +6,6 @@ Core utilities and patterns used throughout the application.
 
 - **`EventBus.ts`** - Typed pub/sub event bus for cross-layer communication
 - **`ObjectPool.ts`** - Generic object pool for reducing GC pressure
-- **`StateMachine.ts`** - Type-safe finite state machine implementation
 
 ## EventBus
 
@@ -48,7 +47,7 @@ Objects must implement `PooledObject` interface with `reset()` and `activate()` 
 Type-safe state machine with transition validation.
 
 ```typescript
-import { StateMachine } from './core/StateMachine'
+import { StateMachine } from '@property-tycoon/shared'
 
 const machine = new StateMachine('idle', {
   idle: ['running', 'paused'],

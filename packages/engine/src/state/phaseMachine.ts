@@ -1,6 +1,6 @@
-import { Phase } from '../types/game'
-import { StateMachine, type Transition } from '../../core/StateMachine'
-import type { GameState } from '../types/game'
+import { Phase } from '@property-tycoon/shared'
+import { StateMachine, type Transition } from '@property-tycoon/shared'
+import type { GameState } from '@property-tycoon/shared'
 
 /**
  * Complete transition table for all 13 game phases.

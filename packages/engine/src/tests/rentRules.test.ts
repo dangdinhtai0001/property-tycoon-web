@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { payRent } from '../rules/rentRules';
-import { type GameState, Phase, TileType, type Property, PropertyGroup, PropertyKind } from '../types/game';
+import { type GameState, Phase, TileType, type Property, PropertyGroup, PropertyKind } from '@property-tycoon/shared';
 
 describe('Rent Rules', () => {
   const mockProperty: Property = {

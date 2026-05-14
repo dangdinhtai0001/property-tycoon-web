@@ -1,4 +1,4 @@
-import { type GameState, type GameAction, Phase, TileType, type Property } from '../types/game';
+import { type GameState, type GameAction, Phase, TileType, type Property } from '@property-tycoon/shared';
 import { createInitialGame } from './setupGame';
 import { rollDice } from '../rules/diceRules';
 import { applyMovement } from '../rules/movementRules';

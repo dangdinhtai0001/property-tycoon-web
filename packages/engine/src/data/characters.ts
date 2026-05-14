@@ -1,4 +1,4 @@
-import type { CharacterId } from '../../config/assets'
+import type { CharacterId } from '@property-tycoon/shared'
 
 /** Minimal character definition — sprite metadata lives in config/assets.ts. */
 export interface CharacterDef {

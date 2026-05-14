@@ -1,4 +1,4 @@
-import { type GameState, type Card, TileType, Phase, type Property, type TemporaryModifier } from '../types/game';
+import { type GameState, type Card, TileType, Phase, type Property, type TemporaryModifier } from '@property-tycoon/shared';
 import { applyMovement } from './movementRules';
 
 export function drawCard(type: TileType.CHANCE | TileType.FORTUNE, state: GameState): { card: Card; nextState: GameState } {

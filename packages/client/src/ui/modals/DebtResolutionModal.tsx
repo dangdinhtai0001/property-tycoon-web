@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { Phase, TileType, type Property } from '@property-tycoon/shared';
-import { canMortgage, canSellBuilding } from '../../game-engine/rules/financeRules';
+import { canMortgage, canSellBuilding } from '@property-tycoon/engine';
 
 export const DebtResolutionModal: React.FC = () => {
   const { state, dispatch } = useGameStore();

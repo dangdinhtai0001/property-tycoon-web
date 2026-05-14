@@ -1,4 +1,4 @@
-import { type GameState, Phase, type Property, type Money, type PlayerId } from '../types/game';
+import { type GameState, Phase, type Property, type Money, type PlayerId } from '@property-tycoon/shared';
 
 export const handleBid = (state: GameState, amount: Money): GameState => {
   if (!state.auctionState) return state;

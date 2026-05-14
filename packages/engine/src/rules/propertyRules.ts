@@ -1,4 +1,4 @@
-import { type GameState, type Property, TileType } from '../types/game';
+import { type GameState, type Property, TileType } from '@property-tycoon/shared';
 import { GAME_LOG } from '@property-tycoon/shared';
 
 export const buyProperty = (state: GameState, propertyId: string): GameState => {

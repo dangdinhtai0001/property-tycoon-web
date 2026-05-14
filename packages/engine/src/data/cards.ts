@@ -1,4 +1,4 @@
-import { type Card, TileType } from '../types/game';
+import { type Card, TileType } from '@property-tycoon/shared';
 
 export const CHANCE_CARDS: Card[] = [
   {

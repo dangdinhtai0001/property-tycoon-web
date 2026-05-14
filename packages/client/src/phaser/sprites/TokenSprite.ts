@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { Player } from '@property-tycoon/shared';
 import { THEME } from '../../ui/theme/tokens';
-import { CHARACTERS, getCharacter } from '../../game-engine/data/characters';
+import { CHARACTERS, getCharacter } from '@property-tycoon/engine';
 import { CHARACTER_SPRITES } from '../../config/assets';
 
 // Tăng / giảm số này nếu nhân vật quá to hoặc quá nhỏ trên bàn cờ

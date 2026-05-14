@@ -1,6 +1,8 @@
 /** All static asset paths and sprite frame metadata. No imports from src/. */
 
-export type CharacterId = 'ghost' | 'cat' | 'magician' | 'rouge' | 'light knight'
+import type { CharacterId } from '@property-tycoon/shared';
+
+export type { CharacterId };
 
 /** Sprite sheet metadata for each selectable character. Consumed by characters.ts, TokenSprite.ts, CharacterSprite.tsx. */
 export const CHARACTER_SPRITES: Record<CharacterId, {

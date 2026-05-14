@@ -1,4 +1,4 @@
-import { type GameState, type Property, TileType, Phase } from '../types/game';
+import { type GameState, type Property, TileType, Phase } from '@property-tycoon/shared';
 import { GAME_LOG, BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
 
 export const canMortgage = (state: GameState, propertyId: string): boolean => {

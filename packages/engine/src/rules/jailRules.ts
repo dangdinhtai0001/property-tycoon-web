@@ -1,4 +1,4 @@
-import { type GameState, Phase } from '../types/game';
+import { type GameState, Phase } from '@property-tycoon/shared';
 import { rollDice, isDouble } from './diceRules';
 import { JAIL_FINE } from '@property-tycoon/shared';
 import { GAME_LOG } from '@property-tycoon/shared';
