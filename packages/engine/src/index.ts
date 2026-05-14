@@ -15,3 +15,7 @@ export * from './data/boards/basicBoard.js';
 export * from './data/cards.js';
 export * from './data/characters.js';
 export * from './utils/boardGeometry.js';
+export { GameController } from './GameController.js';
+export type { ActionResult } from './GameController.js';
+export { diffEvents } from './diffEvents.js';
+export type { GameEvent } from './diffEvents.js';

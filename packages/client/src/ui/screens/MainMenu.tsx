@@ -2,11 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { SetupGameScreen } from './SetupGameScreen';
 import { listSaves, loadGame, deleteSave } from '../../storage/gameStorage';
 import { useGameStore } from '../../app/store/useGameStore';
-import { Play, RotateCcw, Settings, ScrollText, Volume2, HelpCircle, Dices, Landmark, Coins } from 'lucide-react';
+import { Play, RotateCcw, Settings, ScrollText, Volume2, HelpCircle, Dices, Landmark, Coins, Globe } from 'lucide-react';
 import { SaveSlotModal } from '../modals/SaveSlotModal';
 import { motion } from 'framer-motion';
 
-export const MainMenu: React.FC = () => {
+export const MainMenu: React.FC<{ onOnlineMultiplayer?: () => void }> = ({ onOnlineMultiplayer }) => {
   const [showSetup, setShowSetup] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
   const { dispatch } = useGameStore();
@@ -161,6 +161,23 @@ export const MainMenu: React.FC = () => {
               </p>
             )}
           </motion.button>
+
+          {/* Online Multiplayer */}
+          {onOnlineMultiplayer && (
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.4, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onOnlineMultiplayer}
+              className="w-full py-4 bg-purple-600 text-white text-lg font-black rounded-[2rem] shadow-xl flex items-center justify-center gap-3 hover:bg-purple-700 transition-colors"
+            >
+              <Globe size={20} />
+              <span>CHƠI ONLINE</span>
+            </motion.button>
+          )}
+
         </div>
 
         {/* Game Info Footer */}

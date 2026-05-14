@@ -9,6 +9,7 @@ import { GameLogPanel } from './ui/panels/GameLogPanel';
 import { useGameStore } from './app/store/useGameStore';
 import { useUIStore } from './app/store/useUIStore';
 import { MainMenu } from './ui/screens/MainMenu';
+import { LobbyScreen } from './ui/screens/LobbyScreen';
 import { CurrentTilePanel } from './ui/panels/CurrentTilePanel';
 import { Phase } from '@property-tycoon/shared';
 import { DebtResolutionModal } from './ui/modals/DebtResolutionModal';
@@ -35,6 +36,7 @@ function App() {
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isActionExpanded, setIsActionExpanded] = React.useState(true);
   const [isGuideOpen, setIsGuideOpen] = React.useState(false);
+  const [showLobby, setShowLobby] = React.useState(false);
 
   React.useEffect(() => {
     // Initialize animation subscriber once on mount
@@ -47,10 +49,18 @@ function App() {
     };
   }, []); // Empty array ensures this runs only once
 
+  if (showLobby) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+        <LobbyScreen onBack={() => setShowLobby(false)} />
+      </div>
+    );
+  }
+
   if (state.phase === Phase.SETUP) {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
-        <MainMenu />
+        <MainMenu onOnlineMultiplayer={() => setShowLobby(true)} />
       </div>
     );
   }
