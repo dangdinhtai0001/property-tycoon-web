@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { type GameState, type GameAction, Phase } from '../../game-engine/types/game'
+import { type GameState, type GameAction, Phase } from '@property-tycoon/shared'
 import { gameReducer } from '../../game-engine/state/gameReducer'
 import { saveGame } from '../../storage/gameStorage'
 import { eventBus } from '../../core/EventBus'

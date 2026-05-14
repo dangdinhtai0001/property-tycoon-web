@@ -1,5 +1,5 @@
 import { type GameState } from '../types/game';
-import { GAME_LOG } from '../../config/text';
+import { GAME_LOG } from '@property-tycoon/shared';
 
 export const calculateNewPosition = (currentPosition: number, steps: number, boardSize: number): { position: number; passedStart: boolean } => {
   const newPosition = (currentPosition + steps) % boardSize;

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
 import type { TokenAnimState } from '../../app/store/useUIStore';
-import { Phase, TileType } from '../../game-engine/types/game';
-import type { Property, GameState, Player } from '../../game-engine/types/game';
+import { Phase, TileType } from '@property-tycoon/shared';
+import type { Property, GameState, Player } from '@property-tycoon/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dices,

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { Player } from '../../game-engine/types/game';
+import type { Player } from '@property-tycoon/shared';
 import { THEME } from '../../ui/theme/tokens';
 import { CHARACTERS, getCharacter } from '../../game-engine/data/characters';
 import { CHARACTER_SPRITES } from '../../config/assets';

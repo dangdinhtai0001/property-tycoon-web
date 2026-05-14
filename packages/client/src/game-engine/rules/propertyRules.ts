@@ -1,5 +1,5 @@
 import { type GameState, type Property, TileType } from '../types/game';
-import { GAME_LOG } from '../../config/text';
+import { GAME_LOG } from '@property-tycoon/shared';
 
 export const buyProperty = (state: GameState, propertyId: string): GameState => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);

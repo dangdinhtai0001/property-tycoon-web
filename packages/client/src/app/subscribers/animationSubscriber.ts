@@ -1,6 +1,6 @@
 import { eventBus } from '../../core/EventBus'
 import { useAnimationQueue } from '../store/useAnimationQueue'
-import { TileType, type Property, type GameState } from '../../game-engine/types/game'
+import { TileType, type Property, type GameState } from '@property-tycoon/shared'
 
 /**
  * Subscribes to game state changes and enqueues animations based on state diffs.

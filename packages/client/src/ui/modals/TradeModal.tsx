@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { type Property, TileType, Phase } from '../../game-engine/types/game';
+import { type Property, TileType, Phase } from '@property-tycoon/shared';
 import { Handshake, ArrowRightLeft, X, Check } from 'lucide-react';
 
 const GROUP_COLORS: Record<string, string> = {

@@ -1,5 +1,5 @@
 import { type GameState, type Property, TileType, Phase } from '../types/game';
-import { GAME_LOG, BUILDING_LEVEL_NAMES } from '../../config/text';
+import { GAME_LOG, BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
 
 export const canMortgage = (state: GameState, propertyId: string): boolean => {
   const property = state.board.find(t => t.id === propertyId) as Property | undefined;

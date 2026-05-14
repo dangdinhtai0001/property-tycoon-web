@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { TileSprite } from '../sprites/TileSprite';
 import { TokenSprite } from '../sprites/TokenSprite';
-import { Phase } from '../../game-engine/types/game';
-import type { GameState, Player } from '../../game-engine/types/game';
+import { Phase } from '@property-tycoon/shared';
+import type { GameState, Player } from '@property-tycoon/shared';
 import { DiceSprite } from '../sprites/DiceSprite';
 import { DicePool } from '../pools/DicePool';
 import { useUIStore } from '../../app/store/useUIStore';

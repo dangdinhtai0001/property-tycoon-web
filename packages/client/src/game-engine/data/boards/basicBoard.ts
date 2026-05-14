@@ -1,6 +1,6 @@
 import { type BoardTile, TileType, type Property, PropertyGroup, PropertyKind } from '../../types/game';
-import { MORTGAGE_RATE } from '../../../config/gameplay';
-import { TILE_NAMES } from '../../../config/text';
+import { MORTGAGE_RATE } from '@property-tycoon/shared';
+import { TILE_NAMES } from '@property-tycoon/shared';
 
 const tileId = (position: number) => `tile-${position}`;
 

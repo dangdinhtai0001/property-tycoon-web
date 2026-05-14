@@ -1,4 +1,4 @@
-import { type GameState } from '../game-engine/types/game';
+import { type GameState } from '@property-tycoon/shared';
 
 const SAVE_PREFIX = 'property-tycoon-save-';
 const METADATA_KEY = 'property-tycoon-saves-metadata';

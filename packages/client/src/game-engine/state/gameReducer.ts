@@ -10,8 +10,8 @@ import { mortgageProperty, unmortgageProperty, sellBuilding, resolveDebt, declar
 import { handleBid, handlePassBid } from '../rules/auctionRules';
 import { acceptTrade } from '../rules/tradeRules';
 import { drawCard, applyCardEffect } from '../rules/cardRules';
-import { GAME_LOG, BUILDING_LEVEL_NAMES } from '../../config/text';
-import { TAX_LUXURY_AMOUNT, TAX_INCOME_AMOUNT } from '../../config/gameplay';
+import { GAME_LOG, BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
+import { TAX_LUXURY_AMOUNT, TAX_INCOME_AMOUNT } from '@property-tycoon/shared';
 import { phaseMachine } from './phaseMachine';
 
 export function assertGameInvariants(state: GameState): void {

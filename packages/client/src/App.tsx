@@ -10,7 +10,7 @@ import { useGameStore } from './app/store/useGameStore';
 import { useUIStore } from './app/store/useUIStore';
 import { MainMenu } from './ui/screens/MainMenu';
 import { CurrentTilePanel } from './ui/panels/CurrentTilePanel';
-import { Phase } from './game-engine/types/game';
+import { Phase } from '@property-tycoon/shared';
 import { DebtResolutionModal } from './ui/modals/DebtResolutionModal';
 import { AuctionModal } from './ui/modals/AuctionModal';
 import { TradeModal } from './ui/modals/TradeModal';

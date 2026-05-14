@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { type Property } from '../../game-engine/types/game';
+import { type Property } from '@property-tycoon/shared';
 import { Gavel, TrendingUp, User, X } from 'lucide-react';
 
 export const AuctionModal: React.FC = () => {

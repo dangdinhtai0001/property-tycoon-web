@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { Phase, type Property } from '../../game-engine/types/game';
+import { Phase, type Property } from '@property-tycoon/shared';
 import { canBuild } from '../../game-engine/rules/buildingRules';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Landmark, X, ChevronRight, Sparkles, AlertCircle } from 'lucide-react';

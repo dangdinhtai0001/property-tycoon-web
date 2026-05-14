@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { useUIStore } from '../../app/store/useUIStore';
 import { useGameStore } from '../../app/store/useGameStore';
 import { eventBus } from '../../core/EventBus';
-import type { GameState } from '../../game-engine/types/game';
+import type { GameState } from '@property-tycoon/shared';
 
 export class PhaserBridge {
   private static game: Phaser.Game | null = null;

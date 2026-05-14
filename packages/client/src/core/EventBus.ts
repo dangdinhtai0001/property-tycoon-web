@@ -1,4 +1,4 @@
-import type { GameState, Phase } from '../game-engine/types/game'
+import type { GameState, Phase } from '@property-tycoon/shared'
 import type { AnimationEvent } from '../app/store/useAnimationQueue'
 
 /**

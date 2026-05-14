@@ -1,11 +1,11 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
 import { useUIStore } from '../../app/store/useUIStore';
-import { type Property, PropertyKind } from '../../game-engine/types/game';
+import { type Property, PropertyKind } from '@property-tycoon/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Home, Landmark, Info, MapPin } from 'lucide-react';
-import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT } from '../../config/gameplay';
-import { GROUP_THEMES, BUILDING_LEVEL_NAMES } from '../../config/text';
+import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
+import { GROUP_THEMES } from '../../config/text';
 
 export const PropertyInfoModal: React.FC = () => {
   const { state } = useGameStore();

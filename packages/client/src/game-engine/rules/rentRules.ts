@@ -1,6 +1,6 @@
 import { type GameState, type Property, TileType, Phase, PropertyKind } from '../types/game';
-import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, GROUP_RENT_MULTIPLIER } from '../../config/gameplay';
-import { GAME_LOG } from '../../config/text';
+import { STATION_RENT_BY_COUNT, UTILITY_MULTIPLIER_BY_COUNT, GROUP_RENT_MULTIPLIER } from '@property-tycoon/shared';
+import { GAME_LOG } from '@property-tycoon/shared';
 
 export const calculateRent = (state: GameState, property: Property, diceTotal: number = 0): number => {
   const ownerId = property.ownerId;

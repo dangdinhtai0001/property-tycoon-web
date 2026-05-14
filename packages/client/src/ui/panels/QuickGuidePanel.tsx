@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { Phase } from '../../game-engine/types/game';
+import { Phase } from '@property-tycoon/shared';
 import { HelpCircle, Info, AlertTriangle, Lightbulb } from 'lucide-react';
 
 interface QuickGuidePanelProps {

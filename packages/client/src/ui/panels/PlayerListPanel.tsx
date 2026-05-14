@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { TileType, type Property } from '../../game-engine/types/game';
+import { TileType, type Property } from '@property-tycoon/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Building2, Home, Lock } from 'lucide-react';
 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useGameStore } from '../../app/store/useGameStore';
-import { type GameConfig } from '../../game-engine/types/game';
+import { type GameConfig } from '@property-tycoon/shared';
 import { DEFAULT_CONFIG } from '../../game-engine/state/setupGame';
 import { Users, Shield, Zap, Trash2, Plus, Info, CheckCircle2, AlertCircle, Landmark, Dices } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

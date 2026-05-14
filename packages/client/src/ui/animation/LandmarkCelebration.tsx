@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimationQueue } from '../../app/store/useAnimationQueue';
 import { Landmark, Sparkles, Trophy } from 'lucide-react';
-import { BUILDING_LEVEL_NAMES } from '../../config/text';
+import { BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
 import { PhaserBridge } from '../../phaser/bridge/PhaserBridge';
 
 export const LandmarkCelebration: React.FC = () => {

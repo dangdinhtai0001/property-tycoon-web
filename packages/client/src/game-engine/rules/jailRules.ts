@@ -1,7 +1,7 @@
 import { type GameState, Phase } from '../types/game';
 import { rollDice, isDouble } from './diceRules';
-import { JAIL_FINE } from '../../config/gameplay';
-import { GAME_LOG } from '../../config/text';
+import { JAIL_FINE } from '@property-tycoon/shared';
+import { GAME_LOG } from '@property-tycoon/shared';
 
 export const payJailFine = (state: GameState): GameState => {
   const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);

@@ -1,7 +1,7 @@
 import { type GameState, Phase, type GameConfig } from '../types/game';
 import { BASIC_BOARD } from '../data/boards/basicBoard';
-import { STARTING_CASH, PASS_START_BONUS } from '../../config/gameplay';
-import { GAME_LOG } from '../../config/text';
+import { STARTING_CASH, PASS_START_BONUS } from '@property-tycoon/shared';
+import { GAME_LOG } from '@property-tycoon/shared';
 
 import { CHANCE_CARDS, FORTUNE_CARDS } from '../data/cards';
 
