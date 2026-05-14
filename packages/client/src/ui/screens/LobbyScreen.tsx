@@ -55,7 +55,7 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
       const result = await manager.joinRoom(rid, playerName || 'Host', 'ghost');
       setRoomId(rid);
       setPlayers(result.players);
-      setIsHost(result.isHost);
+      setIsHost(true); // room creator is always the host
       setInLobby(true);
       setNm(manager);
       setMode('online');
