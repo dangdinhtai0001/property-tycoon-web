@@ -9,16 +9,30 @@ import { Dices, Home, Ban, Landmark, Coins, CheckCircle, Info, Handshake, Rotate
 import { BUILDING_LEVEL_NAMES } from '@property-tycoon/shared';
 
 export const ActionPanel: React.FC = () => {
-  const { state, dispatch } = useGameStore();
+  const { state, dispatch, mode, playerId } = useGameStore();
   const { setShowTradeModal } = useUIStore();
   const { enqueue, isAnimating, queue } = useAnimationQueue();
   const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId)!;
   const currentTile = state.board[currentPlayer.position];
-  
+
+  const isMyTurn = mode === 'offline' || playerId === state.currentPlayerId;
+
+  // Turn-change notification
+  const [showTurnBanner, setShowTurnBanner] = React.useState(false);
+  const prevIsMyTurn = React.useRef(isMyTurn);
+  React.useEffect(() => {
+    if (!prevIsMyTurn.current && isMyTurn) {
+      setShowTurnBanner(true);
+      const t = setTimeout(() => setShowTurnBanner(false), 2000);
+      return () => clearTimeout(t);
+    }
+    prevIsMyTurn.current = isMyTurn;
+  }, [isMyTurn]);
+
   const [isRolling, setIsRolling] = React.useState(false);
 
-  // Block actions if any animation is playing or in queue
-  const isBlocked = isRolling || isAnimating || queue.length > 0;
+  // Block actions if any animation is playing or in queue, or if not my turn
+  const isBlocked = !isMyTurn || isRolling || isAnimating || queue.length > 0;
 
   const handleRollDice = () => {
     if (isBlocked) return;
@@ -362,6 +376,20 @@ export const ActionPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Turn change banner */}
+      <AnimatePresence>
+        {showTurnBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-2xl text-center font-black text-sm shadow-xl"
+          >
+            🎲 ĐẾN LƯỢT CỦA BẠN!
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Dynamic Header */}
       <div className="flex items-center justify-between px-2">
         <h2 className="text-sm font-black text-slate-400 tracking-widest uppercase italic">Bảng điều khiển</h2>
@@ -387,6 +415,14 @@ export const ActionPanel: React.FC = () => {
       >
         {/* Primary Action Area */}
         <div className="relative">
+          {/* Not-your-turn overlay for online mode */}
+          {!isMyTurn && (
+            <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-3xl flex items-center justify-center">
+              <p className="text-sm font-black text-slate-400 uppercase tracking-widest">
+                ⏳ Đợi lượt {currentPlayer.name}...
+              </p>
+            </div>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={state.phase}
