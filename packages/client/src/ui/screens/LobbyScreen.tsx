@@ -26,6 +26,7 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
   const serverUrl = 'http://localhost:3000';
 
   const setupCallbacks = useCallback((manager: NetworkManager) => {
+    manager.onStateUpdate = (state) => setFullState(state);
     manager.onPlayerList = (plist) => {
       console.log('[Lobby] playerList received:', plist);
       setPlayers(plist);

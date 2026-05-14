@@ -107,8 +107,14 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
 
       // Turn validation: only the current player can act
       const gamePlayerId = room.socketToPlayerId.get(socket.id);
+      if (!gamePlayerId) {
+        log(roomId, `Action blocked: socket ${socket.id} has no game player mapping`);
+        socket.emit('actionError', { message: 'Not associated with a game player' });
+        return;
+      }
       const state = controller.getState();
-      if (gamePlayerId && state.currentPlayerId !== gamePlayerId) {
+      if (state.currentPlayerId !== gamePlayerId) {
+        log(roomId, `Action blocked: ${currentPlayer.playerName} (${gamePlayerId}) not current (${state.currentPlayerId})`);
         socket.emit('actionError', { message: 'Not your turn' });
         return;
       }
