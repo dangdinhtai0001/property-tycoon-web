@@ -157,9 +157,7 @@ export function LobbyScreen({ onBack }: LobbyScreenProps) {
           <div className="flex flex-col gap-2">
             {players.map((p, i) => (
               <div key={p.socketId} className="flex items-center gap-3 bg-gray-800 rounded-xl px-4 py-3">
-                <span className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
-                  {i + 1}
-                </span>
+                <CharacterSprite charId={p.characterId} className="w-8 h-8 rounded-full" />
                 <span className="font-semibold">{p.playerName}</span>
                 {i === 0 && <span className="text-xs text-purple-400 ml-auto">HOST</span>}
               </div>

@@ -179,7 +179,7 @@ export interface GameState {
 }
 
 export type GameAction =
-  | { type: 'START_GAME'; payload: { players: { name: string; color: string }[]; config?: GameConfig } }
+  | { type: 'START_GAME'; payload: { players: { name: string; color: string; avatarUrl?: string }[]; config?: GameConfig } }
   | { type: 'ROLL_DICE'; payload?: { dice?: [number, number] } }
   | { type: 'MOVE_PLAYER'; payload: { steps: number } }
   | { type: 'MOVE_ONE_STEP' }

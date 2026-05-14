@@ -69,10 +69,17 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
       }
 
       log(roomId, `Game starting with ${room.players.size} players`);
-      const state = controller.getState();
+      const roomPlayers = Array.from(room.players.values());
+      const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
       const result = controller.applyAction({
         type: 'START_GAME',
-        payload: { players: state.players.map(p => ({ name: p.name, color: p.color })) },
+        payload: {
+          players: roomPlayers.map((p, i) => ({
+            name: p.playerName,
+            color: colors[i % colors.length],
+            avatarUrl: p.characterId,
+          })),
+        },
       });
       if (result.success) {
         manager.setRoomStatus(roomId, 'playing');
