@@ -49,23 +49,9 @@ function App() {
     };
   }, []); // Empty array ensures this runs only once
 
-  if (showLobby) {
+  // Priority 1: Game is running → show game screen, ignore menu/lobby state
+  if (state.phase !== Phase.SETUP) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-        <LobbyScreen onBack={() => setShowLobby(false)} />
-      </div>
-    );
-  }
-
-  if (state.phase === Phase.SETUP) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
-        <MainMenu onOnlineMultiplayer={() => setShowLobby(true)} />
-      </div>
-    );
-  }
-
-  return (
     <div className="fixed inset-0 overflow-hidden bg-slate-50 flex flex-col font-sans selection:bg-blue-100">
       {/* Ambient Background Image */}
       <div
@@ -233,6 +219,23 @@ function App() {
       <DiceRollAnimation />
       <PurchaseCelebration />
       <ParticleSystem />
+    </div>
+    );
+  }
+
+  // Priority 2: In lobby (SETUP phase)
+  if (showLobby) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+        <LobbyScreen onBack={() => setShowLobby(false)} />
+      </div>
+    );
+  }
+
+  // Priority 3: Main menu (SETUP phase, not in lobby)
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
+      <MainMenu onOnlineMultiplayer={() => setShowLobby(true)} />
     </div>
   );
 }
