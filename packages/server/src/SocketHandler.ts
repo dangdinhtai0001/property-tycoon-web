@@ -18,7 +18,10 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
   io.on('connection', (socket: Socket) => {
     socket.on('createRoom', (payload: Record<string, unknown>) => {
       try {
-        const roomId = manager.createRoom(payload as { playerCount: number; playerNames: string[]; characterIds: string[]; boardId: string });
+        const roomId = manager.createRoom(
+          payload as { playerCount: number; playerNames: string[]; characterIds: string[]; boardId: string },
+          socket.id,
+        );
         socket.emit('roomCreated', { roomId });
       } catch (err: any) {
         socket.emit('error', { message: err.message, code: 'CREATE_FAILED' });
@@ -30,17 +33,36 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
       const result = manager.joinRoom(roomId, socket, { playerName, characterId, slot: 0 });
       if (!result.success) { socket.emit('error', { message: result.error, code: 'JOIN_FAILED' }); return; }
       const room = manager.getRoom(roomId)!;
-      socket.emit('joinedSuccess', { roomId, playerId: socket.id, players: Array.from(room.players.values()) });
+      socket.emit('joinedSuccess', {
+        roomId,
+        playerId: socket.id,
+        players: Array.from(room.players.values()),
+        isHost: room.hostSocketId === socket.id,
+      });
       socket.to(roomId).emit('playerJoined', { playerName, characterId, socketId: socket.id });
-      const controller = manager.getController(roomId)!;
+      // Broadcast updated player list to everyone
+      io.to(roomId).emit('playerList', { players: Array.from(room.players.values()) });
+    });
+
+    socket.on('requestStartGame', (payload: { roomId: string }) => {
+      const { roomId } = payload;
+      const controller = manager.getController(roomId);
+      const room = manager.getRoom(roomId);
+      if (!controller || !room) { socket.emit('error', { message: 'Room not found' }); return; }
+      if (room.hostSocketId !== socket.id) { socket.emit('error', { message: 'Only the host can start the game' }); return; }
+      if (room.players.size < 2) { socket.emit('error', { message: 'Need at least 2 players to start' }); return; }
+
       const state = controller.getState();
-      if (room.players.size >= state.players.length) {
-        const result = controller.applyAction({ type: 'START_GAME', payload: { players: state.players.map(p => ({ name: p.name, color: p.color })) } });
-        if (result.success) {
-          manager.setRoomStatus(roomId, 'playing');
-          io.to(roomId).emit('gameStarted', { initialState: result.state });
-          io.to(roomId).emit('gameStateUpdate', { state: result.state });
-        }
+      const result = controller.applyAction({
+        type: 'START_GAME',
+        payload: { players: state.players.map(p => ({ name: p.name, color: p.color })) },
+      });
+      if (result.success) {
+        manager.setRoomStatus(roomId, 'playing');
+        io.to(roomId).emit('gameStarted', { initialState: result.state });
+        io.to(roomId).emit('gameStateUpdate', { state: result.state });
+      } else {
+        socket.emit('error', { message: result.error || 'Failed to start game' });
       }
     });
 

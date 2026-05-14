@@ -7,14 +7,14 @@ export class RoomManager {
   private rooms = new Map<string, GameRoom>();
   private controllers = new Map<string, GameController>();
 
-  createRoom(config: { playerCount: number; playerNames: string[]; characterIds: string[]; boardId: string }): string {
+  createRoom(config: { playerCount: number; playerNames: string[]; characterIds: string[]; boardId: string }, hostSocketId: string): string {
     const roomId = this.generateRoomId();
     const playerConfigs = config.playerNames.map((name, i) => ({
       name,
       color: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'][i % 6],
     }));
     this.controllers.set(roomId, new GameController(playerConfigs));
-    this.rooms.set(roomId, { id: roomId, players: new Map(), status: 'waiting', createdAt: Date.now(), lastActivityAt: Date.now() });
+    this.rooms.set(roomId, { id: roomId, hostSocketId, players: new Map(), status: 'waiting', createdAt: Date.now(), lastActivityAt: Date.now() });
     return roomId;
   }
 

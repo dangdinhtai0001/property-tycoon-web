@@ -7,6 +7,7 @@ export interface PlayerSocket {
 
 export interface GameRoom {
   id: string;
+  hostSocketId: string | null;
   players: Map<string, PlayerSocket>;
   status: 'waiting' | 'playing' | 'finished';
   createdAt: number;

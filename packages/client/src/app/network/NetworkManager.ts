@@ -2,8 +2,8 @@ import { io, type Socket } from 'socket.io-client';
 import type { GameState, GameAction } from '@property-tycoon/shared';
 import type { GameEvent } from '@property-tycoon/engine';
 
-export interface PlayerInfo { playerName: string; characterId: string; socketId: string; }
-export interface JoinResult { roomId: string; playerId: string; players: PlayerInfo[]; }
+export interface PlayerInfo { socketId: string; playerName: string; characterId: string; slot: number; }
+export interface JoinResult { roomId: string; playerId: string; players: PlayerInfo[]; isHost: boolean; }
 
 export class NetworkManager {
   private socket: Socket;
@@ -11,6 +11,7 @@ export class NetworkManager {
   onGameEvent: ((event: GameEvent) => void) | null = null;
   onPlayerJoined: ((player: PlayerInfo) => void) | null = null;
   onPlayerLeft: ((playerId: string) => void) | null = null;
+  onPlayerList: ((players: PlayerInfo[]) => void) | null = null;
   onGameStarted: ((initialState: GameState) => void) | null = null;
   onGameOver: ((winnerId: string) => void) | null = null;
   onError: ((message: string) => void) | null = null;
@@ -40,6 +41,7 @@ export class NetworkManager {
       this.socket.once('error', (data: { message: string }) => reject(new Error(data.message)));
     });
   }
+  requestStartGame(roomId: string): void { this.socket.emit('requestStartGame', { roomId }); }
   sendAction(action: GameAction, roomId?: string): void { this.socket.emit('playerAction', { roomId, action }); }
   leaveRoom(roomId: string): void { this.socket.emit('leaveRoom', { roomId }); }
 
@@ -48,6 +50,7 @@ export class NetworkManager {
     this.socket.on('gameEvent', (event: GameEvent) => this.onGameEvent?.(event));
     this.socket.on('playerJoined', (player: PlayerInfo) => this.onPlayerJoined?.(player));
     this.socket.on('playerLeft', (data: { socketId: string }) => this.onPlayerLeft?.(data.socketId));
+    this.socket.on('playerList', (data: { players: PlayerInfo[] }) => this.onPlayerList?.(data.players));
     this.socket.on('gameStarted', (data: { initialState: GameState }) => this.onGameStarted?.(data.initialState));
     this.socket.on('gameOver', (data: { winnerId: string }) => this.onGameOver?.(data.winnerId));
     this.socket.on('actionError', (data: { message: string }) => this.onError?.(data.message));
