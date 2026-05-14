@@ -82,6 +82,10 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
         },
       });
       if (result.success) {
+        // Map socket IDs to game player IDs for turn validation
+        for (let i = 0; i < roomPlayers.length; i++) {
+          room.socketToPlayerId.set(roomPlayers[i].socketId, result.state.players[i].id);
+        }
         manager.setRoomStatus(roomId, 'playing');
         io.to(roomId).emit('gameStarted', { initialState: result.state });
         io.to(roomId).emit('gameStateUpdate', { state: result.state });
@@ -101,7 +105,15 @@ export function registerHandlers(io: SocketIOServer, manager: RoomManager): void
       const currentPlayer = room.players.get(socket.id);
       if (!currentPlayer) { socket.emit('actionError', { message: 'Not a player in this room' }); return; }
 
-      log(roomId, `Action: ${action.type} from ${currentPlayer.playerName}`);
+      // Turn validation: only the current player can act
+      const gamePlayerId = room.socketToPlayerId.get(socket.id);
+      const state = controller.getState();
+      if (gamePlayerId && state.currentPlayerId !== gamePlayerId) {
+        socket.emit('actionError', { message: 'Not your turn' });
+        return;
+      }
+
+      log(roomId, `Action: ${action.type} from ${currentPlayer.playerName} (gameId=${gamePlayerId})`);
       let result = controller.applyAction(action);
       if (!result.success) {
         log(roomId, `Action rejected: ${result.error}`);
